@@ -74,6 +74,9 @@ const fs = require('fs');
   await click('[data-act="stage"][data-arg="6"]'); await click('[data-act="startLessonQuiz"]');
   for (let i=0;i<3;i++){ const a = await page.evaluate(()=>UI.quiz.qs[UI.quiz.idx].a); await click(`[data-act="answer"][data-arg="${a}"]`); if (i===0) await shot('15-quiz-q'); await click('[data-act="nextQ"]'); }
   await page.waitForTimeout(300); await shot('16-quiz-result-modal'); await closeModals(); await shot('17-quiz-result');
+  // "Teach your family" card after a passed lesson quiz, shared via WhatsApp without personal data
+  console.log('family card / whatsapp link / no name in link:', await page.evaluate(()=>{ const a=document.querySelector('.fc-actions a'); return [!!document.querySelector('.family-card'), !!a && a.href.startsWith('https://wa.me/?text='), !!a && !decodeURIComponent(a.href).includes(S.user.name)]; }));
+  await page.evaluate(()=>document.querySelector('.family').scrollIntoView({block:'center'})); await shot('17b-family-card');
   // presenter shortcut then test each activity type
   await page.evaluate(()=>demoComplete(6)); await page.waitForTimeout(300);
   const openAct = async id => { await page.evaluate(id=>{ UI.lessonId=id; UI.stage=5; go('lesson'); }, id); await page.waitForTimeout(300); };
@@ -141,6 +144,8 @@ const fs = require('fs');
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=4; go('lesson'); }); await page.waitForTimeout(300);
   await page.screenshot({ path: __dirname + '/shots/40d-m-scam-reallife.png', fullPage: true });
+  await page.evaluate(()=>{ UI.lessonId='m4l2'; UI.stage=6; go('lesson'); }); await page.waitForTimeout(300);
+  await click('[data-act="familyCard"]'); await page.waitForTimeout(200); await shot('40e-m-family-modal'); await closeModals();
   const ow = await page.evaluate(()=>document.documentElement.scrollWidth); console.log('mobile scrollWidth', ow);
   await page.evaluate(()=>{ HEALTH_CHECKS.slice(0,5).forEach(c=>S.health[c.id]=true); go('home'); }); await page.waitForTimeout(400);
   await page.screenshot({ path: __dirname + '/shots/41-m-home.png', fullPage: true });

@@ -438,6 +438,22 @@ const MODULES = [
   }]}
 ];
 
+/* "Teach your family" cards: a 1-minute, plain-language summary of each lesson to share with parents and grandparents */
+const FAMILY_CARDS = {
+  m1l1:{h:'Your phone and accounts are worth protecting', tips:['Scammers look for easy weak spots, like an old password or a phone that never updates.','Use a different password for your important accounts, like email and banking.','Turn on automatic updates so your phone fixes its own security holes.'], try:'Check together that your phone is set to update automatically.'},
+  m1l2:{h:'Keep it private, correct and working', tips:['Private: never let others see your banking app, PIN or passwords.','Correct: be suspicious of messages asking you to change payment details.','Working: back up your photos so a broken or lost phone does not lose them.'], try:'Turn on photo backup together today.'},
+  m2l1:{h:'Stop, check, then click', tips:['Banks never ask for your password, PIN or TAC/OTP by SMS, call or WhatsApp.','Messages that rush you ("act within 24 hours!") are a warning sign.','Do not tap links in messages. Open the official app or website yourself.'], try:'If you think you have been scammed, call NSRC 997 straight away.'},
+  m2l2:{h:'Only install apps from the official app store', tips:['Never open .apk files or attachments sent by strangers on WhatsApp.','Fake wedding invitations and parcel notices can hide malware.','Keep your phone updated and your photos backed up.'], try:'Look through the apps on your phone together and remove ones you do not use.'},
+  m3l1:{h:'Free public Wi-Fi is shared with strangers', tips:['Use mobile data, not public Wi-Fi, for banking.','Check the website address carefully before you log in.','Turn off auto-connect to unknown Wi-Fi networks.'], try:'Switch off auto-join for public Wi-Fi in your phone settings.'},
+  m3l2:{h:'Lock your home Wi-Fi', tips:['Change the router\'s default admin password.','Use WPA2 or WPA3 security with a long Wi-Fi password.','Keep the router updated, or ask your internet provider to.'], try:'Find the sticker on your router and check its settings together.'},
+  m4l1:{h:'Long passphrases beat short tricky passwords', tips:['Use 3 or 4 random words joined together, like "mango-kettle-rain-bicycle".','Never reuse your email password anywhere else.','A password manager can remember all your passwords for you.'], try:'Change one password you use on more than one account.'},
+  m4l2:{h:'Turn on two-step login', tips:['Two-step login asks for a code or approval when someone signs in.','Never share that code with anyone, not even "the bank" or "the police".','Give apps and people only the access they really need.'], try:'Turn on two-step verification in WhatsApp settings.'},
+  m5l1:{h:'The padlock means private, not honest', tips:['The padlock in the address bar means the connection is private, not that the website is genuine.','Use encrypted chat apps for private conversations.','A phone screen lock keeps your data scrambled if the phone is stolen.'], try:'Set a 6-digit screen lock or fingerprint unlock.'},
+  m5l2:{h:'Check who is using your accounts', tips:['Turn on login and transaction alerts for email and banking.','See a login or payment you do not recognise? Change your password and call your bank.','Read alerts from your bank instead of ignoring them.'], try:'Check "Linked devices" in WhatsApp together and remove any you do not know.'},
+  m6l1:{h:'Make a simple family safety plan', tips:['Family rule: never send money after a single message or call. Call back on a number you know.','Keep important documents and photos backed up.','Agree who to call first if something goes wrong.'], try:'Choose a family "safe word" to check that urgent calls are really from family.'},
+  m6l2:{h:'If something goes wrong, act fast', tips:['Do not panic or hide it. Tell someone you trust.','Change your passwords and call your bank immediately.','Report scams to NSRC 997 and keep screenshots as evidence.'], try:'Save 997 in your contacts today.'}
+};
+
 /* "What to do in real life" box shown at the end of scam lessons (lessons with realLife:'scam') */
 const SCAM_STEPS = [
   {t:'Call NSRC 997 within 24 hours', d:'The National Scam Response Centre works with banks and the police. The sooner you call, the better the chance your money can be traced and frozen.', call:true},

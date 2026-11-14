@@ -280,6 +280,22 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .rl-foot{margin-top:12px; font-size:13.5px; color:var(--ink-2)}
 @media (max-width:560px){ .reallife{padding:14px 12px} .rl-steps li{padding:10px; gap:10px} .rl-n{width:26px; height:26px} }
 
+/* ---------- "Teach your family" card ---------- */
+.family{text-align:left}
+.family-card{background:#fffaf0; color:var(--ink); border:3px solid var(--ink); border-top:8px solid var(--mc); box-shadow:5px 5px 0 var(--ink); padding:16px 18px; max-width:560px}
+.fc-top{display:flex; gap:12px; align-items:center}
+.fc-top img{width:44px; height:44px; flex:none; background:#151a3e; border:2px solid var(--ink); padding:2px}
+.fc-top .label{color:#5b45c9; font-size:11px}
+.fc-top b{display:block; font-size:18px; line-height:1.3; margin-top:2px}
+.fc-tips{margin:12px 0 0; padding-left:22px; display:grid; gap:6px; font-size:15px; line-height:1.45}
+.fc-tips li::marker{font-weight:700; color:#5b45c9}
+.fc-try{margin-top:12px; padding:10px 12px; background:#c9f7de; border:2px solid var(--ink); font-size:14.5px}
+.fc-foot{margin-top:10px; font-family:var(--f-label); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2)}
+.fc-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.fc-actions a.btn{text-decoration:none}
+.modal .family-card{max-width:none}
+.modal .fc-actions{justify-content:center}
+
 /* ---------- Building-themed page headers ---------- */
 .bhead{position:relative; overflow:hidden; align-items:center; padding:14px 18px 14px 14px; border:3px solid #000; border-bottom:4px solid var(--bc); box-shadow:var(--hard);
   background:linear-gradient(100deg, color-mix(in srgb, var(--bc) 28%, var(--navy)) 0%, var(--navy) 62%)}
@@ -1071,6 +1087,22 @@ const MODULES = [
   }]}
 ];
 
+/* "Teach your family" cards: a 1-minute, plain-language summary of each lesson to share with parents and grandparents */
+const FAMILY_CARDS = {
+  m1l1:{h:'Your phone and accounts are worth protecting', tips:['Scammers look for easy weak spots, like an old password or a phone that never updates.','Use a different password for your important accounts, like email and banking.','Turn on automatic updates so your phone fixes its own security holes.'], try:'Check together that your phone is set to update automatically.'},
+  m1l2:{h:'Keep it private, correct and working', tips:['Private: never let others see your banking app, PIN or passwords.','Correct: be suspicious of messages asking you to change payment details.','Working: back up your photos so a broken or lost phone does not lose them.'], try:'Turn on photo backup together today.'},
+  m2l1:{h:'Stop, check, then click', tips:['Banks never ask for your password, PIN or TAC/OTP by SMS, call or WhatsApp.','Messages that rush you ("act within 24 hours!") are a warning sign.','Do not tap links in messages. Open the official app or website yourself.'], try:'If you think you have been scammed, call NSRC 997 straight away.'},
+  m2l2:{h:'Only install apps from the official app store', tips:['Never open .apk files or attachments sent by strangers on WhatsApp.','Fake wedding invitations and parcel notices can hide malware.','Keep your phone updated and your photos backed up.'], try:'Look through the apps on your phone together and remove ones you do not use.'},
+  m3l1:{h:'Free public Wi-Fi is shared with strangers', tips:['Use mobile data, not public Wi-Fi, for banking.','Check the website address carefully before you log in.','Turn off auto-connect to unknown Wi-Fi networks.'], try:'Switch off auto-join for public Wi-Fi in your phone settings.'},
+  m3l2:{h:'Lock your home Wi-Fi', tips:['Change the router\'s default admin password.','Use WPA2 or WPA3 security with a long Wi-Fi password.','Keep the router updated, or ask your internet provider to.'], try:'Find the sticker on your router and check its settings together.'},
+  m4l1:{h:'Long passphrases beat short tricky passwords', tips:['Use 3 or 4 random words joined together, like "mango-kettle-rain-bicycle".','Never reuse your email password anywhere else.','A password manager can remember all your passwords for you.'], try:'Change one password you use on more than one account.'},
+  m4l2:{h:'Turn on two-step login', tips:['Two-step login asks for a code or approval when someone signs in.','Never share that code with anyone, not even "the bank" or "the police".','Give apps and people only the access they really need.'], try:'Turn on two-step verification in WhatsApp settings.'},
+  m5l1:{h:'The padlock means private, not honest', tips:['The padlock in the address bar means the connection is private, not that the website is genuine.','Use encrypted chat apps for private conversations.','A phone screen lock keeps your data scrambled if the phone is stolen.'], try:'Set a 6-digit screen lock or fingerprint unlock.'},
+  m5l2:{h:'Check who is using your accounts', tips:['Turn on login and transaction alerts for email and banking.','See a login or payment you do not recognise? Change your password and call your bank.','Read alerts from your bank instead of ignoring them.'], try:'Check "Linked devices" in WhatsApp together and remove any you do not know.'},
+  m6l1:{h:'Make a simple family safety plan', tips:['Family rule: never send money after a single message or call. Call back on a number you know.','Keep important documents and photos backed up.','Agree who to call first if something goes wrong.'], try:'Choose a family "safe word" to check that urgent calls are really from family.'},
+  m6l2:{h:'If something goes wrong, act fast', tips:['Do not panic or hide it. Tell someone you trust.','Change your passwords and call your bank immediately.','Report scams to NSRC 997 and keep screenshots as evidence.'], try:'Save 997 in your contacts today.'}
+};
+
 /* "What to do in real life" box shown at the end of scam lessons (lessons with realLife:'scam') */
 const SCAM_STEPS = [
   {t:'Call NSRC 997 within 24 hours', d:'The National Scam Response Centre works with banks and the police. The sooner you call, the better the chance your money can be traced and frozen.', call:true},
@@ -1698,9 +1730,22 @@ function lessonStageHTML(l, st){
     return `${kicker}<div class="result-hero"><div class="score-ring" style="background:${l.mod.color}">${icon('check','#05061a',56)}</div><h2>Lesson ${l.mod.n}.${l.li+1} quiz</h2>
     <p class="lesson-body" style="margin:10px auto 0">${l.quiz.length} questions about <b>${esc(l.title)}</b>. You get an explanation after every answer. Pass mark: ${S.passMark}%.</p>
     ${p.quizBest!=null?`<p style="margin-top:8px">Best score so far: <b>${p.quizBest}%</b></p>`:''}
+    ${p.quiz && FAMILY_CARDS[l.id] ? `<p style="margin-top:10px"><button class="btn ghost small" data-act="familyCard" data-arg="${l.id}">${icon('chat','#2ee6ff',14)} Teach your family</button></p>`:''}
     <div style="margin-top:20px">${ready?`<button class="btn gold" data-act="startLessonQuiz" data-arg="${l.id}">${p.quiz?'Retake quiz':'Start quiz'} ▸</button>`:`<p class="feedback bad" style="display:inline-block">Finish the lesson and the activity first. The quiz unlocks after you have studied and practised.</p>`}</div></div>
     ${nav(5, '<span></span>')}`; }
   return '';
+}
+// "Teach your family" card: shared as plain text on WhatsApp (no personal data in the link)
+function familyText(l){ const c = FAMILY_CARDS[l.id];
+  return `1-minute cyber tip for the family: ${c.h}\n\n${c.tips.map((t,i)=>`${i+1}. ${t}`).join('\n')}\n\nTry this today: ${c.try}\n\n(Shared from Cybersity, a cybersecurity learning app)`; }
+function familyCardHTML(l){
+  const c = FAMILY_CARDS[l.id]; if (!c) return '';
+  return `<div class="family"><div class="family-card" style="--mc:${l.mod.color}">
+    <div class="fc-top"><img class="px" src="${BOT_URL}" alt=""><div><div class="label">Teach your family · 1-minute read</div><b>${esc(c.h)}</b></div></div>
+    <ol class="fc-tips">${c.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>
+    <div class="fc-try"><b>Try this today:</b> ${esc(c.try)}</div>
+    <div class="fc-foot">From Lesson ${l.mod.n}.${l.li+1}: ${esc(l.title)} · Cybersity</div></div>
+    <div class="fc-actions"><a class="btn green" href="https://wa.me/?text=${encodeURIComponent(familyText(l))}" target="_blank" rel="noopener">${icon('chat','#05061a',16)} Share on WhatsApp</a><button class="btn ghost" data-act="familyCopy" data-arg="${l.id}">Copy text</button></div></div>`;
 }
 function realLifeHTML(){
   return `<section class="reallife" aria-labelledby="rlTitle"><div class="rl-head"><span class="rl-alert">!</span><div><div class="label">If it happens to you</div><h3 id="rlTitle">What to do in real life</h3></div></div>
@@ -1771,6 +1816,7 @@ function quizResult(el, Q){
       ${!Q.pass && m ? `<button class="btn ghost" data-act="openModule" data-arg="${m.id}">Review module</button>`:''}
       <button class="btn ${Q.pass?'ghost':''}" data-act="retryQuiz">Retake</button>${nextBtn}
     </div></div>
+    ${Q.pass && l && FAMILY_CARDS[l.id] ? `<div class="kicker" style="margin-top:26px">Teach your family</div><p style="margin:6px 0 12px; color:var(--ink-2)">Share what you just learned with someone scammers might target, like your parents or grandparents.</p>${familyCardHTML(l)}` : ''}
     ${wrong.length?`<div class="kicker" style="margin-top:22px">Review your mistakes</div><div class="review">${wrong.map(x=>`<div class="bad"><b>${esc(x.q.q)}</b><br>Correct answer: <b>${esc(x.q.o[x.q.a])}</b><br><span style="color:var(--ink-2)">${esc(x.q.e)}</span></div>`).join('')}</div>`:''}
   </section>`;
 }
@@ -1937,6 +1983,8 @@ const ACTIONS = {
   downloadCert: () => toast('In the full system, this downloads a PDF generated by the server with your unique certificate ID.'),
   askAbout: a => { const l=lessonById(a); Mentor.openDrawer(); Mentor.ask(`Can you explain "${l.title}" in simple terms?`); },
   toggleDrawer: () => Mentor.toggleDrawer(),
+  familyCard: a => { const l=lessonById(a); showModal(`<div class="label" style="color:var(--green)">Teach your family</div><h2 style="margin:6px 0 14px">Share this lesson in 1 minute</h2>${familyCardHTML(l)}<div class="actions"><button class="btn gold" data-act="closeModal">Done</button></div>`); },
+  familyCopy: a => { const t = familyText(lessonById(a)); try { navigator.clipboard.writeText(t).then(()=>toast('Copied. Paste it into any chat.'), ()=>toast('Copy is blocked here. Use the WhatsApp button instead.')); } catch(e){ toast('Copy is blocked here. Use the WhatsApp button instead.'); } },
   adminNote: () => toast('Content editing and learner records are part of the full admin system.'),
   modAction: a => { const [i,st]=a.split('|'); S.reports[+i].status=st; if (st==='removed') Community.removeMessage(S.reports[+i].mid); save(); renderView(); toast(st==='removed'?'Message removed from the room':'Report dismissed'); }
 };
