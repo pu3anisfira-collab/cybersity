@@ -1,48 +1,120 @@
 # Cybersity prototype — notes for Claude Code
 
 Cybersity is a competition prototype of an AI-powered cybersecurity learning and social platform for beginners
-(students and the general public, English only). **It is deliberately prototype-only**: no backend, no real
+(students and the general public, English only), entered in IIMaCC 2026 (category T2 Educational Innovation;
+judged on a video of 5 minutes or less plus an abstract). **It is deliberately prototype-only**: no backend, no real
 accounts, no database. Everything runs in the browser with simulated data. Do not add a server, framework or
 build tooling unless the owner asks.
 
 ## How it is built
-- Plain HTML, CSS and JavaScript. No frameworks, no npm dependencies for the app itself.
+- Plain HTML, CSS and JavaScript. No frameworks, no npm dependencies for the app itself. No image files:
+  all pixel art (buildings, avatars, icons, banners) is drawn in code.
 - Source lives in `src/` as numbered parts. `build.sh` concatenates them into one self-contained file,
   `cybersity.html`. **Edit files in `src/`, never `cybersity.html` directly, then run `./build.sh`.**
+  New script files go in `build.sh` before `99-init.js`, which must stay last.
 - Fonts load from Google Fonts (Press Start 2P, Silkscreen, Lexend, VT323) with fallbacks.
-- Progress is saved in `localStorage` (key `cybersity-prototype-v1`), wrapped in try/catch.
+- Progress is saved in `localStorage` (key `cybersity-prototype-v1`), wrapped in try/catch. Saved state is merged
+  over `freshState()`, so new state keys need a default there.
 
 ## Source map
 | File | Contents |
 |---|---|
 | `src/01-head.html` | `<title>`, font links, all CSS (design tokens in `:root`) |
 | `src/02-body.html` | Mount points: `#app`, `#toasts`, `#layer` |
-| `src/03-data.js` | All content: 6 modules × 2 lessons (7-step structure), activities, quizzes, module extra questions, levels, XP values, badges, campus buildings, tips |
+| `src/03-data.js` | All content: 6 modules × 2 lessons (7-step structure), activities, quizzes, module extra questions, levels, XP values, badges, campus buildings, tips; Home Base (`HOME_BASE`, `HEALTH_CHECKS`, `HOME_STAGES`); Career Compass (`CAREER_SIGN`, `CAREERS`, `ROADMAP_STEPS`, `CAREER_QUIZ`); Campus Incident (`INCIDENT`, `FAKE_ADMIN`); `FAMILY_CARDS`; `SCAM_STEPS` |
 | `src/04-pixel.js` | Pixel art drawn in code: avatar sprite grids, BYTE robot, icon grids, `iconURL()` / `avatarCanvas()` |
-| `src/05-app.js` | State, progression/lock rules, rewards (XP, levels, badges, modals, toasts), routing, onboarding, dashboard, library, module, lesson, quiz engine, challenge centre, achievements, certificate, admin preview, presenter menu, click-action dispatcher (`ACTIONS`) |
-| `src/06-activities.js` | Six activity engines: sort, select (email/logs), match, toggle (router), password, order |
-| `src/07-campus.js` | Canvas campus: 30×20 tile map, buildings, BFS pathfinding, NPC learners, door prompts |
+| `src/05-app.js` | State, progression/lock rules, rewards (XP, levels, badges, modals, toasts), routing, building-themed page headers (`themeHead`), onboarding, dashboard (incl. Safety Score card), library, module, lesson (incl. scam "real life" box and "Teach your family" card), quiz engine, challenge centre, achievements, certificate, admin preview, presenter menu, click-action dispatcher (`ACTIONS`) |
+| `src/06-activities.js` | Six activity engines: sort, select (email/logs), match, toggle (router), password, order. `Activities.mount(lesson, el, opts)` also runs a game stand-alone (see Conventions) |
+| `src/07-campus.js` | Canvas campus: 30×25 tile map, buildings, Home Base dorm, Career Compass signpost, BFS pathfinding, NPC learners, door prompts, phone camera, building banners (`Campus.banner`); Home Base page and Security Health Check; Campus Incident (attack effects, banner, challenge pages, celebration) |
 | `src/08-social.js` | BYTE scripted mentor (keyword knowledge base, safety refusals, lesson context, quiz-me) and Community Hub (rooms, bot replies, personal-info filter, reporting) |
-| `src/10-career.js` | Career Compass: role quiz, role pages, taster missions (activities mounted stand-alone), roadmaps |
+| `src/10-career.js` | Career Compass: role quiz, role pages, taster missions, roadmaps |
 | `src/99-init.js` | Boot (always last in `build.sh`) |
+
+## Features added for IIMaCC 2026
+- **Home Base + Security Health Check** (07). A dorm in the campus's south strip. 7 real-life actions (2FA,
+  updates, unique password, screen lock, photo backup, app permissions, save NSRC 997) are ticked by the learner
+  and raise a Safety Score. The dorm upgrades in 4 stages: dark → lights on (1–3 ticks) → padlock (4–6) → shield
+  and "SECURED" sign (7). XP once per action (`S.healthXP` stops repeat XP), +50 bonus and the `homesafe` badge
+  at 100%. Score card on the dashboard.
+- **Career Compass** (10). A glowing signpost on the plaza plus a Careers nav item. A 5-question quiz matches
+  learners to SOC analyst, penetration tester, incident responder, GRC/risk analyst or network security engineer
+  (most picks wins; ties go to the most recent pick). Each role page has a plain-words job description, a taster
+  mission that reuses the matching game, and a 6-step roadmap marking what Cybersity covers. Tasters never
+  change lesson progress. `explorer` badge for a taster. The platforms and certificates are named as examples to
+  research, not endorsements.
+- **Campus Incident** (07). "Campus under attack!" starts from the gear menu and unlocks after the Module 2
+  assessment. Effects: red sky and edges, flashing alarm lamps, a red Cyber Core, and glitching "HACKED"
+  buildings. The banner shows "x/6 buildings secured" with chips that open each challenge directly.
+  Challenges by building:
+  - Library: phishing email
+  - AI Lab: passphrase
+  - Community Hub: `FAKE_ADMIN` sort
+  - Challenge Centre: router
+  - Achievement Hall: logs
+  - Certificate Hall: incident response order
+
+  A score under 60% leaves the building hacked. Each secured building plays a restore animation. All six
+  trigger fireworks, a "Campus saved" modal, +150 XP and the `defender` badge. The Certificate Hall opens
+  during the incident even before the final is passed. State lives in `S.incident`.
+- **Building-themed pages** (05 `themeHead`, 07 `Campus.banner`). After each view renders, a building page's
+  `.page-head` gets the building colour (`--bc`) and a pixel banner drawn with the campus building code. The
+  view→building map is `VIEW_BUILDING`. Incident pages show the building hacked. Lesson/quiz pages and career
+  role pages (`.role-head`) are not themed.
+- **Scam "What to do in real life" box** (05 `realLifeHTML`). Shown at the end of the Recap step for lessons
+  with `realLife:'scam'` (currently only Lesson 2.1). Steps: call NSRC 997 within 24 hours (`tel:997` link),
+  contact your bank, report the number, keep evidence.
+- **"Teach your family" card** (05 `familyCardHTML`). Shown after a passed lesson quiz, and reopened from the
+  lesson's quiz step. A 1-minute plain-language card per lesson (`FAMILY_CARDS`) with a WhatsApp share link
+  (`wa.me/?text=`) and copy text. The shared text holds lesson content only: never put the learner's name or
+  other personal data in it.
+- **Phone camera** (07). On screens up to 640px wide the campus shows a 12×14-tile window that follows the
+  player. A Full map / Zoom in toggle sets `UI.campusFull`. Draw in world coordinates with `world()`; use
+  `screen()` with `vw`/`vh` for overlays that belong to the visible view. Map pointer input through `toLogical()`.
 
 ## Conventions
 - UI is rendered as HTML strings; clicks are handled by event delegation on `data-act` / `data-arg`
-  attributes. Add new handlers to `ACTIONS` (05) or `window.EXTRA_ACTIONS` (06–08).
+  attributes. Add new handlers to `ACTIONS` (05) or `window.EXTRA_ACTIONS` (06–10). The dispatcher calls
+  `preventDefault` on `<a data-act>`, so real links (WhatsApp, `tel:`) must not carry `data-act`.
 - Always pass user text through `esc()` before inserting into HTML.
 - Colours come from CSS tokens; game surfaces are pixel art, reading surfaces are light "monitor" panels.
 - Lock rules: lesson quiz needs lesson + activity done; next lesson needs previous quiz passed; module
   assessment needs all lesson quizzes; next module needs previous module assessment; final needs all modules;
-  certificate needs final passed. Pass mark `S.passMark` (default 70, adjustable in admin view).
+  certificate needs final passed (use `bLocked(id)` for the campus, which also opens it during the incident);
+  Campus Incident needs the Module 2 assessment. Pass mark `S.passMark` (default 70, adjustable in admin view).
 - Adding a lesson = add an object to a module's `lessons` array in `03-data.js` using an existing activity type.
+  Also add its `FAMILY_CARDS` entry, and `realLife:'scam'` if it is about scams.
+- Reusing a game outside a lesson: `Activities.mount(lessonLikeObject, el, { onDone(score), nextAct, nextArg,
+  nextLabel, tag })`. In this mode it skips lesson progress and calls `onDone` instead. Badges still award.
+  A lesson-like object only needs `{ id, activity }` (see `FAKE_ADMIN`).
+- Campus buildings: the six learning buildings come from `BUILDINGS`; Home Base and the signpost are added in
+  `07` with custom drawing (`drawDorm`, `drawSignpost`). The Campus Incident uses only the six in `INCIDENT`.
 - Simulated parts (be clear about these when presenting): scripted mentor, bot classmates, fake accounts,
-  certificate "Download PDF" shows a message only.
+  certificate "Download PDF" shows a message only, Home Base ticks are self-reported, the Campus Incident is a
+  scripted event.
+- Real-world facts to keep accurate: NSRC scam hotline 997, PDRM Semak Mule, career platforms and certificates.
+  Have the owner confirm them before changing the wording.
 
 ## Testing
 `node test.js` runs a headless Playwright click-through of the whole journey and saves screenshots to `shots/`
-(Playwright + Chromium required: `npm i playwright && npx playwright install chromium`). It prints any page errors.
-A font-loading network error in offline environments is expected and harmless.
+(Playwright + Chromium required: `npm i playwright && npx playwright install chromium`). It prints check results
+and any page errors. It covers the new features at desktop (1360px) and phone (390px) widths, including campus
+walking, Home Base stages, career quiz and taster, the full incident, themed headers, the real-life box, family
+cards and the phone camera. A full run takes about 5–6 minutes. A font-loading network error in offline
+environments is expected and harmless. `shots/` and `test-page.html` are git-ignored.
 
 ## Demo tips
-"Try the demo instantly" skips sign-up. The gear menu has presenter shortcuts (complete Module 1, Modules 1–5,
-all modules), admin view and reset.
+"Try the demo instantly" skips sign-up. Gear menu presenter shortcuts:
+- Complete Module 1 / **Modules 1–2 (unlocks the incident)** / Modules 1–5 / all modules (final unlocked)
+- **Campus incident**: Start "Campus under attack!", Secure next building (plays the restore animation),
+  End incident (resets for another take)
+- **Home Base**: tick every action / clear checklist (resets the dorm to dark without giving XP again)
+- Admin view, reset demo progress, log out
+
+Recording the incident in about 40 seconds:
+1. Start it (the alert shows for about 3s).
+2. Play one or two challenges live. Fake Admin (about 8s) and the passphrase (about 5s) are the quickest; the
+   banner chips skip walking.
+3. Use "Secure next building" for the rest, about 2.5s each.
+4. The fireworks and modal take about 6s.
+
+On phones the campus is zoomed; use Full map to show the whole campus.
