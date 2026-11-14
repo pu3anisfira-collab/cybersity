@@ -6,6 +6,21 @@ const Campus = (() => {
   const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4], compass:[21,7,1,2] };
   const B = [...BUILDINGS, HOME_BASE, CAREER_SIGN].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
+  // Phone camera: on small screens show a zoomed 12x14-tile window that follows the player (UI.campusFull shows the whole map)
+  const CAM_W=12*T, CAM_H=14*T; let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
+  const world = () => ctx.setTransform(SC,0,0,SC,-camX*SC,-camY*SC), screen = () => ctx.setTransform(SC,0,0,SC,0,0);
+  function sizeCanvas(){
+    zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H;
+    canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; canvas.style.aspectRatio = `${vw}/${vh}`; camSnap = true;
+    const tb = $('#camToggle'); if (tb) tb.textContent = UI.campusFull ? 'Zoom in' : 'Full map';
+  }
+  function updateCam(){
+    if (!zoom){ camX = camY = 0; return; }
+    const tx = Math.max(0, Math.min(W-vw, player.x-vw/2)), ty = Math.max(0, Math.min(H-vh, player.y-10-vh/2));
+    if (camSnap){ camFX = tx; camFY = ty; camSnap = false; } else { camFX += (tx-camFX)*0.12; camFY += (ty-camFY)*0.12; }
+    camX = Math.round(camFX*SC)/SC; camY = Math.round(camFY*SC)/SC;
+  }
+  const onResize = () => { if (zoom !== (!UI.campusFull && matchMedia('(max-width:640px)').matches)) sizeCanvas(); };
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
   function buildGrid(){
@@ -112,7 +127,7 @@ const Campus = (() => {
   }
 
   function draw(){
-    ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(bg,0,0); ctx.setTransform(SC,0,0,SC,0,0); ctx.imageSmoothingEnabled=false;
+    updateCam(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(bg, -camX*SC, -camY*SC); world(); ctx.imageSmoothingEnabled=false;
     const t = frame/60;
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
@@ -165,21 +180,23 @@ const Campus = (() => {
   }
 
   // Campus Incident layer: red sky, glitching hacked buildings, restore animation, alert text and the win celebration
-  function bigText(txt, y, size, col){ ctx.font=`${size}px "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
-    const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(W/2-w/2-10, y-size, w+20, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, W/2+1.5, y+1.5); ctx.fillStyle=col; ctx.fillText(txt, W/2, y); }
+  function bigText(txt, y, size, col){ size = Math.min(size, (vw-16)/txt.length); ctx.font=`${size}px "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(vw/2-w/2-6, y-size, w+12, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, vw/2+1, y+1); ctx.fillStyle=col; ctx.fillText(txt, vw/2, y); }
   function drawIncident(t){
     const act = incActive(), now = Date.now();
     if (act){
       const pulse = 0.5+0.5*Math.sin(t*4);
-      ctx.fillStyle = `rgba(255,40,70,${0.03+0.03*pulse})`; ctx.fillRect(0,0,W,H);
-      const sky = ctx.createLinearGradient(0,0,0,H*0.3); sky.addColorStop(0,`rgba(255,30,60,${0.3+0.1*pulse})`); sky.addColorStop(1,'rgba(255,30,60,0)'); ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.3);
-      const vig = ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.75); vig.addColorStop(0,'rgba(255,30,60,0)'); vig.addColorStop(1,`rgba(255,30,60,${0.22+0.12*pulse})`); ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+      screen(); // tints are drawn over the visible view
+      ctx.fillStyle = `rgba(255,40,70,${0.03+0.03*pulse})`; ctx.fillRect(0,0,vw,vh);
+      const sky = ctx.createLinearGradient(0,0,0,vh*0.3); sky.addColorStop(0,`rgba(255,30,60,${0.3+0.1*pulse})`); sky.addColorStop(1,'rgba(255,30,60,0)'); ctx.fillStyle=sky; ctx.fillRect(0,0,vw,vh*0.3);
+      const vig = ctx.createRadialGradient(vw/2,vh/2,vh*0.35,vw/2,vh/2,vh*0.75); vig.addColorStop(0,'rgba(255,30,60,0)'); vig.addColorStop(1,`rgba(255,30,60,${0.22+0.12*pulse})`); ctx.fillStyle=vig; ctx.fillRect(0,0,vw,vh);
+      world();
       INCIDENT.forEach(x=>{ if (!S.incident.secured.includes(x.b) || (UI.incFx && UI.incFx.id===x.b)) return; const b = B.find(v=>v.id===x.b);
         ctx.strokeStyle='rgba(71,245,154,0.75)'; ctx.lineWidth=1.5; ctx.strokeRect(b.px-4, b.py-2, b.pw+8, b.ph+3); ctx.drawImage(dormIcon('shield','#47f59a'), b.cx-6, b.py-14); });
       B.forEach(b=>{ if (!incHacked(b.id)) return; const x=b.px-3, w=b.pw+6;
         ctx.fillStyle = `rgba(255,60,80,${0.1+0.14*Math.random()})`; ctx.fillRect(x, b.py, w, b.ph);
         if (Math.random()<0.55) for (let k=0;k<3;k++){ const sy = b.py+Math.floor(Math.random()*(b.ph-5)), sh = 2+Math.floor(Math.random()*4), off = Math.round((Math.random()-0.5)*10);
-          ctx.drawImage(canvas, x*SC, sy*SC, w*SC, sh*SC, x+off, sy, w, sh); }
+          ctx.drawImage(canvas, (x-camX)*SC, (sy-camY)*SC, w*SC, sh*SC, x+off, sy, w, sh); }
         if (Math.random()<0.06){ ctx.fillStyle='rgba(5,6,26,0.6)'; ctx.fillRect(x, b.py, w, b.ph); }
         if (frame%40 < 28){ ctx.font='6px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; const tw=ctx.measureText('HACKED').width;
           ctx.fillStyle='#05061a'; ctx.fillRect(b.cx-tw/2-3, b.py-11, tw+6, 9); ctx.fillStyle='#ff5d6e'; ctx.fillText('HACKED', b.cx, b.py-6.5); } });
@@ -193,18 +210,19 @@ const Campus = (() => {
         ctx.globalAlpha=1; const s = 12*(1+Math.min(age*5,1)*1.2); ctx.drawImage(dormIcon('shield','#47f59a'), mx-s/2, b.py-s-4-Math.min(age,0.5)*8, s, s);
         ctx.font='8px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#05061a'; ctx.fillRect(mx-28, b.py+b.ph+3, 56, 12); ctx.fillStyle='#47f59a'; ctx.fillText('SECURED', mx, b.py+b.ph+9.5); }
       else if (age >= 2.6){ UI.incFx = null; if (act && incAllSecured()) incWin(); } }
-    if (UI.incAlert){ const age = (now-UI.incAlert)/1000; if (act && age < 3){ if (Math.floor(age*4)%2===0) bigText('! CAMPUS UNDER ATTACK !', H*0.42, 12, '#ff5d6e'); } else UI.incAlert = 0; }
-    if (UI.incWin){ const age = (now-UI.incWin)/1000;
+    screen(); // alert text and fireworks are placed on the visible view
+    if (UI.incAlert){ const age = (now-UI.incAlert)/1000; if (act && age < 3){ if (Math.floor(age*4)%2===0) bigText('! CAMPUS UNDER ATTACK !', vh*0.42, 12, '#ff5d6e'); } else UI.incAlert = 0; }
+    if (UI.incWin){ const age = (now-UI.incWin)/1000, fs = Math.max(0.6, vw/W);
       if (age < 6.5){
-        for (let j=0;j<12;j++){ const a2 = age-j*0.4; if (a2<=0 || a2>=1.8) continue; const bx = W*(0.1+0.8*((j*37)%11)/10), by = H*(0.08+0.5*((j*53)%10)/10);
-          ctx.globalAlpha = 1-a2/1.8; for (let p=0;p<30;p++){ const ang=p/30*Math.PI*2, r=a2*(55+(p%3)*12); ctx.fillStyle=['#47f59a','#ffd447','#2ee6ff','#ff4fae'][(p+j)%4]; ctx.fillRect(bx+Math.cos(ang)*r, by+Math.sin(ang)*r+a2*a2*12, 3, 3); }
+        for (let j=0;j<12;j++){ const a2 = age-j*0.4; if (a2<=0 || a2>=1.8) continue; const bx = vw*(0.1+0.8*((j*37)%11)/10), by = vh*(0.08+0.5*((j*53)%10)/10);
+          ctx.globalAlpha = 1-a2/1.8; for (let p=0;p<30;p++){ const ang=p/30*Math.PI*2, r=a2*(55+(p%3)*12)*fs; ctx.fillStyle=['#47f59a','#ffd447','#2ee6ff','#ff4fae'][(p+j)%4]; ctx.fillRect(bx+Math.cos(ang)*r, by+Math.sin(ang)*r+a2*a2*12, 3, 3); }
           if (a2 < 0.25){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(bx, by, 6-a2*16, 0, Math.PI*2); ctx.fill(); } }
-        ctx.globalAlpha=1; if (age < 4.5) bigText('CAMPUS SAVED!', H*0.42, 16, '#47f59a');
+        ctx.globalAlpha=1; if (age < 4.5) bigText('CAMPUS SAVED!', vh*0.42, 16, '#47f59a');
       } else UI.incWin = 0; }
   }
 
   function loop(){ if (!active) return; update(); if (!active) return; draw(); raf = requestAnimationFrame(loop); }
-  function toLogical(e){ const r = canvas.getBoundingClientRect(); return [ (e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H ]; }
+  function toLogical(e){ const r = canvas.getBoundingClientRect(); return [ (e.clientX-r.left)/r.width*vw + camX, (e.clientY-r.top)/r.height*vh + camY ]; }
   const bAt = (x,y) => B.find(b=> b.id==='compass' ? (x>=b.px-12 && x<=b.px+b.pw+12 && y>=b.py-12 && y<=b.py+b.ph) : (x>=b.px-3 && x<=b.px+b.pw+3 && y>=b.py && y<=b.py+b.ph));
   function onClick(e){
     const [x,y]=toLogical(e); const b = bAt(x,y); const [pc,pr]=tileOf(player);
@@ -225,7 +243,7 @@ const Campus = (() => {
   const ku = e => { const k = e.key.length===1 ? e.key.toLowerCase() : e.key; keys[k]=false; };
 
   function start(cv){
-    canvas = cv; ctx = canvas.getContext('2d'); canvas.width=W*SC; canvas.height=H*SC; ctx.imageSmoothingEnabled=false;
+    canvas = cv; ctx = canvas.getContext('2d'); sizeCanvas(); window.addEventListener('resize', onResize);
     buildGrid(); renderBG();
     player = player && player.look===S.user.look ? player : makeChar(S.user.look, 12, 9, S.user.name, true);
     player.path=[]; pendingEnter=null; marker=null; nearDoor=null; keys={};
@@ -236,8 +254,9 @@ const Campus = (() => {
     active = true; const go2 = ()=>{ if (active){ renderBG(); } }; if (document.fonts && document.fonts.ready) document.fonts.ready.then(go2);
     loop();
   }
-  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); keys={}; }
-  window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
+  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', onResize); keys={}; }
+  window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); },
+    campusZoom: () => { UI.campusFull = !UI.campusFull; if (active) sizeCanvas(); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
   // Small pixel banner of one building (as seen on the campus) for its page header; cached once fonts are ready
   const bannerCache = new Map();
   function bannerURL(id, hacked){
@@ -276,6 +295,7 @@ function viewCampus(el){
   <div id="incBanner">${incBannerHTML()}</div>
   <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
     <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} Night shift · Sector 7</span></div>
+    <button class="cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button>
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));

@@ -139,6 +139,16 @@ const fs = require('fs');
   await page.setViewportSize({ width: 390, height: 844 }); await page.click('#fab',{force:true}); await page.waitForTimeout(200);
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(400); await shot('38-m-dashboard');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(700); await shot('39-m-campus');
+  // phone camera: zoomed view that follows the avatar, taps still walk to the right place, full-map toggle
+  console.log('phone camera canvas (expect 576x672):', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width+'x'+c.height; }));
+  const cb = await (await page.$('#campus')).boundingBox();
+  await page.mouse.click(cb.x + cb.width*0.5, cb.y + cb.height*0.85); await page.waitForTimeout(1600); await shot('39b-m-campus-walk');
+  await click('.quick-nav [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:25000}).catch(()=>{});
+  console.log('phone: walked to signpost and entered:', await page.evaluate(()=>S.view));
+  await page.evaluate(()=>go('campus')); await page.waitForTimeout(900); await shot('39c-m-campus-follow');
+  await click('#camToggle'); await page.waitForTimeout(300); await shot('39d-m-campus-fullmap');
+  console.log('full map toggle canvas (expect 1440x1200):', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width+'x'+c.height; }));
+  await click('#camToggle'); await page.waitForTimeout(200);
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(300); await shot('40-m-lesson');
   await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
