@@ -86,6 +86,11 @@ const fs = require('fs');
   await openAct('m5l2'); await click('[data-act="actFlag"][data-arg="l3"]'); await click('[data-act="actCheck"]'); await closeModals(); await shot('25-logs');
   await openAct('m6l2'); for (const id of ['prep','ident','cont','erad','rec','less']) await click(`[data-act="actPlace"][data-arg="${id}"]`); await click('[data-act="actCheck"]'); await closeModals(); await shot('26-order');
   await page.evaluate(()=>{ UI.lessonId='m5l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(500); await shot('27-hash');
+  // scam lessons end their recap with a "What to do in real life" box
+  await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=4; go('lesson'); }); await page.waitForTimeout(300);
+  await page.evaluate(()=>document.querySelector('.reallife').scrollIntoView({block:'center'})); await shot('27r-scam-reallife');
+  console.log('real-life box on scam lesson / not on others / call link:', await page.evaluate(()=>{ const on=!!document.querySelector('.reallife'), tel=(document.querySelector('.rl-call')||{}).getAttribute?.('href');
+    UI.lessonId='m1l1'; UI.stage=4; go('lesson'); return [on, !document.querySelector('.reallife'), tel]; }));
   // Campus Incident: start from the gear menu, play three challenges for real, fast-forward the rest
   const toCampus = async () => { await page.waitForFunction(()=>S.view==="campus", null, {timeout:6000}).catch(()=>{}); await page.waitForTimeout(700); };
   await click('[data-act="toggleMenu"]'); await shot('27a-menu-incident');
@@ -132,7 +137,10 @@ const fs = require('fs');
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(400); await shot('38-m-dashboard');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(700); await shot('39-m-campus');
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(300); await shot('40-m-lesson');
-await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');  await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
+  await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');
+  await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
+  await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=4; go('lesson'); }); await page.waitForTimeout(300);
+  await page.screenshot({ path: __dirname + '/shots/40d-m-scam-reallife.png', fullPage: true });
   const ow = await page.evaluate(()=>document.documentElement.scrollWidth); console.log('mobile scrollWidth', ow);
   await page.evaluate(()=>{ HEALTH_CHECKS.slice(0,5).forEach(c=>S.health[c.id]=true); go('home'); }); await page.waitForTimeout(400);
   await page.screenshot({ path: __dirname + '/shots/41-m-home.png', fullPage: true });

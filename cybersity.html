@@ -264,6 +264,22 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 }
 .other-roles{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:22px}
 
+/* ---------- "What to do in real life" (scam lessons) ---------- */
+.reallife{margin-top:22px; background:#fff; border:3px solid var(--ink); box-shadow:5px 5px 0 #b3203a; padding:18px 20px}
+.rl-head{display:flex; gap:12px; align-items:center}
+.rl-head .label{color:#b3203a}
+.rl-head h3{font-size:20px; color:var(--ink)}
+.rl-alert{flex:none; width:38px; height:38px; display:grid; place-items:center; font-family:var(--f-pixel); font-size:16px; color:#fff; background:#d8344f; border:3px solid var(--ink); box-shadow:2px 2px 0 var(--ink)}
+.rl-lead{margin-top:10px; color:var(--ink-2); font-size:15px}
+.rl-steps{list-style:none; margin:14px 0 0; padding:0; display:grid; gap:10px}
+.rl-steps li{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; background:#fff1f3; border:2px solid var(--ink)}
+.rl-steps li > div{display:flex; flex-direction:column; gap:3px; min-width:0; font-size:14.5px; line-height:1.45; color:var(--ink-2)}
+.rl-steps b{font-size:16px; color:var(--ink)}
+.rl-n{flex:none; width:30px; height:30px; display:grid; place-items:center; font-family:var(--f-pixel); font-size:11px; background:var(--gold); color:#05061a; border:2px solid var(--ink)}
+.rl-call{align-self:flex-start; margin-top:8px; text-decoration:none}
+.rl-foot{margin-top:12px; font-size:13.5px; color:var(--ink-2)}
+@media (max-width:560px){ .reallife{padding:14px 12px} .rl-steps li{padding:10px; gap:10px} .rl-n{width:26px; height:26px} }
+
 /* ---------- Building-themed page headers ---------- */
 .bhead{position:relative; overflow:hidden; align-items:center; padding:14px 18px 14px 14px; border:3px solid #000; border-bottom:4px solid var(--bc); box-shadow:var(--hard);
   background:linear-gradient(100deg, color-mix(in srgb, var(--bc) 28%, var(--navy)) 0%, var(--navy) 62%)}
@@ -722,6 +738,7 @@ const MODULES = [
       {t:'Tap the link and pay. It\'s only RM1.50.', ok:false, fb:'The small fee is bait. The real goal is to capture your card details.'},
       {t:'Reply "STOP" so they stop messaging you', ok:false, fb:'Replying tells scammers your number is active, so you may get more scams.'},
       {t:'Check your parcel in the courier\'s official app or website (typed in yourself), then delete and report the SMS', ok:true, fb:'Correct. Go to the source yourself instead of trusting links in unexpected messages.'}]},
+    realLife:'scam',
     recap:{points:['Phishing impersonates trusted organisations to steal information.','Watch for look-alike senders, urgency, mismatched links and requests for secrets.','When in doubt, contact the organisation through a channel you find yourself.'],
       terms:[['Phishing','Deceptive messages that trick people'],['Smishing','Phishing by SMS'],['Vishing','Phishing by voice call'],['Spear phishing','Phishing aimed at one specific target']]},
     activity:{type:'select', variant:'email', title:'Spot the Phishing Email', intro:'Click every part of this email that looks suspicious. There are 7 warning signs; find at least 6 to pass. Press "Check" when you are done.',
@@ -1054,6 +1071,12 @@ const MODULES = [
   }]}
 ];
 
+/* "What to do in real life" box shown at the end of scam lessons (lessons with realLife:'scam') */
+const SCAM_STEPS = [
+  {t:'Call NSRC 997 within 24 hours', d:'The National Scam Response Centre works with banks and the police. The sooner you call, the better the chance your money can be traced and frozen.', call:true},
+  {t:'Contact your bank', d:'Call the hotline on the back of your card or in the official banking app. Ask them to block your card or account, then change your online banking password.'},
+  {t:'Report the number', d:'Report the scammer\'s phone number and bank account to the police (PDRM), and block and report them in the app they used. You can check suspicious numbers and accounts on the PDRM Semak Mule portal.'}
+];
 const LESSON_STAGES = ['Introduction','Concept','Visual example','Scenario','Recap','Activity','Lesson quiz'];
 
 const LEVELS = [
@@ -1668,6 +1691,7 @@ function lessonStageHTML(l, st){
     ${nav(2, `<button class="btn" data-act="stage" data-arg="4" ${pickd==null?'disabled':''}>Recap ▸</button>`)}`; }
   if (st===4) return `${kicker}<h2 style="margin:8px 0 10px">Knowledge recap</h2><ul class="recap-list lesson-body">${l.recap.points.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
     <div class="label" style="color:#4a5180; margin-top:18px">Key terms</div><div class="terms">${l.recap.terms.map(([t,d])=>`<div><b>${esc(t)}</b>${esc(d)}</div>`).join('')}</div>
+    ${l.realLife==='scam' ? realLifeHTML() : ''}
     ${nav(3, p.read ? `<button class="btn" data-act="stage" data-arg="5">Go to activity ▸</button>` : `<button class="btn green" data-act="completeLesson" data-arg="${l.id}">Complete lesson · +${XP.lesson} XP</button>`)}`;
   if (st===5) return `${kicker}<div id="actHost"></div>${nav(4, `<button class="btn" data-act="stage" data-arg="6" ${p.activity?'':'disabled'}>Go to quiz ▸</button>`)}`;
   if (st===6){ const ready = p.read && p.activity;
@@ -1677,6 +1701,12 @@ function lessonStageHTML(l, st){
     <div style="margin-top:20px">${ready?`<button class="btn gold" data-act="startLessonQuiz" data-arg="${l.id}">${p.quiz?'Retake quiz':'Start quiz'} ▸</button>`:`<p class="feedback bad" style="display:inline-block">Finish the lesson and the activity first. The quiz unlocks after you have studied and practised.</p>`}</div></div>
     ${nav(5, '<span></span>')}`; }
   return '';
+}
+function realLifeHTML(){
+  return `<section class="reallife" aria-labelledby="rlTitle"><div class="rl-head"><span class="rl-alert">!</span><div><div class="label">If it happens to you</div><h3 id="rlTitle">What to do in real life</h3></div></div>
+    <p class="rl-lead">Clicked a scam link, shared a code or sent money? Act fast and stay calm. Being scammed is never something to be ashamed of.</p>
+    <ol class="rl-steps">${SCAM_STEPS.map((s,i)=>`<li><span class="rl-n">${i+1}</span><div><b>${esc(s.t)}</b><span>${esc(s.d)}</span>${s.call?`<a class="btn pink small rl-call" href="tel:997">Call 997</a>`:''}</div></li>`).join('')}</ol>
+    <p class="rl-foot">Keep the evidence: screenshots of the chat, the phone number and your transfer receipts. Do not delete the messages.</p></section>`;
 }
 async function bindHashDemo(){
   const inp = $('#hashIn'), out = $('#hashOut'); if (!inp) return;

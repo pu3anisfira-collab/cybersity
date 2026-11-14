@@ -105,6 +105,7 @@ const MODULES = [
       {t:'Tap the link and pay. It\'s only RM1.50.', ok:false, fb:'The small fee is bait. The real goal is to capture your card details.'},
       {t:'Reply "STOP" so they stop messaging you', ok:false, fb:'Replying tells scammers your number is active, so you may get more scams.'},
       {t:'Check your parcel in the courier\'s official app or website (typed in yourself), then delete and report the SMS', ok:true, fb:'Correct. Go to the source yourself instead of trusting links in unexpected messages.'}]},
+    realLife:'scam',
     recap:{points:['Phishing impersonates trusted organisations to steal information.','Watch for look-alike senders, urgency, mismatched links and requests for secrets.','When in doubt, contact the organisation through a channel you find yourself.'],
       terms:[['Phishing','Deceptive messages that trick people'],['Smishing','Phishing by SMS'],['Vishing','Phishing by voice call'],['Spear phishing','Phishing aimed at one specific target']]},
     activity:{type:'select', variant:'email', title:'Spot the Phishing Email', intro:'Click every part of this email that looks suspicious. There are 7 warning signs; find at least 6 to pass. Press "Check" when you are done.',
@@ -437,6 +438,12 @@ const MODULES = [
   }]}
 ];
 
+/* "What to do in real life" box shown at the end of scam lessons (lessons with realLife:'scam') */
+const SCAM_STEPS = [
+  {t:'Call NSRC 997 within 24 hours', d:'The National Scam Response Centre works with banks and the police. The sooner you call, the better the chance your money can be traced and frozen.', call:true},
+  {t:'Contact your bank', d:'Call the hotline on the back of your card or in the official banking app. Ask them to block your card or account, then change your online banking password.'},
+  {t:'Report the number', d:'Report the scammer\'s phone number and bank account to the police (PDRM), and block and report them in the app they used. You can check suspicious numbers and accounts on the PDRM Semak Mule portal.'}
+];
 const LESSON_STAGES = ['Introduction','Concept','Visual example','Scenario','Recap','Activity','Lesson quiz'];
 
 const LEVELS = [

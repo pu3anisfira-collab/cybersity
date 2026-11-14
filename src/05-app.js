@@ -353,6 +353,7 @@ function lessonStageHTML(l, st){
     ${nav(2, `<button class="btn" data-act="stage" data-arg="4" ${pickd==null?'disabled':''}>Recap ▸</button>`)}`; }
   if (st===4) return `${kicker}<h2 style="margin:8px 0 10px">Knowledge recap</h2><ul class="recap-list lesson-body">${l.recap.points.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
     <div class="label" style="color:#4a5180; margin-top:18px">Key terms</div><div class="terms">${l.recap.terms.map(([t,d])=>`<div><b>${esc(t)}</b>${esc(d)}</div>`).join('')}</div>
+    ${l.realLife==='scam' ? realLifeHTML() : ''}
     ${nav(3, p.read ? `<button class="btn" data-act="stage" data-arg="5">Go to activity ▸</button>` : `<button class="btn green" data-act="completeLesson" data-arg="${l.id}">Complete lesson · +${XP.lesson} XP</button>`)}`;
   if (st===5) return `${kicker}<div id="actHost"></div>${nav(4, `<button class="btn" data-act="stage" data-arg="6" ${p.activity?'':'disabled'}>Go to quiz ▸</button>`)}`;
   if (st===6){ const ready = p.read && p.activity;
@@ -362,6 +363,12 @@ function lessonStageHTML(l, st){
     <div style="margin-top:20px">${ready?`<button class="btn gold" data-act="startLessonQuiz" data-arg="${l.id}">${p.quiz?'Retake quiz':'Start quiz'} ▸</button>`:`<p class="feedback bad" style="display:inline-block">Finish the lesson and the activity first. The quiz unlocks after you have studied and practised.</p>`}</div></div>
     ${nav(5, '<span></span>')}`; }
   return '';
+}
+function realLifeHTML(){
+  return `<section class="reallife" aria-labelledby="rlTitle"><div class="rl-head"><span class="rl-alert">!</span><div><div class="label">If it happens to you</div><h3 id="rlTitle">What to do in real life</h3></div></div>
+    <p class="rl-lead">Clicked a scam link, shared a code or sent money? Act fast and stay calm. Being scammed is never something to be ashamed of.</p>
+    <ol class="rl-steps">${SCAM_STEPS.map((s,i)=>`<li><span class="rl-n">${i+1}</span><div><b>${esc(s.t)}</b><span>${esc(s.d)}</span>${s.call?`<a class="btn pink small rl-call" href="tel:997">Call 997</a>`:''}</div></li>`).join('')}</ol>
+    <p class="rl-foot">Keep the evidence: screenshots of the chat, the phone number and your transfer receipts. Do not delete the messages.</p></section>`;
 }
 async function bindHashDemo(){
   const inp = $('#hashIn'), out = $('#hashOut'); if (!inp) return;
