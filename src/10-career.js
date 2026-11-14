@@ -49,7 +49,7 @@ function careerRole(el, c){
       <ul class="recap-list lesson-body">${c.day.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>
       <div class="fit-box"><b>Sounds like you?</b> ${esc(c.fit)}</div></section>
     <section class="panel taster" style="--rc:${c.c}">
-      <div class="label" style="color:var(--gold)">Taster mission</div>
+      <div class="label" style="color:var(--gold-ink)">Taster mission</div>
       <h2 class="pixel" style="font-size:14px; margin:10px 0">${esc(L.activity.title)}</h2>
       <p>${esc(c.mission.brief)}</p>
       <p class="muted" style="font-size:13px; margin-top:10px">About 3 minutes. The same game as Lesson ${L.mod.n}.${L.li+1}, played as a stand-alone taster, so it does not change your lesson progress.</p>

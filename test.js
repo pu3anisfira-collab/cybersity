@@ -173,6 +173,18 @@ const fs = require('fs');
   await page.screenshot({ path: __dirname + '/shots/46-m-incident-cert.png', fullPage: true });
   console.log('mobile incident scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
   await page.evaluate(()=>EXTRA_ACTIONS.incEnd());
+  // Day mode: sun/moon toggle in the top bar, remembered on this device, campus and pages repainted
+  await page.evaluate(()=>go('campus')); await page.waitForTimeout(500);
+  await click('.hud [data-act="toggleTheme"]'); await page.waitForTimeout(800); await shot('47-m-day-campus');
+  await page.evaluate(()=>go('home')); await page.waitForTimeout(400); await page.screenshot({ path: __dirname + '/shots/48-m-day-home.png', fullPage: true });
+  await page.setViewportSize({ width: 1360, height: 900 });
+  for (const v of ['dashboard','campus','library','community']){ await page.evaluate(v=>go(v), v); await page.waitForTimeout(700); await shot('49-day-'+v); }
+  await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=4; go('lesson'); }); await page.waitForTimeout(300); await shot('49-day-lesson');
+  console.log('day mode on / saved / day canvas palette:', await page.evaluate(()=>[document.documentElement.dataset.theme, localStorage.getItem('cybersity-theme'), pal()===PAL_DAY]));
+  await page.reload(); await page.waitForTimeout(800);
+  console.log('day mode survives reload:', await page.evaluate(()=>document.documentElement.dataset.theme));
+  await click('.hud [data-act="toggleTheme"]'); await page.waitForTimeout(300);
+  console.log('back to night:', await page.evaluate(()=>document.documentElement.dataset.theme + '/' + localStorage.getItem('cybersity-theme')));
   console.log('ERRORS:', errs.length ? errs.join('\n') : 'none');
   await browser.close();
 })();

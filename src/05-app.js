@@ -2,6 +2,10 @@
    APP CORE — state, rewards, routing, shell and most views
    ============================================================ */
 const STORE_KEY = 'cybersity-prototype-v1';
+// Night (default) or Day mode, remembered on this device
+const THEME_KEY = 'cybersity-theme';
+try { if (localStorage.getItem(THEME_KEY)==='day') document.documentElement.dataset.theme = 'day'; } catch(e){}
+const themeBtnHTML = (cls, id='') => `<button class="${cls}" ${id?`id="${id}"`:''} data-act="toggleTheme" aria-label="Switch to ${isDay()?'night':'day'} mode" title="Switch to ${isDay()?'night':'day'} mode">${icon(isDay()?'moon':'sun', isDay()?'#6a38c9':'#ffd447')}</button>`;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -70,12 +74,12 @@ function addXP(n, why){
   const before = levelInfo().n; S.xp += n; log(why, n); save();
   toast(`+${n} XP`, 'xp'); updateHUD();
   const after = levelInfo();
-  if (after.n > before) showModal(`<div class="label" style="color:var(--gold)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
+  if (after.n > before) showModal(`<div class="label" style="color:var(--gold-ink)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
 }
 function award(id){
   if (S.badges.includes(id)) return; const b = BADGES.find(x=>x.id===id); if (!b) return;
   S.badges.push(id); log(`Badge unlocked: ${b.t}`); save();
-  showModal(`<div class="label" style="color:var(--gold)">Badge unlocked</div><div class="big-medal" style="background:${b.c}">${icon(b.icon,'#05061a',58)}</div><h2>${esc(b.t)}</h2><p class="muted">${esc(b.d)}</p><div class="actions"><button class="btn ghost" data-act="shareBadge" data-arg="${b.id}">Share in Community</button><button class="btn gold" data-act="closeModal">Nice!</button></div>`);
+  showModal(`<div class="label" style="color:var(--gold-ink)">Badge unlocked</div><div class="big-medal" style="background:${b.c}">${icon(b.icon,'#05061a',58)}</div><h2>${esc(b.t)}</h2><p class="muted">${esc(b.d)}</p><div class="actions"><button class="btn ghost" data-act="shareBadge" data-arg="${b.id}">Share in Community</button><button class="btn gold" data-act="closeModal">Nice!</button></div>`);
 }
 
 /* ---------- Shell ---------- */
@@ -89,12 +93,13 @@ function renderApp(){
   $('#app').innerHTML = `
     <header class="hud">
       <button class="logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
-      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, '#2ee6ff')}${t}</button>`).join('')}</nav>
+      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, isDay() ? '#0a7ea3' : '#2ee6ff')}${t}</button>`).join('')}</nav>
       <div class="player-chip" data-act="go" data-arg="achievements" title="Your progress">
         <div class="ava"><img class="px" id="hudAva" alt=""></div>
         <div class="xpwrap"><div class="lvl" id="hudLvl"></div><div class="xpbar"><i id="hudXp"></i></div></div>
       </div>
-      <button class="icon-btn" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear','#ffd447')}</button>
+      ${themeBtnHTML('icon-btn')}
+      <button class="icon-btn" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear', isDay() ? '#b07800' : '#ffd447')}</button>
     </header>
     <main class="stage" id="view"></main>
     <button class="fab" id="fab" data-act="toggleDrawer" aria-label="Ask BYTE, your AI mentor"><img class="px" alt="" src="${BOT_URL}"><span class="bubble-hint">Need help? Ask BYTE</span></button>
@@ -175,7 +180,7 @@ function renderOnboarding(){
   if (UI.onb==='avatar'){ app.innerHTML = `<div class="auth"><div style="width:100%;max-width:900px">${avatarCreatorHTML()}</div></div>`; bindAvatarCreator(); return; }
   if (UI.onb==='brief'){
     app.innerHTML = `<div class="auth"><div class="briefing">
-      <div class="label" style="color:var(--pink)">Mission briefing</div>
+      <div class="label" style="color:var(--pink-ink)">Mission briefing</div>
       <h1 class="pixel" style="font-size:clamp(18px,4vw,28px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
       <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
       <div class="flow">
@@ -196,7 +201,7 @@ function renderOnboarding(){
 function drawHeroStrip(){
   const c = $('#heroCanvas'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
   const looks = [0,1,2,3,4].map(()=>randomLook()); let f=0;
-  const draw = ()=>{ x.clearRect(0,0,160,40); x.fillStyle='#1a2056'; x.fillRect(0,32,160,8); x.fillStyle='#303b8f'; for(let i=0;i<160;i+=6) x.fillRect(i,32,3,1);
+  const draw = ()=>{ x.clearRect(0,0,160,40); x.fillStyle=isDay() ? '#58b83a' : '#1a2056'; x.fillRect(0,32,160,8); x.fillStyle=isDay() ? '#3c8f27' : '#303b8f'; for(let i=0;i<160;i+=6) x.fillRect(i,32,3,1);
     looks.forEach((L,i)=>{ const sp = avatarCanvas(L, (f+i)%2); x.drawImage(sp, 6+i*26, 14 + ((f+i)%2)); });
     x.drawImage(botCanvas(), 138, 17); f++; };
   draw(); timers.push(setInterval(draw, 450));
@@ -206,7 +211,7 @@ function avatarCreatorHTML(){
   const sw = (key, list) => `<div class="swatches">${list.map(v=>`<button class="sw ${L[key]===v?'on':''}" style="background:${v}" data-act="look" data-arg="${key}|${v}" aria-label="${key} ${v}"></button>`).join('')}</div>`;
   const chips = (key, list) => `<div class="swatches">${list.map(v=>`<button class="chip ${L[key]===v?'on':''}" data-act="look" data-arg="${key}|${v}">${v}</button>`).join('')}</div>`;
   return `<div class="panel">
-    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:18px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
+    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:18px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
     <div class="creator">
       <div><div class="ava-stage"><div class="floor"></div><img class="px" id="avaPreview" alt="Avatar preview" src="${avatarURL(L)}"></div>
         <div class="field" style="margin-top:16px"><label for="avaName">Display name</label><input class="input" id="avaName" maxlength="18" value="${esc(UI.draftName)}"></div></div>
@@ -233,7 +238,7 @@ function viewDashboard(el){
     <section class="welcome">
       <div class="big-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
       <div style="position:relative; z-index:1">
-        <div class="label" style="color:var(--cyan)">Learner dashboard</div>
+        <div class="label" style="color:var(--cyan-ink)">Learner dashboard</div>
         <h1>Welcome back, ${esc(S.user.name)}</h1>
         <p class="muted" style="margin-top:6px">Level ${L.n} · ${esc(L.t)} · ${pct}% of the Cybersecurity Fundamentals pathway complete</p>
       </div>
@@ -263,7 +268,7 @@ function viewDashboard(el){
         </section>
         <section class="panel home-card">
           <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
-          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
+          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green-ink)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
             <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
           <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
         </section>
@@ -278,10 +283,10 @@ function viewDashboard(el){
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
-  x.fillStyle='#14352b'; x.fillRect(0,0,240,96); x.fillStyle='#262c66'; x.fillRect(0,58,240,22);
-  BUILDINGS.forEach((b,i)=>{ const bx = 6+i*39; x.fillStyle=b.roof; x.fillRect(bx,16,34,12); x.fillStyle='#1b2054'; x.fillRect(bx+2,28,30,28); x.fillStyle=b.color; x.fillRect(bx+5,33,6,6); x.fillRect(bx+23,33,6,6); x.fillStyle='#05061a'; x.fillRect(bx+14,44,6,12); });
+  const P = pal(); if (isDay()){ x.fillStyle='#8fd3ff'; x.fillRect(0,0,240,58); x.fillStyle=P.grass; x.fillRect(0,48,240,48); } else { x.fillStyle='#14352b'; x.fillRect(0,0,240,96); } x.fillStyle=P.path[0]; x.fillRect(0,58,240,22);
+  BUILDINGS.forEach((b,i)=>{ const bx = 6+i*39; x.fillStyle=b.roof; x.fillRect(bx,16,34,12); x.fillStyle=P.wall; x.fillRect(bx+2,28,30,28); x.fillStyle=b.color; x.fillRect(bx+5,33,6,6); x.fillRect(bx+23,33,6,6); x.fillStyle='#05061a'; x.fillRect(bx+14,44,6,12); });
   let f=0; const looks=[S.user.look, ...COMMUNITY_USERS.slice(0,4).map(u=>u.look)];
-  const draw=()=>{ x.fillStyle='#262c66'; x.fillRect(0,58,240,22); looks.forEach((L,i)=>{ const px = (i*53 + f*(i%2?1:-1)*2 + 600) % 240; x.drawImage(avatarCanvas(L,f%2), px, 60); }); f++; };
+  const draw=()=>{ x.fillStyle=P.path[0]; x.fillRect(0,58,240,22); looks.forEach((L,i)=>{ const px = (i*53 + f*(i%2?1:-1)*2 + 600) % 240; x.drawImage(avatarCanvas(L,f%2), px, 60); }); f++; };
   draw(); timers.push(setInterval(draw, 300));
 }
 
@@ -456,7 +461,7 @@ function viewChallenge(el){
   const row = (ic, color, title, sub, btn) => `<div class="ch-row">${icon(ic,color,28)}<div><b>${title}</b><small>${sub}</small></div>${btn}</div>`;
   const fUn = allModsPassed();
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Challenge Centre</div><h1>Challenge Centre</h1><p>Every practice activity, quiz and assessment in one place. Locked items open as you progress through the lessons.</p></div></div>
-  <section class="boss"><img class="px" src="${iconURL('trophy','#ffd447')}" alt="" style="width:64px;height:64px"><div style="flex:1; min-width:220px"><div class="label" style="color:var(--pink)">Final boss</div><h2>Final Assessment</h2><p class="muted" style="margin-top:6px">${MODULES.length*2} questions drawn from every module. Pass at ${S.passMark}% to earn the Cybersity Certificate of Completion.</p></div>
+  <section class="boss"><img class="px" src="${iconURL('trophy','#ffd447')}" alt="" style="width:64px;height:64px"><div style="flex:1; min-width:220px"><div class="label" style="color:var(--pink-ink)">Final boss</div><h2>Final Assessment</h2><p class="muted" style="margin-top:6px">${MODULES.length*2} questions drawn from every module. Pass at ${S.passMark}% to earn the Cybersity Certificate of Completion.</p></div>
     ${finalPassed()?`<span class="pill green">Passed · best ${S.final.best}%</span>`:''}<button class="btn gold" data-act="startFinal" ${fUn?'':'disabled'}>${fUn?(finalPassed()?'Retake':'Start'):'Pass all 6 modules first'}</button></section>
   <div class="grid g2" style="margin-top:22px">
     <section><div class="section-title">Practice activities</div>${ALL_LESSONS.map(l=>{ const p=S.lessons[l.id]||{}, ok=lessonUnlocked(l)&&p.read; return row(p.activity?'check':ok?'flag':'lock', p.activity?'#47f59a':ok?'#ff9a3d':'#5a6199', esc(l.activity.title), `Lesson ${l.mod.n}.${l.li+1} · ${esc(l.title)}${p.actScore!=null?` · ${p.actScore}%`:''}`, `<button class="btn small ${p.activity?'ghost':''}" data-act="openLesson" data-arg="${l.id}|5" ${ok?'':'disabled'}>${p.activity?'Replay':ok?'Play':'Locked'}</button>`); }).join('')}</section>
@@ -470,7 +475,7 @@ function viewAchievements(el){
   const L = levelInfo();
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Achievement Hall</div><h1>Achievement Hall</h1><p>Your XP, rank, badges and learning history.</p></div></div>
   <div class="grid g-wide">
-    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold)">Current rank</div><h2 class="pixel" style="font-size:16px; margin-top:6px">${esc(L.t)}</h2>
+    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:16px; margin-top:6px">${esc(L.t)}</h2>
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
@@ -522,7 +527,7 @@ function viewAdmin(el){
   <div class="grid g2" style="margin-top:20px">
     <section class="panel"><div class="section-title">Module completion (all learners)</div>${MODULES.map((m,i)=>{ const v=[82,64,51,40,29,21][i]; return `<div style="display:grid; grid-template-columns:150px 1fr 44px; gap:10px; align-items:center; margin-bottom:10px; font-size:13.5px"><span>${m.n}. ${esc(m.title.split(' ').slice(0,2).join(' '))}</span><div class="bar"><i style="width:${v}%; background:${m.color}"></i></div><span class="label muted">${v}%</span></div>`; }).join('')}</section>
     <section class="panel"><div class="section-title">Assessment settings</div>
-      <label class="label muted" for="passMark">Pass mark for quizzes and assessments: <b style="color:var(--gold)" id="pmVal">${S.passMark}%</b></label>
+      <label class="label muted" for="passMark">Pass mark for quizzes and assessments: <b style="color:var(--gold-ink)" id="pmVal">${S.passMark}%</b></label>
       <input type="range" class="range" id="passMark" min="50" max="90" step="5" value="${S.passMark}" style="margin-top:10px">
       <p class="note" style="margin-top:8px">This setting is live in the prototype: change it and the learner quizzes use the new pass mark.</p>
       <div class="section-title" style="margin-top:18px">Certificate rules</div>
@@ -602,6 +607,10 @@ const ACTIONS = {
   retryQuiz: () => { const Q=UI.quiz; startQuiz(Q.kind, Q.id); },
   quitQuiz: () => { const Q=UI.quiz; UI.quiz=null; if (Q && Q.kind==='lesson'){ UI.lessonId=Q.id; UI.stage=6; go('lesson'); } else go('challenge'); },
   toggleMenu: () => { UI.menu=!UI.menu; renderMenu(); },
+  toggleTheme: () => { const day = !isDay(); document.documentElement.dataset.theme = day ? 'day' : 'night';
+    try { localStorage.setItem(THEME_KEY, day ? 'day' : 'night'); } catch(e){}
+    const corner = $('#themeCorner'); if (corner) corner.outerHTML = themeBtnHTML('theme-corner', 'themeCorner');
+    if (S.user) renderApp(); toast(day ? '☀ Day mode on' : '🌙 Night mode on'); },
   demoComplete: a => demoComplete(+a),
   resetDemo: () => { UI.menu=false; renderMenu(); showModal(`<h2>Reset demo?</h2><p class="muted">This clears all progress, XP, badges and your avatar so you can start the journey again.</p><div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="confirmReset">Reset everything</button></div>`); },
   confirmReset: () => { S = freshState(); save(); UI.onb='auth'; UI.scen={}; UI.quiz=null; modalQueue.length=0; $('#layer').innerHTML=''; Mentor.reset(); renderApp(); },
@@ -613,7 +622,7 @@ const ACTIONS = {
   downloadCert: () => toast('In the full system, this downloads a PDF generated by the server with your unique certificate ID.'),
   askAbout: a => { const l=lessonById(a); Mentor.openDrawer(); Mentor.ask(`Can you explain "${l.title}" in simple terms?`); },
   toggleDrawer: () => Mentor.toggleDrawer(),
-  familyCard: a => { const l=lessonById(a); showModal(`<div class="label" style="color:var(--green)">Teach your family</div><h2 style="margin:6px 0 14px">Share this lesson in 1 minute</h2>${familyCardHTML(l)}<div class="actions"><button class="btn gold" data-act="closeModal">Done</button></div>`); },
+  familyCard: a => { const l=lessonById(a); showModal(`<div class="label" style="color:var(--green-ink)">Teach your family</div><h2 style="margin:6px 0 14px">Share this lesson in 1 minute</h2>${familyCardHTML(l)}<div class="actions"><button class="btn gold" data-act="closeModal">Done</button></div>`); },
   familyCopy: a => { const t = familyText(lessonById(a)); try { navigator.clipboard.writeText(t).then(()=>toast('Copied. Paste it into any chat.'), ()=>toast('Copy is blocked here. Use the WhatsApp button instead.')); } catch(e){ toast('Copy is blocked here. Use the WhatsApp button instead.'); } },
   adminNote: () => toast('Content editing and learner records are part of the full admin system.'),
   modAction: a => { const [i,st]=a.split('|'); S.reports[+i].status=st; if (st==='removed') Community.removeMessage(S.reports[+i].mid); save(); renderView(); toast(st==='removed'?'Message removed from the room':'Report dismissed'); }

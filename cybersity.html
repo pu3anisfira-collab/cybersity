@@ -15,6 +15,8 @@
   --f-body:'Lexend', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-term:'VT323', 'Courier New', monospace;
   --hard: 4px 4px 0 #000;
+  /* accent colours used as text; Day mode deepens them so they stay readable on light panels */
+  --cyan-ink:var(--cyan); --blue-ink:var(--blue); --pink-ink:var(--pink); --purple-ink:var(--purple); --gold-ink:var(--gold); --green-ink:var(--green); --red-ink:var(--red); --orange-ink:var(--orange);
   color-scheme: dark;
 }
 *{box-sizing:border-box}
@@ -87,7 +89,7 @@ p{margin:0}
 }
 body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:60; background:#0d1135}
 .logo{font-family:var(--f-pixel); font-size:15px; color:#fff; text-shadow:2px 2px 0 var(--pink), -1px -1px 0 var(--cyan); white-space:nowrap; background:none; border:0; padding:4px 0}
-.logo span{color:var(--cyan)}
+.logo span{color:var(--cyan-ink)}
 .nav{display:flex; gap:4px; overflow-x:auto; flex:1; min-width:0; scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nav button{
@@ -100,7 +102,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .player-chip{display:flex; align-items:center; gap:10px; background:var(--panel); border:2px solid #000; padding:4px 10px 4px 4px; box-shadow:2px 2px 0 #000; cursor:pointer}
 .player-chip .ava{width:34px; height:34px; background:#232b72; border:2px solid #000; display:grid; place-items:center; overflow:hidden}
 .player-chip .ava img{width:28px; height:36px; margin-top:6px}
-.lvl{font-family:var(--f-pixel); font-size:9px; color:var(--gold)}
+.lvl{font-family:var(--f-pixel); font-size:9px; color:var(--gold-ink)}
 .xpbar{width:110px; height:10px; background:#05071a; border:2px solid #000; position:relative; margin-top:4px}
 .xpbar i{position:absolute; inset:0 auto 0 0; background:repeating-linear-gradient(90deg,var(--gold) 0 6px,#ffb800 6px 8px); transition:width .6s}
 .icon-btn{width:40px;height:40px; display:grid; place-items:center; background:var(--panel); border:2px solid #000; box-shadow:2px 2px 0 #000}
@@ -112,7 +114,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .page-head h1{font-family:var(--f-pixel); font-size:20px; line-height:1.4; color:#fff; text-shadow:3px 3px 0 #000}
 .page-head p{color:var(--muted); max-width:62ch; margin-top:8px}
 .crumbs{font-family:var(--f-label); font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap}
-.crumbs button{background:none;border:0;color:var(--cyan);padding:0;font:inherit;text-transform:inherit;letter-spacing:inherit}
+.crumbs button{background:none;border:0;color:var(--cyan-ink);padding:0;font:inherit;text-transform:inherit;letter-spacing:inherit}
 
 .grid{display:grid; gap:18px}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -129,11 +131,11 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 @media (max-width:860px){ .auth-wrap{grid-template-columns:1fr} }
 .hero-logo{font-family:var(--f-pixel); font-size:clamp(28px,6vw,54px); line-height:1.15; color:#fff;
   text-shadow:4px 4px 0 var(--pink), -2px -2px 0 var(--cyan), 8px 8px 0 #000}
-.hero-tag{font-family:var(--f-label); color:var(--cyan); text-transform:uppercase; letter-spacing:.12em; margin-top:18px; font-size:14px}
+.hero-tag{font-family:var(--f-label); color:var(--cyan-ink); text-transform:uppercase; letter-spacing:.12em; margin-top:18px; font-size:14px}
 .hero-copy{color:var(--muted); margin-top:14px; max-width:46ch; font-size:16px}
 .hero-pills{display:flex; flex-wrap:wrap; gap:8px; margin-top:22px}
 .pill{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.08em; padding:5px 9px; border:2px solid #000; background:var(--panel-2); color:var(--text); box-shadow:2px 2px 0 #000}
-.pill.cyan{background:#0e3f55; color:var(--cyan)} .pill.pink{background:#4a1239; color:#ffb3dc} .pill.gold{background:#4a3b0b; color:var(--gold)} .pill.purple{background:#30185e; color:#d6bcff} .pill.green{background:#0f3e2b; color:var(--green)} .pill.red{background:#4a121c; color:#ffb0b8}
+.pill.cyan{background:#0e3f55; color:var(--cyan-ink)} .pill.pink{background:#4a1239; color:#ffb3dc} .pill.gold{background:#4a3b0b; color:var(--gold-ink)} .pill.purple{background:#30185e; color:#d6bcff} .pill.green{background:#0f3e2b; color:var(--green-ink)} .pill.red{background:#4a121c; color:#ffb0b8}
 .tabs{display:flex; border:3px solid #000; margin-bottom:18px}
 .tabs button{flex:1; padding:10px; background:var(--navy); border:0; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
 .tabs button.on{background:var(--cyan); color:#05071a; font-weight:700}
@@ -181,25 +183,25 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .bar{height:12px; background:#05071a; border:2px solid #000; position:relative; overflow:hidden}
 .bar i{position:absolute; inset:0 auto 0 0; background:var(--cyan); transition:width .6s}
 .bar.gold i{background:var(--gold)} .bar.pink i{background:var(--pink)} .bar.green i{background:var(--green)} .bar.purple i{background:var(--purple)}
-.section-title{font-family:var(--f-label); text-transform:uppercase; letter-spacing:.1em; font-size:13px; color:var(--cyan); margin-bottom:12px; display:flex; align-items:center; gap:8px}
+.section-title{font-family:var(--f-label); text-transform:uppercase; letter-spacing:.1em; font-size:13px; color:var(--cyan-ink); margin-bottom:12px; display:flex; align-items:center; gap:8px}
 .section-title::after{content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 10px)}
 .mod-row{display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center; padding:10px 0; border-bottom:2px dashed var(--line-soft)}
 .mod-row:last-child{border-bottom:0}
 .mod-num{width:34px;height:34px; display:grid; place-items:center; font-family:var(--f-pixel); font-size:11px; border:2px solid #000; box-shadow:2px 2px 0 #000}
 .tip-card{background:#0d2f3c; border:3px solid #000; box-shadow:var(--hard); padding:16px}
-.tip-card .label{color:var(--cyan)}
+.tip-card .label{color:var(--cyan-ink)}
 
 /* ---------- Campus ---------- */
 .campus-wrap{position:relative; max-width:max(560px, calc((100vh - 110px) * 1.2)); margin:0 auto; border:4px solid #000; box-shadow:0 0 0 3px var(--line), 8px 8px 0 3px #000; background:#000}
 #campus{display:block; width:100%; height:auto; aspect-ratio:6/5; cursor:crosshair; touch-action:manipulation}
 .campus-hud{position:absolute; left:10px; top:10px; display:flex; gap:8px; flex-wrap:wrap; pointer-events:none}
 .campus-hud .pill{pointer-events:auto}
-.cam-toggle{display:none; position:absolute; right:8px; top:8px; z-index:4; font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 9px; background:#0b0f2ce6; color:var(--cyan); border:2px solid #000; box-shadow:2px 2px 0 #000}
+.cam-toggle{display:none; position:absolute; right:8px; top:8px; z-index:4; font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 9px; background:#0b0f2ce6; color:var(--cyan-ink); border:2px solid #000; box-shadow:2px 2px 0 #000}
 @media (max-width:640px){ .cam-toggle{display:block} }
 .prompt{position:absolute; left:50%; bottom:14px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; background:#0b0f2ce6; border:3px solid #000; box-shadow:var(--hard); padding:8px 10px 8px 14px; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; font-size:12px; white-space:nowrap; max-width:calc(100% - 20px)}
 .prompt kbd{font-family:var(--f-pixel); font-size:9px; background:var(--gold); color:#000; padding:4px 6px; border:2px solid #000}
 .tooltip{position:absolute; pointer-events:none; background:#0b0f2cf0; border:2px solid #000; box-shadow:3px 3px 0 #000; padding:8px 10px; font-size:13px; max-width:240px; z-index:5}
-.tooltip b{font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; display:block; color:var(--cyan)}
+.tooltip b{font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; display:block; color:var(--cyan-ink)}
 .quick-nav{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-top:18px}
 @media (max-width:860px){ .quick-nav{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:480px){ .quick-nav{grid-template-columns:repeat(2,minmax(0,1fr))} }
@@ -217,10 +219,10 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 @media (max-width:860px){ .home-grid{grid-template-columns:1fr} }
 .home-dorm canvas{display:block; width:100%; max-width:384px; height:auto; margin:0 auto; border:3px solid #000}
 .home-score{display:flex; align-items:baseline; gap:10px; margin:10px 0 8px}
-.home-score b{font-size:26px; color:var(--green); text-shadow:3px 3px 0 #000}
+.home-score b{font-size:26px; color:var(--green-ink); text-shadow:3px 3px 0 #000}
 .home-stages{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:14px}
 .home-stages span{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 8px; border:2px solid #000; background:var(--navy); color:var(--muted)}
-.home-stages span.on{background:#0f3e2b; color:var(--green)}
+.home-stages span.on{background:#0f3e2b; color:var(--green-ink)}
 .hc-list{display:grid; gap:10px; margin-top:16px}
 .hc{display:grid; grid-template-columns:32px 1fr auto; gap:12px; align-items:start; text-align:left; padding:12px 14px; background:#fff; color:var(--ink); border:3px solid var(--ink); box-shadow:3px 3px 0 var(--ink)}
 .hc:hover{background:#f4f6ff}
@@ -258,7 +260,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .rm-body{display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:1.4; color:var(--muted)}
 .rm-body b{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#fff}
 .rm-tag{font-family:var(--f-label); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
-.rm.full .rm-tag{color:var(--green)} .rm.part .rm-tag{color:var(--gold)}
+.rm.full .rm-tag{color:var(--green-ink)} .rm.part .rm-tag{color:var(--gold-ink)}
 @media (max-width:860px){
   .roadmap{grid-template-columns:1fr; gap:16px}
   .roadmap::before{left:19px; right:auto; top:8px; bottom:8px; width:4px; height:auto; background:repeating-linear-gradient(180deg,var(--line) 0 8px,transparent 8px 12px)}
@@ -313,14 +315,14 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .inc-banner{display:flex; align-items:center; gap:10px 18px; flex-wrap:wrap; margin:0 auto 14px; max-width:max(560px, calc((100vh - 110px) * 1.2)); padding:10px 14px; background:#3a0d1a; border:3px solid #000; box-shadow:0 0 0 3px var(--red), var(--hard); animation:incPulse 1s steps(2) infinite}
 .inc-banner.saved{background:#0f3e2b; box-shadow:0 0 0 3px var(--green), var(--hard); animation:none}
 .inc-title{display:flex; align-items:center; gap:10px; font-family:var(--f-pixel); font-size:12px; color:#fff; text-shadow:2px 2px 0 #000}
-.inc-banner.saved .inc-title{color:var(--green)}
+.inc-banner.saved .inc-title{color:var(--green-ink)}
 .inc-count{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#ffc2cb}
 .inc-count b{font-family:var(--f-pixel); font-size:13px; color:#fff}
-.inc-banner.saved .inc-count{color:var(--green)}
+.inc-banner.saved .inc-count{color:var(--green-ink)}
 .inc-chips{display:flex; gap:6px; flex-wrap:wrap; flex-basis:100%}
 .inc-chip{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:5px 8px; background:#5a1a26; color:#ffd6db; border:2px solid #000; box-shadow:2px 2px 0 #000}
 .inc-chip:hover{background:#7a2232; color:#fff}
-.inc-chip.ok{background:#0f3e2b; color:var(--green); cursor:default}
+.inc-chip.ok{background:#0f3e2b; color:var(--green-ink); cursor:default}
 .siren{width:14px; height:14px; background:var(--red); border:2px solid #000; box-shadow:0 0 12px 3px #ff5d6e; animation:siren .5s steps(2) infinite}
 .campus-wrap.alarm{box-shadow:0 0 0 3px var(--red), 8px 8px 0 3px #000; animation:incGlow 1s steps(2) infinite}
 .inc-head h1{color:#ffd6db; text-shadow:3px 3px 0 #5a1a26}
@@ -351,7 +353,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .lesson-item h3{font-size:16px; font-weight:600}
 .steps-mini{display:flex; gap:6px; margin-top:6px; flex-wrap:wrap}
 .steps-mini span{font-family:var(--f-label); font-size:10px; text-transform:uppercase; letter-spacing:.06em; padding:2px 6px; border:2px solid #000; background:#0b0f2c; color:var(--muted)}
-.steps-mini span.done{background:#0f3e2b; color:var(--green)}
+.steps-mini span.done{background:#0f3e2b; color:var(--green-ink)}
 @media (max-width:600px){ .lesson-item{grid-template-columns:44px 1fr} .lesson-item > :last-child{grid-column:1/-1} }
 
 /* ---------- Lesson ---------- */
@@ -411,7 +413,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .code-tbl td,.code-tbl th{border:2px solid var(--ink); padding:4px 8px; text-align:left}
 .code-tbl th{background:#e6e9f8; font-family:var(--f-label); font-size:12px; text-transform:uppercase}
 .hash-demo{display:grid; gap:8px; margin-top:12px}
-.hash-out{font-family:var(--f-term); font-size:18px; word-break:break-all; background:var(--ink); color:var(--green); padding:10px 12px; border:3px solid var(--ink)}
+.hash-out{font-family:var(--f-term); font-size:18px; word-break:break-all; background:var(--ink); color:var(--green-ink); padding:10px 12px; border:3px solid var(--ink)}
 .hbar{display:grid; grid-template-columns:minmax(120px,240px) 1fr; gap:10px; align-items:center; font-size:14px; margin-bottom:8px}
 .hbar code{font-family:var(--f-term); font-size:19px}
 .hbar .track{height:22px; background:var(--paper-2); border:2px solid var(--ink); position:relative}
@@ -560,12 +562,15 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .cmsg .av{width:34px;height:34px; background:#1b2160; border:2px solid #000; display:grid; place-items:center; overflow:hidden; flex:none}
 .cmsg .av img{width:26px; height:32px; margin-top:4px}
 .cmsg .nm{font-weight:600; font-size:13.5px}
+.cmsg.sys{background:#4a121c55; border:2px solid #000} .cmsg.sys .av{background:#4a121c} .cmsg.sys .nm{color:#ffb0b8}
+.safety-panel{background:#2a1030}
+.quote-box{background:#0b0f2c; border:2px solid #000; padding:10px; text-align:left; font-size:14px; margin:10px 0}
 .cmsg .tm{font-family:var(--f-label); font-size:10px; color:var(--muted); margin-left:6px}
 .cmsg .tx{font-size:14.5px; overflow-wrap:anywhere}
 .cmsg .rep{position:absolute; right:6px; top:4px; opacity:0; background:var(--panel-2); border:2px solid #000; font-family:var(--f-label); font-size:10px; text-transform:uppercase; padding:3px 6px; color:var(--muted)}
 .cmsg:hover .rep, .cmsg .rep:focus{opacity:1}
 @media (hover:none){ .cmsg .rep{opacity:.8} }
-.share-card{display:inline-flex; align-items:center; gap:10px; margin-top:6px; padding:8px 12px; background:#2b2408; border:2px solid #000; box-shadow:3px 3px 0 #000; color:var(--gold)}
+.share-card{display:inline-flex; align-items:center; gap:10px; margin-top:6px; padding:8px 12px; background:#2b2408; border:2px solid #000; box-shadow:3px 3px 0 #000; color:var(--gold-ink)}
 .share-card img{width:28px;height:28px}
 .rules{font-size:12.5px; color:var(--muted); margin-top:14px; padding:12px; background:var(--panel); border:2px solid #000}
 
@@ -586,7 +591,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .history{display:grid; gap:0; font-size:14px}
 .history div{display:grid; grid-template-columns:90px 1fr auto; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line-soft)}
 .history span.t{font-family:var(--f-term); font-size:18px; color:var(--muted)}
-.history span.x{font-family:var(--f-label); color:var(--gold); font-size:12px}
+.history span.x{font-family:var(--f-label); color:var(--gold-ink); font-size:12px}
 
 /* ---------- Certificate ---------- */
 .cert{background:#fffdf4; color:#1b1d3a; border:6px solid #1b1d3a; box-shadow:0 0 0 6px #ffd447, 0 0 0 12px #1b1d3a, 12px 12px 0 12px #000; padding:clamp(20px,5vw,48px); text-align:center; margin:16px; position:relative; overflow:hidden}
@@ -607,12 +612,12 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .checklist .ok .box{background:var(--green); color:#000}
 
 /* ---------- Admin ---------- */
-.admin-banner{background:repeating-linear-gradient(45deg,#3a2a00 0 14px,#2a1e00 14px 28px); border:3px solid #000; padding:10px 14px; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.08em; color:var(--gold); margin-bottom:18px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center}
+.admin-banner{background:repeating-linear-gradient(45deg,#3a2a00 0 14px,#2a1e00 14px 28px); border:3px solid #000; padding:10px 14px; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.08em; color:var(--gold-ink); margin-bottom:18px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center}
 .tbl-wrap{overflow-x:auto}
 .tbl{width:100%; border-collapse:collapse; font-size:14px; min-width:560px}
 .tbl th{font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; font-size:11px; color:var(--muted); text-align:left; padding:8px; border-bottom:2px solid var(--line)}
 .tbl td{padding:9px 8px; border-bottom:1px dashed var(--line-soft); font-variant-numeric:tabular-nums}
-.range{width:100%; accent-color:var(--gold)}
+.range{width:100%; accent-color:var(--gold-ink)}
 
 /* ---------- Modals / toasts ---------- */
 .overlay{position:fixed; inset:0; z-index:200; background:#04061acc; display:grid; place-items:center; padding:16px; animation:fade .15s}
@@ -628,7 +633,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .toast.xp{background:var(--gold); color:#000; font-family:var(--f-pixel); font-size:11px}
 @keyframes slide{from{transform:translateY(-12px); opacity:0}}
 .menu{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(68px + env(safe-area-inset-top,0px)); z-index:120; width:290px; background:var(--panel); border:3px solid #000; box-shadow:var(--hard); padding:12px}
-.menu .label{color:var(--gold); display:block; margin:6px 4px 8px}
+.menu .label{color:var(--gold-ink); display:block; margin:6px 4px 8px}
 .menu button.item{display:block; width:100%; text-align:left; padding:9px 10px; background:transparent; border:2px solid transparent; font-size:14px}
 .menu button.item:hover{background:var(--panel-2); border-color:#000}
 .menu hr{border:0; border-top:2px dashed var(--line); margin:8px 0}
@@ -644,6 +649,136 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
   .campus-hud{display:none}
 }
 @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+
+/* Theme switch on the sign-in screens (the top bar has its own once signed in) */
+.theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
+.theme-corner img, .icon-btn img{width:20px; height:20px}
+body:has(.hud) .theme-corner{display:none}
+
+/* =====================================================================
+   DAY MODE  ·  :root[data-theme="day"]
+   Bright sky blue with pixel clouds, green grass, cream panels with dark pixel outlines,
+   yellow titles outlined in brown and chunky green buttons. Device screens (log terminal, router,
+   incident alarm, tooltips) stay dark, so they restore the bright accent "ink" colours locally.
+   ===================================================================== */
+:root[data-theme="day"]{
+  --night:#8fd3ff; --navy:#fff3d6; --panel:#fffaf0; --panel-2:#e6f6d2; --line:#6b4a2b; --line-soft:#f0dfb6;
+  --muted:#5e5878; --text:#2b2340;
+  --cyan-ink:#0a7ea3; --blue-ink:#2c55d6; --pink-ink:#c2257e; --purple-ink:#6a38c9; --gold-ink:#9a6400; --green-ink:#1d8a3e; --red-ink:#c4233e; --orange-ink:#b85a00;
+  --sky-1:#6cc4ff; --sky-2:#bfe7ff; --grass:#58b83a; --grass-dark:#3c8f27; --dirt:#9a5a2e; --wood:#6b4a2b; --title:#ffd23f;
+  color-scheme: light;
+}
+[data-theme="day"] body{
+  background-color:var(--sky-2);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='240' shape-rendering='crispEdges'%3E%3Cg fill='%23ffffff'%3E%3Crect x='40' y='60' width='96' height='16'/%3E%3Crect x='56' y='44' width='56' height='16'/%3E%3Crect x='72' y='32' width='24' height='12'/%3E%3Crect x='28' y='76' width='124' height='12'/%3E%3Crect x='340' y='148' width='120' height='16'/%3E%3Crect x='360' y='132' width='72' height='16'/%3E%3Crect x='380' y='120' width='32' height='12'/%3E%3Crect x='324' y='164' width='152' height='12'/%3E%3C/g%3E%3Cg fill='%23d9e6ff'%3E%3Crect x='28' y='84' width='124' height='4'/%3E%3Crect x='324' y='172' width='152' height='4'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, var(--grass) 0 6px, var(--grass-dark) 6px 10px, var(--dirt) 10px),
+    linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 70%);
+  background-repeat:repeat-x, no-repeat, no-repeat;
+  background-position:0 64px, 0 100%, 0 0;
+  background-size:560px 240px, 100% 26px, 100% 100%;
+  background-attachment:fixed;
+}
+[data-theme="day"] body::after{background:repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0 1px, transparent 1px 3px)}
+[data-theme="day"] body::before{background:#fff3d6}
+[data-theme="day"] .stage{padding-bottom:130px}
+
+/* top bar */
+[data-theme="day"] .hud{background:linear-gradient(#fffaf0,#fff0cc); border-bottom:4px solid var(--wood); box-shadow:0 4px 0 var(--grass)}
+[data-theme="day"] .logo{color:var(--title); text-shadow:2px 0 var(--wood),-2px 0 var(--wood),0 2px var(--wood),0 -2px var(--wood),3px 3px 0 var(--wood)}
+[data-theme="day"] .logo span{color:#7fd3ff}
+[data-theme="day"] .nav button{color:#5e5878}
+[data-theme="day"] .nav button:hover{color:var(--text); border-color:var(--line-soft)}
+[data-theme="day"] .nav button.on{color:#fff; background:#5aa83c; border-color:#000}
+[data-theme="day"] .player-chip .ava{background:#bfe7ff}
+[data-theme="day"] .xpbar, [data-theme="day"] .bar{background:#f0e6cf}
+[data-theme="day"] .player-chip .lvl{color:var(--text)}
+
+/* titles: yellow pixel letters outlined in brown, like the reference title cards */
+[data-theme="day"] .page-head h1, [data-theme="day"] .hero-logo{color:var(--title); text-shadow:2px 0 var(--wood),-2px 0 var(--wood),0 2px var(--wood),0 -2px var(--wood),4px 4px 0 var(--wood)}
+[data-theme="day"] .page-head p{color:#33405e}
+[data-theme="day"] .crumbs{color:#33405e}
+[data-theme="day"] .crumbs button{color:#0a6f93}
+
+/* buttons: chunky green pixel buttons */
+[data-theme="day"] .btn{background:#6cc24a; color:#16300c}
+[data-theme="day"] .btn.ghost{background:#fffaf0; color:var(--text)}
+[data-theme="day"] .btn[disabled]{background:#e4dccb; color:#8b8470}
+[data-theme="day"] .icon-btn{background:#fffaf0}
+
+/* panels and cards */
+[data-theme="day"] .panel, [data-theme="day"] .qn, [data-theme="day"] .role-card, [data-theme="day"] .badge, [data-theme="day"] .mod-card,
+[data-theme="day"] .lesson-item, [data-theme="day"] .ch-row, [data-theme="day"] .flow div, [data-theme="day"] .checklist div, [data-theme="day"] .room{color:var(--text)}
+[data-theme="day"] .stat b, [data-theme="day"] .role-card b, [data-theme="day"] .rm-body b{color:var(--text)}
+[data-theme="day"] .qn:hover, [data-theme="day"] .role-card:hover{background:#f2fbe8}
+[data-theme="day"] .monitor{box-shadow:0 0 0 4px #ffe08a, 0 0 0 8px #000, 8px 8px 0 8px #000}
+[data-theme="day"] .welcome{background:linear-gradient(120deg,#9fe0ff 0%,#c6f0ff 55%,#ffe7a8 100%); color:var(--text)}
+[data-theme="day"] .welcome h1{color:var(--title); text-shadow:2px 0 var(--wood),-2px 0 var(--wood),0 2px var(--wood),0 -2px var(--wood),3px 3px 0 var(--wood)}
+[data-theme="day"] .welcome .big-ava{background:#bfe7ff}
+[data-theme="day"] .tip-card{background:#e6f6d2; color:var(--text)}
+[data-theme="day"] .boss{background:linear-gradient(120deg,#ffd6e8,#ffe9a8); color:var(--text)}
+[data-theme="day"] .mentor-card{background:linear-gradient(#e9dcff,#fff6e0); color:var(--text)}
+[data-theme="day"] .mentor-card h2{color:#5a2fb0}
+[data-theme="day"] .level-num{color:#000}
+[data-theme="day"] .ladder span, [data-theme="day"] .steps-mini span, [data-theme="day"] .stepper button .dot, [data-theme="day"] .checklist .box{background:#f3ead4; color:#5e5878}
+[data-theme="day"] .stepper button.done .dot, [data-theme="day"] .checklist .ok .box{background:var(--green); color:#000}
+[data-theme="day"] .stepper button.on .dot{background:var(--cyan); color:#000}
+[data-theme="day"] .ladder span.on{background:var(--gold); color:#000}
+[data-theme="day"] .steps-mini span.done, [data-theme="day"] .home-stages span.on{background:#d6f5c4; color:#1d6b2f}
+[data-theme="day"] .home-stages span{background:#f3ead4}
+[data-theme="day"] .home-score b{text-shadow:2px 2px 0 var(--wood)}
+[data-theme="day"] .stepper button{color:var(--text)}
+[data-theme="day"] .stepper button.on{color:var(--text); background:#e6f6d2}
+[data-theme="day"] .badge.locked .medal{background:#d8d2c4!important}
+[data-theme="day"] .mod-card .cover .n{color:#0007}
+[data-theme="day"] .bbanner, [data-theme="day"] .home-dorm canvas, [data-theme="day"] .home-card canvas{background:#bfe7ff}
+
+/* pills */
+[data-theme="day"] .pill{background:#fffaf0; color:var(--text)}
+[data-theme="day"] .pill.cyan{background:#d4f3ff; color:#0a6280} [data-theme="day"] .pill.pink{background:#ffdcee; color:#a01a68}
+[data-theme="day"] .pill.gold{background:#fff0b3; color:#7a4f00} [data-theme="day"] .pill.purple{background:#ece0ff; color:#5a2fb0}
+[data-theme="day"] .pill.green{background:#d6f5c4; color:#1d6b2f} [data-theme="day"] .pill.red{background:#ffd9df; color:#a4132e}
+
+/* forms, chips and tabs */
+[data-theme="day"] .input{background:#fff; color:var(--text); box-shadow:inset 0 0 0 2px #f0dfb6}
+[data-theme="day"] .chip{background:#fffaf0; color:var(--text)}
+[data-theme="day"] .tabs button{color:var(--text)}
+[data-theme="day"] .ava-stage{background:radial-gradient(circle at 50% 70%, #c6f0ff 0%, #8fd3ff 70%)}
+[data-theme="day"] .ava-stage .floor{background:#3c8f2766}
+
+/* AI Lab and Community */
+[data-theme="day"] .chat{background:#fffdf6}
+[data-theme="day"] .msg .av, [data-theme="day"] .presence .who .av, [data-theme="day"] .cmsg .av{background:#bfe7ff}
+[data-theme="day"] .msg.bot .bubble{background:#ece0ff; color:#2b2340}
+[data-theme="day"] .msg.warn .bubble{background:#ffd9df; color:#5a0f1e}
+[data-theme="day"] .suggests button{background:#f3ecff; color:#3c2380}
+[data-theme="day"] .suggests button:hover{background:#e6dbff}
+[data-theme="day"] .typing span{background:#6a38c9}
+[data-theme="day"] .cmsg:hover{background:#0000000a}
+[data-theme="day"] .cmsg.sys{background:#ffd9df} [data-theme="day"] .cmsg.sys .av{background:#ffb3bf} [data-theme="day"] .cmsg.sys .nm{color:#a4132e}
+[data-theme="day"] .safety-panel{background:#ffe4ef}
+[data-theme="day"] .quote-box{background:#fff3d6; color:var(--text)}
+[data-theme="day"] .share-card{background:#fff0b3; color:var(--text)}
+[data-theme="day"] .room.on{color:#fff}
+
+/* overlays */
+[data-theme="day"] .overlay{background:#3a6f9acc}
+[data-theme="day"] .modal{color:var(--text); box-shadow:0 0 0 3px #ffe08a, 10px 10px 0 3px #000}
+[data-theme="day"] .toast{background:#fffaf0; color:var(--text)}
+[data-theme="day"] .menu{color:var(--text)}
+[data-theme="day"] .campus-wrap{box-shadow:0 0 0 3px #ffe08a, 8px 8px 0 3px #000}
+[data-theme="day"] .bhead{background:linear-gradient(100deg, color-mix(in srgb, var(--bc) 30%, #fffaf0) 0%, #fffaf0 62%)}
+[data-theme="day"] .bhead .crumbs, [data-theme="day"] .bhead .crumbs button{color:color-mix(in srgb, var(--bc) 55%, #000)}
+[data-theme="day"] .bhead p{color:#33405e}
+[data-theme="day"] .bhead h1{text-shadow:2px 0 var(--wood),-2px 0 var(--wood),0 2px var(--wood),0 -2px var(--wood),4px 4px 0 var(--wood)}
+[data-theme="day"] .inc-head h1{color:#ffd6db; text-shadow:2px 0 #7a1020,-2px 0 #7a1020,0 2px #7a1020,0 -2px #7a1020,4px 4px 0 #7a1020}
+[data-theme="day"] .admin-banner{background:repeating-linear-gradient(45deg,#ffe08a 0 14px,#ffd04a 14px 28px); color:#3a2a00}
+
+/* device screens and alarms stay dark in Day mode, so keep the bright accents inside them */
+[data-theme="day"] :is(.router, .log-line, .hash-out, .tooltip, .prompt, .cam-toggle, .inc-banner, .campus-hud, .quiz-wrap .term){
+  --cyan-ink:var(--cyan); --blue-ink:var(--blue); --pink-ink:var(--pink); --purple-ink:var(--purple); --gold-ink:var(--gold); --green-ink:var(--green); --red-ink:var(--red); --orange-ink:var(--orange);
+  --text:#e9ecff; --muted:#9aa3da; color:#e9ecff}
+[data-theme="day"] .campus-hud .pill{background:#0b0f2ce6; color:#e9ecff}
 </style>
 <div id="app"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -1336,7 +1471,21 @@ const BOT_ROWS = ['.....AA.....','.....AA.....','..KKKKKKKK..','..KVVVVVVK..','.
 function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'}); }
 let BOT_URL = '';
 
+/* Canvas palette: night (default) or day (bright grass, brick paths, cream walls, sky-blue windows) */
+const isDay = () => document.documentElement.dataset.theme === 'day';
+const PAL_NIGHT = { path:['#262c66','#2a3070'], pathLine:'#1d2358', grass:'#12322a', grassDots:['#174034','#0e2a22'], sparkle:['#ff4fae','#ffd447','#2ee6ff'], trace:['#2ee6ff33','#ff4fae33'],
+  trees:[['#0f4a36','#16664a','#22825c'],['#123f40','#1a5c5a','#28807a'],['#2a1d55','#3d2a7a','#5a3fa8']], trunk:'#3b2516',
+  wall:'#1b2054', wallTop:'#232a6a', wallLine:'#181d4c', plate:'#0b0f2c', winOn:null, winOff:'#262c66', winGlintOff:'#3a4596', doorIn:'#0b0f2c', lamps:true, coreBase:['#303b8f','#3d4aa8'], coreBody:'#141a4a',
+  sky:['#0b0f2c','#161c50'], stars:true };
+const PAL_DAY = { path:['#e8cf9c','#e1c58e'], pathLine:'#c9a970', grass:'#5cb83c', grassDots:['#72cc50','#4ea532'], sparkle:['#ff6fa8','#ffe14d','#ffffff'], trace:['#ffffff66','#ffffff44'],
+  trees:[['#2f7d2a','#45a33a','#6cc94f'],['#2a7a52','#3fa56d','#66cc8e'],['#c2577f','#e486a8','#ffc2d6']], trunk:'#7a4a26',
+  wall:'#f3e2c0', wallTop:'#fff2d8', wallLine:'#e3cc9e', plate:'#3b2a1e', winOn:'#bfe7ff', winOff:'#8fd0ff', winGlintOff:'#e6f6ff', doorIn:'#6b4a2e', lamps:false, coreBase:['#b9a37a','#cdb98f'], coreBody:'#2b3a7a',
+  sky:['#6cc4ff','#bfe7ff'], stars:false };
+const pal = () => isDay() ? PAL_DAY : PAL_NIGHT;
+
 const ICONS = {
+  sun:['....XX....','.X..XX..X.','..XXXXXX..','..XWWWWX..','XXXWWWWXXX','XXXWWWWXXX','..XWWWWX..','..XXXXXX..','.X..XX..X.','....XX....'],
+  moon:['..XXXX....','.XWWX.....','XWWX......','XWX.......','XWX.......','XWX.......','XWWX......','XWWWX..XX.','.XWWWXXWX.','..XXXXXX..'],
   compass:['...XXXX...','.XXWWWWXX.','.XWWWFWWX.','XWWWFFFWWX','XWWWWDWWWX','XWWWZZZWWX','.XWWWZWWX.','.XXWWWWXX.','...XXXX...','..........'],
   home:['....XX....','...XXXX...','..XXXXXX..','.XXXXXXXX.','XXXXXXXXXX','.XWWXXWWX.','.XWWXXWWX.','.XXXXDDXX.','.XXXXDDXX.','.XXXXDDXX.'],
   campus:['....F.....','....FFF...','....F.....','...XXXX...','..XXXXXX..','.XXXXXXXX.','.XWXWWXWX.','.XXXXXXXX.','.XWXDDXWX.','.XXXDDXXX.'],
@@ -1374,6 +1523,10 @@ const icon = (name, color='#2ee6ff', size='', cls='px') => `<img class="${cls}" 
    APP CORE — state, rewards, routing, shell and most views
    ============================================================ */
 const STORE_KEY = 'cybersity-prototype-v1';
+// Night (default) or Day mode, remembered on this device
+const THEME_KEY = 'cybersity-theme';
+try { if (localStorage.getItem(THEME_KEY)==='day') document.documentElement.dataset.theme = 'day'; } catch(e){}
+const themeBtnHTML = (cls, id='') => `<button class="${cls}" ${id?`id="${id}"`:''} data-act="toggleTheme" aria-label="Switch to ${isDay()?'night':'day'} mode" title="Switch to ${isDay()?'night':'day'} mode">${icon(isDay()?'moon':'sun', isDay()?'#6a38c9':'#ffd447')}</button>`;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
@@ -1442,12 +1595,12 @@ function addXP(n, why){
   const before = levelInfo().n; S.xp += n; log(why, n); save();
   toast(`+${n} XP`, 'xp'); updateHUD();
   const after = levelInfo();
-  if (after.n > before) showModal(`<div class="label" style="color:var(--gold)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
+  if (after.n > before) showModal(`<div class="label" style="color:var(--gold-ink)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
 }
 function award(id){
   if (S.badges.includes(id)) return; const b = BADGES.find(x=>x.id===id); if (!b) return;
   S.badges.push(id); log(`Badge unlocked: ${b.t}`); save();
-  showModal(`<div class="label" style="color:var(--gold)">Badge unlocked</div><div class="big-medal" style="background:${b.c}">${icon(b.icon,'#05061a',58)}</div><h2>${esc(b.t)}</h2><p class="muted">${esc(b.d)}</p><div class="actions"><button class="btn ghost" data-act="shareBadge" data-arg="${b.id}">Share in Community</button><button class="btn gold" data-act="closeModal">Nice!</button></div>`);
+  showModal(`<div class="label" style="color:var(--gold-ink)">Badge unlocked</div><div class="big-medal" style="background:${b.c}">${icon(b.icon,'#05061a',58)}</div><h2>${esc(b.t)}</h2><p class="muted">${esc(b.d)}</p><div class="actions"><button class="btn ghost" data-act="shareBadge" data-arg="${b.id}">Share in Community</button><button class="btn gold" data-act="closeModal">Nice!</button></div>`);
 }
 
 /* ---------- Shell ---------- */
@@ -1461,12 +1614,13 @@ function renderApp(){
   $('#app').innerHTML = `
     <header class="hud">
       <button class="logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
-      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, '#2ee6ff')}${t}</button>`).join('')}</nav>
+      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, isDay() ? '#0a7ea3' : '#2ee6ff')}${t}</button>`).join('')}</nav>
       <div class="player-chip" data-act="go" data-arg="achievements" title="Your progress">
         <div class="ava"><img class="px" id="hudAva" alt=""></div>
         <div class="xpwrap"><div class="lvl" id="hudLvl"></div><div class="xpbar"><i id="hudXp"></i></div></div>
       </div>
-      <button class="icon-btn" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear','#ffd447')}</button>
+      ${themeBtnHTML('icon-btn')}
+      <button class="icon-btn" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear', isDay() ? '#b07800' : '#ffd447')}</button>
     </header>
     <main class="stage" id="view"></main>
     <button class="fab" id="fab" data-act="toggleDrawer" aria-label="Ask BYTE, your AI mentor"><img class="px" alt="" src="${BOT_URL}"><span class="bubble-hint">Need help? Ask BYTE</span></button>
@@ -1547,7 +1701,7 @@ function renderOnboarding(){
   if (UI.onb==='avatar'){ app.innerHTML = `<div class="auth"><div style="width:100%;max-width:900px">${avatarCreatorHTML()}</div></div>`; bindAvatarCreator(); return; }
   if (UI.onb==='brief'){
     app.innerHTML = `<div class="auth"><div class="briefing">
-      <div class="label" style="color:var(--pink)">Mission briefing</div>
+      <div class="label" style="color:var(--pink-ink)">Mission briefing</div>
       <h1 class="pixel" style="font-size:clamp(18px,4vw,28px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
       <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
       <div class="flow">
@@ -1568,7 +1722,7 @@ function renderOnboarding(){
 function drawHeroStrip(){
   const c = $('#heroCanvas'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
   const looks = [0,1,2,3,4].map(()=>randomLook()); let f=0;
-  const draw = ()=>{ x.clearRect(0,0,160,40); x.fillStyle='#1a2056'; x.fillRect(0,32,160,8); x.fillStyle='#303b8f'; for(let i=0;i<160;i+=6) x.fillRect(i,32,3,1);
+  const draw = ()=>{ x.clearRect(0,0,160,40); x.fillStyle=isDay() ? '#58b83a' : '#1a2056'; x.fillRect(0,32,160,8); x.fillStyle=isDay() ? '#3c8f27' : '#303b8f'; for(let i=0;i<160;i+=6) x.fillRect(i,32,3,1);
     looks.forEach((L,i)=>{ const sp = avatarCanvas(L, (f+i)%2); x.drawImage(sp, 6+i*26, 14 + ((f+i)%2)); });
     x.drawImage(botCanvas(), 138, 17); f++; };
   draw(); timers.push(setInterval(draw, 450));
@@ -1578,7 +1732,7 @@ function avatarCreatorHTML(){
   const sw = (key, list) => `<div class="swatches">${list.map(v=>`<button class="sw ${L[key]===v?'on':''}" style="background:${v}" data-act="look" data-arg="${key}|${v}" aria-label="${key} ${v}"></button>`).join('')}</div>`;
   const chips = (key, list) => `<div class="swatches">${list.map(v=>`<button class="chip ${L[key]===v?'on':''}" data-act="look" data-arg="${key}|${v}">${v}</button>`).join('')}</div>`;
   return `<div class="panel">
-    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:18px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
+    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:18px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
     <div class="creator">
       <div><div class="ava-stage"><div class="floor"></div><img class="px" id="avaPreview" alt="Avatar preview" src="${avatarURL(L)}"></div>
         <div class="field" style="margin-top:16px"><label for="avaName">Display name</label><input class="input" id="avaName" maxlength="18" value="${esc(UI.draftName)}"></div></div>
@@ -1605,7 +1759,7 @@ function viewDashboard(el){
     <section class="welcome">
       <div class="big-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
       <div style="position:relative; z-index:1">
-        <div class="label" style="color:var(--cyan)">Learner dashboard</div>
+        <div class="label" style="color:var(--cyan-ink)">Learner dashboard</div>
         <h1>Welcome back, ${esc(S.user.name)}</h1>
         <p class="muted" style="margin-top:6px">Level ${L.n} · ${esc(L.t)} · ${pct}% of the Cybersecurity Fundamentals pathway complete</p>
       </div>
@@ -1635,7 +1789,7 @@ function viewDashboard(el){
         </section>
         <section class="panel home-card">
           <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
-          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
+          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green-ink)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
             <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
           <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
         </section>
@@ -1650,10 +1804,10 @@ function viewDashboard(el){
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
-  x.fillStyle='#14352b'; x.fillRect(0,0,240,96); x.fillStyle='#262c66'; x.fillRect(0,58,240,22);
-  BUILDINGS.forEach((b,i)=>{ const bx = 6+i*39; x.fillStyle=b.roof; x.fillRect(bx,16,34,12); x.fillStyle='#1b2054'; x.fillRect(bx+2,28,30,28); x.fillStyle=b.color; x.fillRect(bx+5,33,6,6); x.fillRect(bx+23,33,6,6); x.fillStyle='#05061a'; x.fillRect(bx+14,44,6,12); });
+  const P = pal(); if (isDay()){ x.fillStyle='#8fd3ff'; x.fillRect(0,0,240,58); x.fillStyle=P.grass; x.fillRect(0,48,240,48); } else { x.fillStyle='#14352b'; x.fillRect(0,0,240,96); } x.fillStyle=P.path[0]; x.fillRect(0,58,240,22);
+  BUILDINGS.forEach((b,i)=>{ const bx = 6+i*39; x.fillStyle=b.roof; x.fillRect(bx,16,34,12); x.fillStyle=P.wall; x.fillRect(bx+2,28,30,28); x.fillStyle=b.color; x.fillRect(bx+5,33,6,6); x.fillRect(bx+23,33,6,6); x.fillStyle='#05061a'; x.fillRect(bx+14,44,6,12); });
   let f=0; const looks=[S.user.look, ...COMMUNITY_USERS.slice(0,4).map(u=>u.look)];
-  const draw=()=>{ x.fillStyle='#262c66'; x.fillRect(0,58,240,22); looks.forEach((L,i)=>{ const px = (i*53 + f*(i%2?1:-1)*2 + 600) % 240; x.drawImage(avatarCanvas(L,f%2), px, 60); }); f++; };
+  const draw=()=>{ x.fillStyle=P.path[0]; x.fillRect(0,58,240,22); looks.forEach((L,i)=>{ const px = (i*53 + f*(i%2?1:-1)*2 + 600) % 240; x.drawImage(avatarCanvas(L,f%2), px, 60); }); f++; };
   draw(); timers.push(setInterval(draw, 300));
 }
 
@@ -1828,7 +1982,7 @@ function viewChallenge(el){
   const row = (ic, color, title, sub, btn) => `<div class="ch-row">${icon(ic,color,28)}<div><b>${title}</b><small>${sub}</small></div>${btn}</div>`;
   const fUn = allModsPassed();
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Challenge Centre</div><h1>Challenge Centre</h1><p>Every practice activity, quiz and assessment in one place. Locked items open as you progress through the lessons.</p></div></div>
-  <section class="boss"><img class="px" src="${iconURL('trophy','#ffd447')}" alt="" style="width:64px;height:64px"><div style="flex:1; min-width:220px"><div class="label" style="color:var(--pink)">Final boss</div><h2>Final Assessment</h2><p class="muted" style="margin-top:6px">${MODULES.length*2} questions drawn from every module. Pass at ${S.passMark}% to earn the Cybersity Certificate of Completion.</p></div>
+  <section class="boss"><img class="px" src="${iconURL('trophy','#ffd447')}" alt="" style="width:64px;height:64px"><div style="flex:1; min-width:220px"><div class="label" style="color:var(--pink-ink)">Final boss</div><h2>Final Assessment</h2><p class="muted" style="margin-top:6px">${MODULES.length*2} questions drawn from every module. Pass at ${S.passMark}% to earn the Cybersity Certificate of Completion.</p></div>
     ${finalPassed()?`<span class="pill green">Passed · best ${S.final.best}%</span>`:''}<button class="btn gold" data-act="startFinal" ${fUn?'':'disabled'}>${fUn?(finalPassed()?'Retake':'Start'):'Pass all 6 modules first'}</button></section>
   <div class="grid g2" style="margin-top:22px">
     <section><div class="section-title">Practice activities</div>${ALL_LESSONS.map(l=>{ const p=S.lessons[l.id]||{}, ok=lessonUnlocked(l)&&p.read; return row(p.activity?'check':ok?'flag':'lock', p.activity?'#47f59a':ok?'#ff9a3d':'#5a6199', esc(l.activity.title), `Lesson ${l.mod.n}.${l.li+1} · ${esc(l.title)}${p.actScore!=null?` · ${p.actScore}%`:''}`, `<button class="btn small ${p.activity?'ghost':''}" data-act="openLesson" data-arg="${l.id}|5" ${ok?'':'disabled'}>${p.activity?'Replay':ok?'Play':'Locked'}</button>`); }).join('')}</section>
@@ -1842,7 +1996,7 @@ function viewAchievements(el){
   const L = levelInfo();
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Achievement Hall</div><h1>Achievement Hall</h1><p>Your XP, rank, badges and learning history.</p></div></div>
   <div class="grid g-wide">
-    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold)">Current rank</div><h2 class="pixel" style="font-size:16px; margin-top:6px">${esc(L.t)}</h2>
+    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:16px; margin-top:6px">${esc(L.t)}</h2>
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
@@ -1894,7 +2048,7 @@ function viewAdmin(el){
   <div class="grid g2" style="margin-top:20px">
     <section class="panel"><div class="section-title">Module completion (all learners)</div>${MODULES.map((m,i)=>{ const v=[82,64,51,40,29,21][i]; return `<div style="display:grid; grid-template-columns:150px 1fr 44px; gap:10px; align-items:center; margin-bottom:10px; font-size:13.5px"><span>${m.n}. ${esc(m.title.split(' ').slice(0,2).join(' '))}</span><div class="bar"><i style="width:${v}%; background:${m.color}"></i></div><span class="label muted">${v}%</span></div>`; }).join('')}</section>
     <section class="panel"><div class="section-title">Assessment settings</div>
-      <label class="label muted" for="passMark">Pass mark for quizzes and assessments: <b style="color:var(--gold)" id="pmVal">${S.passMark}%</b></label>
+      <label class="label muted" for="passMark">Pass mark for quizzes and assessments: <b style="color:var(--gold-ink)" id="pmVal">${S.passMark}%</b></label>
       <input type="range" class="range" id="passMark" min="50" max="90" step="5" value="${S.passMark}" style="margin-top:10px">
       <p class="note" style="margin-top:8px">This setting is live in the prototype: change it and the learner quizzes use the new pass mark.</p>
       <div class="section-title" style="margin-top:18px">Certificate rules</div>
@@ -1974,6 +2128,10 @@ const ACTIONS = {
   retryQuiz: () => { const Q=UI.quiz; startQuiz(Q.kind, Q.id); },
   quitQuiz: () => { const Q=UI.quiz; UI.quiz=null; if (Q && Q.kind==='lesson'){ UI.lessonId=Q.id; UI.stage=6; go('lesson'); } else go('challenge'); },
   toggleMenu: () => { UI.menu=!UI.menu; renderMenu(); },
+  toggleTheme: () => { const day = !isDay(); document.documentElement.dataset.theme = day ? 'day' : 'night';
+    try { localStorage.setItem(THEME_KEY, day ? 'day' : 'night'); } catch(e){}
+    const corner = $('#themeCorner'); if (corner) corner.outerHTML = themeBtnHTML('theme-corner', 'themeCorner');
+    if (S.user) renderApp(); toast(day ? '☀ Day mode on' : '🌙 Night mode on'); },
   demoComplete: a => demoComplete(+a),
   resetDemo: () => { UI.menu=false; renderMenu(); showModal(`<h2>Reset demo?</h2><p class="muted">This clears all progress, XP, badges and your avatar so you can start the journey again.</p><div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="confirmReset">Reset everything</button></div>`); },
   confirmReset: () => { S = freshState(); save(); UI.onb='auth'; UI.scen={}; UI.quiz=null; modalQueue.length=0; $('#layer').innerHTML=''; Mentor.reset(); renderApp(); },
@@ -1985,7 +2143,7 @@ const ACTIONS = {
   downloadCert: () => toast('In the full system, this downloads a PDF generated by the server with your unique certificate ID.'),
   askAbout: a => { const l=lessonById(a); Mentor.openDrawer(); Mentor.ask(`Can you explain "${l.title}" in simple terms?`); },
   toggleDrawer: () => Mentor.toggleDrawer(),
-  familyCard: a => { const l=lessonById(a); showModal(`<div class="label" style="color:var(--green)">Teach your family</div><h2 style="margin:6px 0 14px">Share this lesson in 1 minute</h2>${familyCardHTML(l)}<div class="actions"><button class="btn gold" data-act="closeModal">Done</button></div>`); },
+  familyCard: a => { const l=lessonById(a); showModal(`<div class="label" style="color:var(--green-ink)">Teach your family</div><h2 style="margin:6px 0 14px">Share this lesson in 1 minute</h2>${familyCardHTML(l)}<div class="actions"><button class="btn gold" data-act="closeModal">Done</button></div>`); },
   familyCopy: a => { const t = familyText(lessonById(a)); try { navigator.clipboard.writeText(t).then(()=>toast('Copied. Paste it into any chat.'), ()=>toast('Copy is blocked here. Use the WhatsApp button instead.')); } catch(e){ toast('Copy is blocked here. Use the WhatsApp button instead.'); } },
   adminNote: () => toast('Content editing and learner records are part of the full admin system.'),
   modAction: a => { const [i,st]=a.split('|'); S.reports[+i].status=st; if (st==='removed') Community.removeMessage(S.reports[+i].mid); save(); renderView(); toast(st==='removed'?'Message removed from the room':'Report dismissed'); }
@@ -2218,23 +2376,24 @@ const Campus = (() => {
 
   function renderBG(){
     bg = document.createElement('canvas'); bg.width=W*SC; bg.height=H*SC;
-    const g = bg.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(SC,0,0,SC,0,0); seed=7;
+    const g = bg.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(SC,0,0,SC,0,0); seed=7; const P = pal();
     for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++){
       const x=c*T, y=r*T;
       if (isPath(c,r)){
-        g.fillStyle = (c+r)%2 ? '#262c66' : '#2a3070'; g.fillRect(x,y,T,T);
-        g.fillStyle='#1d2358'; g.fillRect(x,y+T-1,T,1); g.fillRect(x+T-1,y,1,T);
+        g.fillStyle = P.path[(c+r)%2 ? 0 : 1]; g.fillRect(x,y,T,T);
+        g.fillStyle=P.pathLine; g.fillRect(x,y+T-1,T,1); g.fillRect(x+T-1,y,1,T);
+        if (isDay() && r%2) g.fillRect(x+T/2,y,1,T-1); // staggered brick joints
       } else {
-        g.fillStyle='#12322a'; g.fillRect(x,y,T,T);
-        for (let k=0;k<6;k++){ g.fillStyle = rnd()<.5 ? '#174034' : '#0e2a22'; g.fillRect(x+Math.floor(rnd()*15), y+Math.floor(rnd()*15), 1, 2); }
-        if (rnd()<.08){ g.fillStyle = pick(['#ff4fae','#ffd447','#2ee6ff']); g.fillRect(x+Math.floor(rnd()*12)+2, y+Math.floor(rnd()*12)+2, 2, 2); }
+        g.fillStyle=P.grass; g.fillRect(x,y,T,T);
+        for (let k=0;k<6;k++){ g.fillStyle = P.grassDots[rnd()<.5 ? 0 : 1]; g.fillRect(x+Math.floor(rnd()*15), y+Math.floor(rnd()*15), 1, 2); }
+        if (rnd()<.08){ g.fillStyle = pick(P.sparkle); g.fillRect(x+Math.floor(rnd()*12)+2, y+Math.floor(rnd()*12)+2, 2, 2); }
       }
     }
-    // circuit traces on plaza
-    g.fillStyle='#2ee6ff33';
+    // circuit traces on plaza (chalk lines by day)
+    g.fillStyle=P.trace[0];
     g.fillRect(24,9.5*T,W-48,1); g.fillRect(24,9.5*T,1,T); g.fillRect(W-25,9.5*T-T,1,T);
     for (let i=0;i<6;i++){ const x = 40+i*72; g.fillRect(x,7*T+3,1,10); g.fillRect(x-2,7*T+12,5,1); }
-    g.fillStyle='#ff4fae33'; g.fillRect(24,17.5*T,W-48,1);
+    g.fillStyle=P.trace[1]; g.fillRect(24,17.5*T,W-48,1);
     // border trees
     for (let c=0;c<COLS;c++){ tree(g,c*T,-4,c%3); tree(g,c*T,(ROWS-1)*T-2,(c+1)%3); }
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
@@ -2244,8 +2403,8 @@ const Campus = (() => {
     B.forEach(b=>{ if (b.id!=='home' && b.id!=='compass') building(g,b); });
   }
   function tree(g,x,y,v){
-    g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
-    const cols = [['#0f4a36','#16664a','#22825c'],['#123f40','#1a5c5a','#28807a'],['#2a1d55','#3d2a7a','#5a3fa8']][v];
+    const P = pal(); g.fillStyle=P.trunk; g.fillRect(x+6,y+12,4,7);
+    const cols = P.trees[v];
     g.fillStyle='#05061a'; g.fillRect(x+1,y+1,14,13); g.fillStyle=cols[0]; g.fillRect(x+2,y+2,12,11); g.fillStyle=cols[1]; g.fillRect(x+3,y+2,9,7); g.fillStyle=cols[2]; g.fillRect(x+4,y+3,4,3);
   }
   function bench(g,x,y){ g.fillStyle='#05061a'; g.fillRect(x+1,y+5,30,8); g.fillStyle='#8a5a34'; g.fillRect(x+2,y+6,28,3); g.fillStyle='#6b4226'; g.fillRect(x+2,y+9,28,2); g.fillStyle='#3a3f7a'; g.fillRect(x+4,y+11,2,3); g.fillRect(x+26,y+11,2,3); }
@@ -2254,17 +2413,17 @@ const Campus = (() => {
     g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
     // wall
     g.fillStyle='#05061a'; g.fillRect(x-1,y+26,w+2,h-25);
-    g.fillStyle='#1b2054'; g.fillRect(x,y+27,w,h-27);
-    g.fillStyle='#232a6a'; g.fillRect(x,y+27,w,3);
-    for (let i=0;i<w;i+=8){ g.fillStyle='#181d4c'; g.fillRect(x+i,y+30,1,h-30); }
+    const P = pal(); g.fillStyle=P.wall; g.fillRect(x,y+27,w,h-27);
+    g.fillStyle=P.wallTop; g.fillRect(x,y+27,w,3);
+    for (let i=0;i<w;i+=8){ g.fillStyle=P.wallLine; g.fillRect(x+i,y+30,1,h-30); }
     // roof
     g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,30);
     g.fillStyle=b.roof; g.fillRect(x-3,y,w+6,28);
     for (let j=4;j<28;j+=5){ g.fillStyle=shade(b.roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
     g.fillStyle=shade(b.roof,0.25); g.fillRect(x-3,y,w+6,2);
     // sign plate
-    g.fillStyle='#05061a'; g.fillRect(x+4,y+17,w-8,11); g.fillStyle='#0b0f2c'; g.fillRect(x+5,y+18,w-10,9);
-    g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=b.color; g.fillText(b.name.toUpperCase(), x+w/2, y+22.5);
+    g.fillStyle='#05061a'; g.fillRect(x+4,y+17,w-8,11); g.fillStyle=P.plate; g.fillRect(x+5,y+18,w-10,9);
+    g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=isDay() ? shade(b.color,0.45) : b.color; g.fillText(b.name.toUpperCase(), x+w/2, y+22.5);
     // roof icon
     const ic = iconCanvas(b.icon, b.color, '#eef0fb', '#151a3e'); g.drawImage(ic, Math.round(x+w/2-6), y+3);
   }
@@ -2314,12 +2473,12 @@ const Campus = (() => {
       else if (b.id==='compass'){ drawSignpost(ctx, b.cx, b.py+b.ph, t); }
       else {
       const locked = bLocked(b.id), hacked = incHacked(b.id), col = hacked ? '#ff5d6e' : b.color;
-      const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
+      const P = pal(), winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
       positions.forEach((wx,i)=>{ const on = hacked ? Math.random()<0.6 : locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
-        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? col : '#262c66'; ctx.fillRect(wx,winY,10,10);
-        ctx.fillStyle = on ? '#ffffffaa' : '#3a4596'; ctx.fillRect(wx+1,winY+1,3,3); ctx.fillStyle='#05061a'; ctx.fillRect(wx+4.5,winY,1,10); });
+        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? (P.winOn && !hacked ? P.winOn : col) : P.winOff; ctx.fillRect(wx,winY,10,10);
+        ctx.fillStyle = on ? '#ffffffaa' : P.winGlintOff; ctx.fillRect(wx+1,winY+1,3,3); ctx.fillStyle='#05061a'; ctx.fillRect(wx+4.5,winY,1,10); });
       const dx = b.cx-10, dy = b.py+b.ph-22;
-      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=col; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
+      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=col; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle=P.doorIn; ctx.fillRect(dx+1,dy+1,18,21);
       if (!locked){ ctx.fillStyle = col+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
       if (locked){ ctx.strokeStyle='#9aa3da'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+1,dy+1); ctx.lineTo(dx+19,dy+21); ctx.moveTo(dx+19,dy+1); ctx.lineTo(dx+1,dy+21); ctx.stroke(); ctx.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); }
       }
@@ -2329,8 +2488,8 @@ const Campus = (() => {
     });
     // cyber core (turns red while the campus is under attack)
     const alarm = incActive(), coreC = alarm ? '#ff5d6e' : '#2ee6ff';
-    const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); ctx.fillStyle='#303b8f'; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle='#3d4aa8'; ctx.fillRect(cx-16,cy+19,32,2);
-    ctx.fillStyle='#05061a'; ctx.fillRect(cx-9,cy-10,18,30); ctx.fillStyle='#141a4a'; ctx.fillRect(cx-8,cy-9,16,28);
+    const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); const CP = pal(); ctx.fillStyle=CP.coreBase[0]; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle=CP.coreBase[1]; ctx.fillRect(cx-16,cy+19,32,2);
+    ctx.fillStyle='#05061a'; ctx.fillRect(cx-9,cy-10,18,30); ctx.fillStyle=CP.coreBody; ctx.fillRect(cx-8,cy-9,16,28);
     for (let i=0;i<5;i++){ const on = (Math.floor(t*4)+i)%5; ctx.fillStyle = on? coreC : (alarm ? '#ffd447' : '#ff4fae'); ctx.fillRect(cx-6, cy-6+i*5, on?10:6, 2); ctx.fillStyle='#47f59a'; if ((Math.floor(t*3)+i)%3===0) ctx.fillRect(cx+5, cy-6+i*5, 1, 2); }
     const bob = Math.round(Math.sin(t*2)*2); ctx.fillStyle=coreC+(alarm && frame%20<10 ? '66' : '33'); ctx.beginPath(); ctx.arc(cx, cy-20+bob, alarm ? 13 : 10, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle='#05061a'; ctx.beginPath(); ctx.moveTo(cx,cy-29+bob); ctx.lineTo(cx+7,cy-20+bob); ctx.lineTo(cx,cy-11+bob); ctx.lineTo(cx-7,cy-20+bob); ctx.closePath(); ctx.fill();
@@ -2338,8 +2497,8 @@ const Campus = (() => {
     ctx.fillStyle='#eef0fb'; ctx.fillRect(cx-2,cy-23+bob,2,3);
     // lamps
     [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = alarm ? ((Math.floor(t*4)+i)%2 ? 1.6 : 0.15) : 0.75+0.25*Math.sin(t*3+i), rgb = alarm ? '255,70,90' : '255,212,71';
-      const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(${rgb},${0.28*fl})`); grd.addColorStop(1,`rgba(${rgb},0)`); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
-      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle = alarm ? (fl>1 ? '#ff5d6e' : '#5a1a26') : '#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
+      if (alarm || CP.lamps){ const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(${rgb},${0.28*fl})`); grd.addColorStop(1,`rgba(${rgb},0)`); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52); }
+      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle = alarm ? (fl>1 ? '#ff5d6e' : '#5a1a26') : CP.lamps ? '#ffd447' : '#fff6d0'; ctx.fillRect(x-2,y-15,5,3); });
     // target marker
     if (marker){ const s = 3+Math.sin(t*8); ctx.strokeStyle='#ffd447'; ctx.lineWidth=1; ctx.strokeRect(marker[0]*T+8-s, marker[1]*T+10-s/2, s*2, s); }
     // characters (y-sorted)
@@ -2410,7 +2569,7 @@ const Campus = (() => {
   }
   function onMove(e){ const [x,y]=toLogical(e); const b=bAt(x,y); hover=b||null; canvas.style.cursor = b?'pointer':'crosshair';
     const tip=$('#campusTip'); if (!tip) return; if (b){ const r=canvas.getBoundingClientRect(); const locked = bLocked(b.id), hk = incHacked(b.id);
-      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
+      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red-ink)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold-ink)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
       const lx = e.clientX - r.left + 14, ly = e.clientY - r.top + 14; tip.style.left = Math.min(lx, r.width-250)+'px'; tip.style.top = Math.min(ly, r.height-90)+'px'; } else tip.classList.add('hidden'); }
   function renderPrompt(){ const el=$('#campusPrompt'); if (!el) return; if (!nearDoor){ el.classList.add('hidden'); return; }
     const locked = bLocked(nearDoor.id), hk = incHacked(nearDoor.id);
@@ -2440,14 +2599,15 @@ const Campus = (() => {
   const bannerCache = new Map();
   function bannerURL(id, hacked){
     const b = B.find(x=>x.id===id); if (!b) return '';
-    const stage = id==='home' ? homeStage() : 0, locked = bLocked(id), k = [id, !!hacked, stage, locked].join('|');
+    const stage = id==='home' ? homeStage() : 0, locked = bLocked(id), P = pal(), k = [id, !!hacked, stage, locked, isDay()].join('|');
     if (bannerCache.has(k)) return bannerCache.get(k);
     const BW=144, BH=100, s=2, c=document.createElement('canvas'); c.width=BW*s; c.height=BH*s;
     const g=c.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(s,0,0,s,0,0);
-    const sky=g.createLinearGradient(0,0,0,BH); sky.addColorStop(0, hacked?'#3a0d1a':'#0b0f2c'); sky.addColorStop(1, hacked?'#1f0811':'#161c50'); g.fillStyle=sky; g.fillRect(0,0,BW,BH);
-    for (let i=0;i<20;i++){ g.fillStyle = i%3 ? '#ffffff55' : (b.color||'#ffd447')+'99'; g.fillRect((i*47+5)%BW, (i*29+3)%46, 1, 1); }
-    g.fillStyle='#12322a'; g.fillRect(0,BH-12,BW,12); g.fillStyle='#174034'; for (let i=0;i<24;i++) g.fillRect((i*13)%BW, BH-11+(i*7)%9, 1, 2);
-    g.fillStyle='#262c66'; g.fillRect(BW/2-14,BH-12,28,12); g.fillStyle='#1d2358'; g.fillRect(BW/2-14,BH-12,28,1);
+    const sky=g.createLinearGradient(0,0,0,BH); sky.addColorStop(0, hacked?'#3a0d1a':P.sky[0]); sky.addColorStop(1, hacked?'#1f0811':P.sky[1]); g.fillStyle=sky; g.fillRect(0,0,BW,BH);
+    if (P.stars || hacked) for (let i=0;i<20;i++){ g.fillStyle = i%3 ? '#ffffff55' : (b.color||'#ffd447')+'99'; g.fillRect((i*47+5)%BW, (i*29+3)%46, 1, 1); }
+    else { g.fillStyle='#ffffff'; [[8,10,26,6],[14,6,12,4],[96,18,30,6],[104,14,14,4]].forEach(([x,y,w,h])=>g.fillRect(x,y,w,h)); }
+    g.fillStyle=P.grass; g.fillRect(0,BH-12,BW,12); g.fillStyle=P.grassDots[1]; for (let i=0;i<24;i++) g.fillRect((i*13)%BW, BH-11+(i*7)%9, 1, 2);
+    g.fillStyle=P.path[0]; g.fillRect(BW/2-14,BH-12,28,12); g.fillStyle=P.pathLine; g.fillRect(BW/2-14,BH-12,28,1);
     if (id==='home') drawDorm(g, (BW-96)/2, BH-12-64, 96, 64, stage, 1);
     else if (id==='compass'){ g.translate(BW/2, BH-12); g.scale(1.7,1.7); drawSignpost(g, 0, 0, 1); g.setTransform(s,0,0,s,0,0); }
     else {
@@ -2473,7 +2633,7 @@ function viewCampus(el){
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
   <div id="incBanner">${incBannerHTML()}</div>
   <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
-    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} Night shift · Sector 7</span></div>
+    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} ${isDay() ? 'Day shift' : 'Night shift'} · Sector 7</span></div>
     <button class="cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button>
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
@@ -2510,7 +2670,7 @@ function incWin(){
   S.incident.active = false; S.incident.done = true; S.incident.best = Math.min(S.incident.best || Infinity, secs); save();
   UI.incWin = Date.now(); UI.incSaved = true; renderIncBanner();
   setTimeout(()=>{
-    showModal(`<div class="label" style="color:var(--green)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
+    showModal(`<div class="label" style="color:var(--green-ink)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
       <p class="muted">You secured all ${INCIDENT.length} buildings in ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}, using phishing spotting, strong passphrases, network hardening, log analysis, scam reporting and incident response.</p>
       <div class="actions"><button class="btn green" data-act="closeModal">Back to campus</button></div>`);
     addXP(XP.incident, 'Campus saved from the incident'); award('defender');
@@ -2520,7 +2680,7 @@ function viewIncident(el){
   const x = INCIDENT.find(i=>i.b===(S.params||{}).b);
   if (!x || !incActive()){ go('campus'); return; }
   const b = Campus.buildings.find(v=>v.id===x.b), L = x.lesson===FAKE_ADMIN.id ? FAKE_ADMIN : lessonById(x.lesson), n = S.incident.secured.length;
-  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red)">Incident</span></div>
+  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red-ink)">Incident</span></div>
     <h1>⚠ ${esc(b.name)} is hacked</h1><p><b style="color:#fff">${esc(x.t)}.</b> ${esc(x.brief)}</p></div><span class="pill red">${n}/${INCIDENT.length} secured</span></div>
   <section class="monitor"><div id="actHost"></div></section>`;
   Activities.mount(L, $('#actHost'), { tag:'Incident response', nextAct:'incBack', nextLabel:'Return to campus', onDone: sc => {
@@ -2562,28 +2722,28 @@ function homeStage(){ const n=healthDone(); return n===0 ? 0 : n<4 ? 1 : n<HEALT
 const dormIcons = new Map(); const dormIcon = (n,c) => { const k=n+c; if (!dormIcons.has(k)) dormIcons.set(k, iconCanvas(n,c)); return dormIcons.get(k); };
 // Draws the dorm in one of 4 stages: dark and plain -> lights on -> padlock -> glowing shield and sign
 function drawDorm(g, x, y, w, h, stage, t){
-  const lit = stage>0, roof = lit ? HOME_BASE.roof : '#2b3540', cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
+  const lit = stage>0, D = isDay(), roof = lit ? HOME_BASE.roof : (D ? '#8a8f99' : '#2b3540'), cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
   if (stage===3){ const grd = g.createRadialGradient(cx,y+h/2,6,cx,y+h/2,w*0.8); grd.addColorStop(0,`rgba(71,245,154,${0.18+0.14*pulse})`); grd.addColorStop(1,'rgba(71,245,154,0)'); g.fillStyle=grd; g.fillRect(x-w*0.35,y-26,w*1.7,h+40); }
   g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
   // wall
   g.fillStyle='#05061a'; g.fillRect(x-1,y+21,w+2,h-20);
-  g.fillStyle = lit ? '#1b2054' : '#11142c'; g.fillRect(x,y+22,w,h-22);
-  g.fillStyle = lit ? '#232a6a' : '#171a38'; g.fillRect(x,y+22,w,3);
-  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? '#181d4c' : '#0e1126'; g.fillRect(x+i,y+25,1,h-25); }
+  g.fillStyle = lit ? (D ? '#f3e2c0' : '#1b2054') : (D ? '#cfc8b8' : '#11142c'); g.fillRect(x,y+22,w,h-22);
+  g.fillStyle = lit ? (D ? '#fff2d8' : '#232a6a') : (D ? '#ddd6c6' : '#171a38'); g.fillRect(x,y+22,w,3);
+  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? (D ? '#e3cc9e' : '#181d4c') : (D ? '#bdb5a3' : '#0e1126'); g.fillRect(x+i,y+25,1,h-25); }
   // roof
   g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,24); g.fillStyle=roof; g.fillRect(x-3,y,w+6,22);
   for (let j=4;j<22;j+=5){ g.fillStyle=shade(roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
   g.fillStyle=shade(roof,0.25); g.fillRect(x-3,y,w+6,2);
   // sign plate
   if (stage===3){ g.fillStyle=`rgba(71,245,154,${0.25+0.3*pulse})`; g.fillRect(x+8,y+9,w-16,15); }
-  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle='#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
+  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle = D ? '#3b2a1e' : '#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
   g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle';
-  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : '#3a4166'; g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
+  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : (D ? '#9a917e' : '#3a4166'); g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
   // windows
   const winY = y+29;
   [x+6, x+18, x+w-28, x+w-16].forEach((wx,i)=>{ const on = lit && (stage>1 || (Math.floor(t*0.6+i*1.7)%6)!==0);
-    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : '#1a1f45'; g.fillRect(wx,winY,10,10);
-    g.fillStyle = on ? '#fff6c8' : '#262c5a'; g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
+    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : (D ? '#9aa3ad' : '#1a1f45'); g.fillRect(wx,winY,10,10);
+    g.fillStyle = on ? '#fff6c8' : (D ? '#c4cbd3' : '#262c5a'); g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
     if (on){ g.fillStyle='rgba(255,212,71,0.16)'; g.fillRect(wx-3,winY+11,16,4); } });
   // door
   const dx = cx-10, dy = y+h-22;
@@ -2600,8 +2760,8 @@ function drawDorm(g, x, y, w, h, stage, t){
 function animateDorm(cv, sc){
   if (!cv) return; const g = cv.getContext('2d'); g.imageSmoothingEnabled=false;
   const draw = () => { const t = performance.now()/1000; g.setTransform(sc,0,0,sc,0,0);
-    g.fillStyle='#12322a'; g.fillRect(0,0,128,104); g.fillStyle='#2a3070'; g.fillRect(0,92,128,12); g.fillStyle='#1d2358'; g.fillRect(0,92,128,1);
-    for (let i=0;i<40;i++){ g.fillStyle = i%2 ? '#174034' : '#0e2a22'; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
+    const P = pal(); g.fillStyle=P.grass; g.fillRect(0,0,128,104); g.fillStyle=P.path[1]; g.fillRect(0,92,128,12); g.fillStyle=P.pathLine; g.fillRect(0,92,128,1);
+    for (let i=0;i<40;i++){ g.fillStyle = P.grassDots[i%2]; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
     drawDorm(g, 16, 28, 96, 64, homeStage(), t);
     const age = (Date.now() - (UI.dormFlash||0))/1000;
     if (age < 1.4){ const k = 1-age/1.4; g.fillStyle=`rgba(255,255,255,${0.55*k*k})`; g.fillRect(0,0,128,104);
@@ -2615,7 +2775,7 @@ function viewHome(el){
   <div class="grid home-grid">
     <section class="panel home-dorm">
       <canvas id="dormCanvas" class="px" width="384" height="312" aria-label="Your dorm, stage ${st+1} of 4: ${esc(HOME_STAGES[st].t)}"></canvas>
-      <div class="label" style="color:var(--green); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
+      <div class="label" style="color:var(--green-ink); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
       <div class="home-score"><b class="pixel" id="safetyScore">${sc}%</b><span class="label muted">Safety Score</span></div>
       <div class="bar green"><i style="width:${sc}%"></i></div>
       <p class="muted" style="margin-top:10px; font-size:14px">${esc(HOME_STAGES[st].d)}</p>
@@ -2763,7 +2923,7 @@ function viewMentor(el){
     <aside class="grid" style="align-content:start">
       <div class="mentor-card"><img class="px" src="${BOT_URL}" alt=""><h2>BYTE</h2><p class="muted" style="font-size:13px; margin-top:6px">AI Cybersecurity Mentor · Online</p>${l?`<div class="pill purple" style="margin-top:12px; display:inline-block">Context: ${esc(l.title)}</div>`:''}</div>
       <div class="panel"><div class="section-title">I can help you</div><ul class="recap-list" style="margin:0; font-size:14px">${['Explain a lesson in simpler words','Give real-world examples','Quiz you for practice','Suggest what to do in a security situation'].map(t=>`<li>${t}</li>`).join('')}</ul></div>
-      <div class="panel" style="border-color:#000; background:#2a1030"><div class="section-title" style="color:var(--pink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
+      <div class="panel safety-panel"><div class="section-title" style="color:var(--pink-ink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
     </aside>
     <div id="mentorPage">${Mentor.chatHTML('page')}</div>
   </div>`;
@@ -2817,9 +2977,9 @@ const Community = (() => {
   ];
   function look(n){ return n===S.user?.name ? S.user.look : (U(n)?.look || COMMUNITY_USERS[0].look); }
   function msgHTML(m){
-    if (m.system) return `<div class="cmsg" style="background:#4a121c55; border:2px solid #000"><div class="av" style="background:#4a121c">${icon('shield','#ff5d6e',20)}</div><div style="min-width:0"><span class="nm" style="color:#ffb0b8">Cybersity Safety</span><span class="tm">only visible to you</span><div class="tx">${m.text}</div></div></div>`;
+    if (m.system) return `<div class="cmsg sys"><div class="av">${icon('shield','#ff5d6e',20)}</div><div style="min-width:0"><span class="nm">Cybersity Safety</span><span class="tm">only visible to you</span><div class="tx">${m.text}</div></div></div>`;
     const me = m.user===S.user?.name;
-    return `<div class="cmsg"><div class="av"><img class="px" alt="" src="${avatarURL(look(m.user))}"></div><div style="min-width:0; flex:1"><span class="nm" style="color:${me?'var(--cyan)':'#fff'}">${esc(m.user)}${me?' (you)':''}</span><span class="tm">${hhmm(new Date(m.t))}</span>
+    return `<div class="cmsg"><div class="av"><img class="px" alt="" src="${avatarURL(look(m.user))}"></div><div style="min-width:0; flex:1"><span class="nm" style="color:${me?'var(--cyan-ink)':'var(--text)'}">${esc(m.user)}${me?' (you)':''}</span><span class="tm">${hhmm(new Date(m.t))}</span>
       <div class="tx">${m.removed?'<i class="muted">[Message removed by a moderator]</i>':esc(m.text)}</div>
       ${m.share && !m.removed?`<div class="share-card"><img class="px" alt="" src="${iconURL(m.share.icon, m.share.color)}"><span>${esc(m.user)} ${m.share.html}</span></div>`:''}</div>
       ${!me && !m.removed?`<button class="rep" data-act="reportMsg" data-arg="${m.id}">${m.reported?'Reported':'Report'}</button>`:''}</div>`;
@@ -2858,7 +3018,7 @@ function viewCommunity(el){
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Community Hub</div><h1>Community Hub</h1><p>Join a room and chat with other learners in real time. Be kind, help each other and keep personal details private.</p></div></div>
   <div class="comm-layout">
     <aside><div class="rooms">${ROOMS.map(r=>`<button class="room ${r.id===room.id?'on':''}" data-act="room" data-arg="${r.id}"><span># ${esc(r.name)}</span><small>${Community.msgCount(r.id)}</small></button>`).join('')}</div>
-      <div class="rules"><b class="label" style="color:var(--gold)">Room rules</b><br>Be respectful · No personal info (phone, email, IC, passwords) · Report anything harmful. Messages are checked automatically.</div></aside>
+      <div class="rules"><b class="label" style="color:var(--gold-ink)">Room rules</b><br>Be respectful · No personal info (phone, email, IC, passwords) · Report anything harmful. Messages are checked automatically.</div></aside>
     <section class="chat" style="height:min(640px,74vh)">
       <div class="chat-head"><div style="flex:1; min-width:0"><b># ${esc(room.name)}</b><div class="muted" style="font-size:12px">${esc(room.d)}</div></div><span class="pill green" style="font-size:9px">● ${people.filter(p=>p.status==='on').length} online</span></div>
       <div class="chat-log" id="commLog" style="gap:6px"></div>
@@ -2874,7 +3034,7 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
   mentorSuggest: s => Mentor.ask(s),
   room: r => { UI.room = r; renderView(); },
   reportMsg: id => { const f = Community.find(+id); if (!f || f.m.reported) return;
-    showModal(`<div class="label" style="color:var(--pink)">Report message</div><h2>Why are you reporting this?</h2><p style="background:#0b0f2c; border:2px solid #000; padding:10px; text-align:left; font-size:14px; margin:10px 0"><b>${esc(f.m.user)}:</b> ${esc(f.m.text)}</p>
+    showModal(`<div class="label" style="color:var(--pink-ink)">Report message</div><h2>Why are you reporting this?</h2><p class="quote-box"><b>${esc(f.m.user)}:</b> ${esc(f.m.text)}</p>
       <div style="display:grid; gap:8px; text-align:left">${['Spam or scam','Harassment or bullying','Sharing personal information','Harmful or illegal content'].map((r,i)=>`<label style="display:flex; gap:10px; align-items:center; padding:8px 10px; background:var(--panel-2); border:2px solid #000"><input type="radio" name="rr" value="${r}" ${i===0?'checked':''}> ${r}</label>`).join('')}</div>
       <div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="submitReport" data-arg="${id}">Send report</button></div>`); },
   submitReport: id => { const f = Community.find(+id); const reason = (document.querySelector('input[name="rr"]:checked')||{}).value || 'Other';
@@ -2931,7 +3091,7 @@ function careerRole(el, c){
       <ul class="recap-list lesson-body">${c.day.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>
       <div class="fit-box"><b>Sounds like you?</b> ${esc(c.fit)}</div></section>
     <section class="panel taster" style="--rc:${c.c}">
-      <div class="label" style="color:var(--gold)">Taster mission</div>
+      <div class="label" style="color:var(--gold-ink)">Taster mission</div>
       <h2 class="pixel" style="font-size:14px; margin:10px 0">${esc(L.activity.title)}</h2>
       <p>${esc(c.mission.brief)}</p>
       <p class="muted" style="font-size:13px; margin-top:10px">About 3 minutes. The same game as Lesson ${L.mod.n}.${L.li+1}, played as a stand-alone taster, so it does not change your lesson progress.</p>
@@ -2973,5 +3133,6 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
 });
 /* ---------- Boot ---------- */
 BOT_URL = botCanvas().toDataURL();
+document.body.insertAdjacentHTML('beforeend', themeBtnHTML('theme-corner', 'themeCorner'));
 renderApp();
 </script>

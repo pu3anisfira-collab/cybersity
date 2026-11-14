@@ -39,23 +39,24 @@ const Campus = (() => {
 
   function renderBG(){
     bg = document.createElement('canvas'); bg.width=W*SC; bg.height=H*SC;
-    const g = bg.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(SC,0,0,SC,0,0); seed=7;
+    const g = bg.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(SC,0,0,SC,0,0); seed=7; const P = pal();
     for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++){
       const x=c*T, y=r*T;
       if (isPath(c,r)){
-        g.fillStyle = (c+r)%2 ? '#262c66' : '#2a3070'; g.fillRect(x,y,T,T);
-        g.fillStyle='#1d2358'; g.fillRect(x,y+T-1,T,1); g.fillRect(x+T-1,y,1,T);
+        g.fillStyle = P.path[(c+r)%2 ? 0 : 1]; g.fillRect(x,y,T,T);
+        g.fillStyle=P.pathLine; g.fillRect(x,y+T-1,T,1); g.fillRect(x+T-1,y,1,T);
+        if (isDay() && r%2) g.fillRect(x+T/2,y,1,T-1); // staggered brick joints
       } else {
-        g.fillStyle='#12322a'; g.fillRect(x,y,T,T);
-        for (let k=0;k<6;k++){ g.fillStyle = rnd()<.5 ? '#174034' : '#0e2a22'; g.fillRect(x+Math.floor(rnd()*15), y+Math.floor(rnd()*15), 1, 2); }
-        if (rnd()<.08){ g.fillStyle = pick(['#ff4fae','#ffd447','#2ee6ff']); g.fillRect(x+Math.floor(rnd()*12)+2, y+Math.floor(rnd()*12)+2, 2, 2); }
+        g.fillStyle=P.grass; g.fillRect(x,y,T,T);
+        for (let k=0;k<6;k++){ g.fillStyle = P.grassDots[rnd()<.5 ? 0 : 1]; g.fillRect(x+Math.floor(rnd()*15), y+Math.floor(rnd()*15), 1, 2); }
+        if (rnd()<.08){ g.fillStyle = pick(P.sparkle); g.fillRect(x+Math.floor(rnd()*12)+2, y+Math.floor(rnd()*12)+2, 2, 2); }
       }
     }
-    // circuit traces on plaza
-    g.fillStyle='#2ee6ff33';
+    // circuit traces on plaza (chalk lines by day)
+    g.fillStyle=P.trace[0];
     g.fillRect(24,9.5*T,W-48,1); g.fillRect(24,9.5*T,1,T); g.fillRect(W-25,9.5*T-T,1,T);
     for (let i=0;i<6;i++){ const x = 40+i*72; g.fillRect(x,7*T+3,1,10); g.fillRect(x-2,7*T+12,5,1); }
-    g.fillStyle='#ff4fae33'; g.fillRect(24,17.5*T,W-48,1);
+    g.fillStyle=P.trace[1]; g.fillRect(24,17.5*T,W-48,1);
     // border trees
     for (let c=0;c<COLS;c++){ tree(g,c*T,-4,c%3); tree(g,c*T,(ROWS-1)*T-2,(c+1)%3); }
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
@@ -65,8 +66,8 @@ const Campus = (() => {
     B.forEach(b=>{ if (b.id!=='home' && b.id!=='compass') building(g,b); });
   }
   function tree(g,x,y,v){
-    g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
-    const cols = [['#0f4a36','#16664a','#22825c'],['#123f40','#1a5c5a','#28807a'],['#2a1d55','#3d2a7a','#5a3fa8']][v];
+    const P = pal(); g.fillStyle=P.trunk; g.fillRect(x+6,y+12,4,7);
+    const cols = P.trees[v];
     g.fillStyle='#05061a'; g.fillRect(x+1,y+1,14,13); g.fillStyle=cols[0]; g.fillRect(x+2,y+2,12,11); g.fillStyle=cols[1]; g.fillRect(x+3,y+2,9,7); g.fillStyle=cols[2]; g.fillRect(x+4,y+3,4,3);
   }
   function bench(g,x,y){ g.fillStyle='#05061a'; g.fillRect(x+1,y+5,30,8); g.fillStyle='#8a5a34'; g.fillRect(x+2,y+6,28,3); g.fillStyle='#6b4226'; g.fillRect(x+2,y+9,28,2); g.fillStyle='#3a3f7a'; g.fillRect(x+4,y+11,2,3); g.fillRect(x+26,y+11,2,3); }
@@ -75,17 +76,17 @@ const Campus = (() => {
     g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
     // wall
     g.fillStyle='#05061a'; g.fillRect(x-1,y+26,w+2,h-25);
-    g.fillStyle='#1b2054'; g.fillRect(x,y+27,w,h-27);
-    g.fillStyle='#232a6a'; g.fillRect(x,y+27,w,3);
-    for (let i=0;i<w;i+=8){ g.fillStyle='#181d4c'; g.fillRect(x+i,y+30,1,h-30); }
+    const P = pal(); g.fillStyle=P.wall; g.fillRect(x,y+27,w,h-27);
+    g.fillStyle=P.wallTop; g.fillRect(x,y+27,w,3);
+    for (let i=0;i<w;i+=8){ g.fillStyle=P.wallLine; g.fillRect(x+i,y+30,1,h-30); }
     // roof
     g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,30);
     g.fillStyle=b.roof; g.fillRect(x-3,y,w+6,28);
     for (let j=4;j<28;j+=5){ g.fillStyle=shade(b.roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
     g.fillStyle=shade(b.roof,0.25); g.fillRect(x-3,y,w+6,2);
     // sign plate
-    g.fillStyle='#05061a'; g.fillRect(x+4,y+17,w-8,11); g.fillStyle='#0b0f2c'; g.fillRect(x+5,y+18,w-10,9);
-    g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=b.color; g.fillText(b.name.toUpperCase(), x+w/2, y+22.5);
+    g.fillStyle='#05061a'; g.fillRect(x+4,y+17,w-8,11); g.fillStyle=P.plate; g.fillRect(x+5,y+18,w-10,9);
+    g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=isDay() ? shade(b.color,0.45) : b.color; g.fillText(b.name.toUpperCase(), x+w/2, y+22.5);
     // roof icon
     const ic = iconCanvas(b.icon, b.color, '#eef0fb', '#151a3e'); g.drawImage(ic, Math.round(x+w/2-6), y+3);
   }
@@ -135,12 +136,12 @@ const Campus = (() => {
       else if (b.id==='compass'){ drawSignpost(ctx, b.cx, b.py+b.ph, t); }
       else {
       const locked = bLocked(b.id), hacked = incHacked(b.id), col = hacked ? '#ff5d6e' : b.color;
-      const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
+      const P = pal(), winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
       positions.forEach((wx,i)=>{ const on = hacked ? Math.random()<0.6 : locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
-        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? col : '#262c66'; ctx.fillRect(wx,winY,10,10);
-        ctx.fillStyle = on ? '#ffffffaa' : '#3a4596'; ctx.fillRect(wx+1,winY+1,3,3); ctx.fillStyle='#05061a'; ctx.fillRect(wx+4.5,winY,1,10); });
+        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? (P.winOn && !hacked ? P.winOn : col) : P.winOff; ctx.fillRect(wx,winY,10,10);
+        ctx.fillStyle = on ? '#ffffffaa' : P.winGlintOff; ctx.fillRect(wx+1,winY+1,3,3); ctx.fillStyle='#05061a'; ctx.fillRect(wx+4.5,winY,1,10); });
       const dx = b.cx-10, dy = b.py+b.ph-22;
-      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=col; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
+      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=col; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle=P.doorIn; ctx.fillRect(dx+1,dy+1,18,21);
       if (!locked){ ctx.fillStyle = col+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
       if (locked){ ctx.strokeStyle='#9aa3da'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+1,dy+1); ctx.lineTo(dx+19,dy+21); ctx.moveTo(dx+19,dy+1); ctx.lineTo(dx+1,dy+21); ctx.stroke(); ctx.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); }
       }
@@ -150,8 +151,8 @@ const Campus = (() => {
     });
     // cyber core (turns red while the campus is under attack)
     const alarm = incActive(), coreC = alarm ? '#ff5d6e' : '#2ee6ff';
-    const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); ctx.fillStyle='#303b8f'; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle='#3d4aa8'; ctx.fillRect(cx-16,cy+19,32,2);
-    ctx.fillStyle='#05061a'; ctx.fillRect(cx-9,cy-10,18,30); ctx.fillStyle='#141a4a'; ctx.fillRect(cx-8,cy-9,16,28);
+    const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); const CP = pal(); ctx.fillStyle=CP.coreBase[0]; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle=CP.coreBase[1]; ctx.fillRect(cx-16,cy+19,32,2);
+    ctx.fillStyle='#05061a'; ctx.fillRect(cx-9,cy-10,18,30); ctx.fillStyle=CP.coreBody; ctx.fillRect(cx-8,cy-9,16,28);
     for (let i=0;i<5;i++){ const on = (Math.floor(t*4)+i)%5; ctx.fillStyle = on? coreC : (alarm ? '#ffd447' : '#ff4fae'); ctx.fillRect(cx-6, cy-6+i*5, on?10:6, 2); ctx.fillStyle='#47f59a'; if ((Math.floor(t*3)+i)%3===0) ctx.fillRect(cx+5, cy-6+i*5, 1, 2); }
     const bob = Math.round(Math.sin(t*2)*2); ctx.fillStyle=coreC+(alarm && frame%20<10 ? '66' : '33'); ctx.beginPath(); ctx.arc(cx, cy-20+bob, alarm ? 13 : 10, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle='#05061a'; ctx.beginPath(); ctx.moveTo(cx,cy-29+bob); ctx.lineTo(cx+7,cy-20+bob); ctx.lineTo(cx,cy-11+bob); ctx.lineTo(cx-7,cy-20+bob); ctx.closePath(); ctx.fill();
@@ -159,8 +160,8 @@ const Campus = (() => {
     ctx.fillStyle='#eef0fb'; ctx.fillRect(cx-2,cy-23+bob,2,3);
     // lamps
     [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = alarm ? ((Math.floor(t*4)+i)%2 ? 1.6 : 0.15) : 0.75+0.25*Math.sin(t*3+i), rgb = alarm ? '255,70,90' : '255,212,71';
-      const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(${rgb},${0.28*fl})`); grd.addColorStop(1,`rgba(${rgb},0)`); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
-      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle = alarm ? (fl>1 ? '#ff5d6e' : '#5a1a26') : '#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
+      if (alarm || CP.lamps){ const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(${rgb},${0.28*fl})`); grd.addColorStop(1,`rgba(${rgb},0)`); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52); }
+      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle = alarm ? (fl>1 ? '#ff5d6e' : '#5a1a26') : CP.lamps ? '#ffd447' : '#fff6d0'; ctx.fillRect(x-2,y-15,5,3); });
     // target marker
     if (marker){ const s = 3+Math.sin(t*8); ctx.strokeStyle='#ffd447'; ctx.lineWidth=1; ctx.strokeRect(marker[0]*T+8-s, marker[1]*T+10-s/2, s*2, s); }
     // characters (y-sorted)
@@ -231,7 +232,7 @@ const Campus = (() => {
   }
   function onMove(e){ const [x,y]=toLogical(e); const b=bAt(x,y); hover=b||null; canvas.style.cursor = b?'pointer':'crosshair';
     const tip=$('#campusTip'); if (!tip) return; if (b){ const r=canvas.getBoundingClientRect(); const locked = bLocked(b.id), hk = incHacked(b.id);
-      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
+      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red-ink)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold-ink)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
       const lx = e.clientX - r.left + 14, ly = e.clientY - r.top + 14; tip.style.left = Math.min(lx, r.width-250)+'px'; tip.style.top = Math.min(ly, r.height-90)+'px'; } else tip.classList.add('hidden'); }
   function renderPrompt(){ const el=$('#campusPrompt'); if (!el) return; if (!nearDoor){ el.classList.add('hidden'); return; }
     const locked = bLocked(nearDoor.id), hk = incHacked(nearDoor.id);
@@ -261,14 +262,15 @@ const Campus = (() => {
   const bannerCache = new Map();
   function bannerURL(id, hacked){
     const b = B.find(x=>x.id===id); if (!b) return '';
-    const stage = id==='home' ? homeStage() : 0, locked = bLocked(id), k = [id, !!hacked, stage, locked].join('|');
+    const stage = id==='home' ? homeStage() : 0, locked = bLocked(id), P = pal(), k = [id, !!hacked, stage, locked, isDay()].join('|');
     if (bannerCache.has(k)) return bannerCache.get(k);
     const BW=144, BH=100, s=2, c=document.createElement('canvas'); c.width=BW*s; c.height=BH*s;
     const g=c.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(s,0,0,s,0,0);
-    const sky=g.createLinearGradient(0,0,0,BH); sky.addColorStop(0, hacked?'#3a0d1a':'#0b0f2c'); sky.addColorStop(1, hacked?'#1f0811':'#161c50'); g.fillStyle=sky; g.fillRect(0,0,BW,BH);
-    for (let i=0;i<20;i++){ g.fillStyle = i%3 ? '#ffffff55' : (b.color||'#ffd447')+'99'; g.fillRect((i*47+5)%BW, (i*29+3)%46, 1, 1); }
-    g.fillStyle='#12322a'; g.fillRect(0,BH-12,BW,12); g.fillStyle='#174034'; for (let i=0;i<24;i++) g.fillRect((i*13)%BW, BH-11+(i*7)%9, 1, 2);
-    g.fillStyle='#262c66'; g.fillRect(BW/2-14,BH-12,28,12); g.fillStyle='#1d2358'; g.fillRect(BW/2-14,BH-12,28,1);
+    const sky=g.createLinearGradient(0,0,0,BH); sky.addColorStop(0, hacked?'#3a0d1a':P.sky[0]); sky.addColorStop(1, hacked?'#1f0811':P.sky[1]); g.fillStyle=sky; g.fillRect(0,0,BW,BH);
+    if (P.stars || hacked) for (let i=0;i<20;i++){ g.fillStyle = i%3 ? '#ffffff55' : (b.color||'#ffd447')+'99'; g.fillRect((i*47+5)%BW, (i*29+3)%46, 1, 1); }
+    else { g.fillStyle='#ffffff'; [[8,10,26,6],[14,6,12,4],[96,18,30,6],[104,14,14,4]].forEach(([x,y,w,h])=>g.fillRect(x,y,w,h)); }
+    g.fillStyle=P.grass; g.fillRect(0,BH-12,BW,12); g.fillStyle=P.grassDots[1]; for (let i=0;i<24;i++) g.fillRect((i*13)%BW, BH-11+(i*7)%9, 1, 2);
+    g.fillStyle=P.path[0]; g.fillRect(BW/2-14,BH-12,28,12); g.fillStyle=P.pathLine; g.fillRect(BW/2-14,BH-12,28,1);
     if (id==='home') drawDorm(g, (BW-96)/2, BH-12-64, 96, 64, stage, 1);
     else if (id==='compass'){ g.translate(BW/2, BH-12); g.scale(1.7,1.7); drawSignpost(g, 0, 0, 1); g.setTransform(s,0,0,s,0,0); }
     else {
@@ -294,7 +296,7 @@ function viewCampus(el){
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
   <div id="incBanner">${incBannerHTML()}</div>
   <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
-    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} Night shift · Sector 7</span></div>
+    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} ${isDay() ? 'Day shift' : 'Night shift'} · Sector 7</span></div>
     <button class="cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button>
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
@@ -331,7 +333,7 @@ function incWin(){
   S.incident.active = false; S.incident.done = true; S.incident.best = Math.min(S.incident.best || Infinity, secs); save();
   UI.incWin = Date.now(); UI.incSaved = true; renderIncBanner();
   setTimeout(()=>{
-    showModal(`<div class="label" style="color:var(--green)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
+    showModal(`<div class="label" style="color:var(--green-ink)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
       <p class="muted">You secured all ${INCIDENT.length} buildings in ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}, using phishing spotting, strong passphrases, network hardening, log analysis, scam reporting and incident response.</p>
       <div class="actions"><button class="btn green" data-act="closeModal">Back to campus</button></div>`);
     addXP(XP.incident, 'Campus saved from the incident'); award('defender');
@@ -341,7 +343,7 @@ function viewIncident(el){
   const x = INCIDENT.find(i=>i.b===(S.params||{}).b);
   if (!x || !incActive()){ go('campus'); return; }
   const b = Campus.buildings.find(v=>v.id===x.b), L = x.lesson===FAKE_ADMIN.id ? FAKE_ADMIN : lessonById(x.lesson), n = S.incident.secured.length;
-  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red)">Incident</span></div>
+  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red-ink)">Incident</span></div>
     <h1>⚠ ${esc(b.name)} is hacked</h1><p><b style="color:#fff">${esc(x.t)}.</b> ${esc(x.brief)}</p></div><span class="pill red">${n}/${INCIDENT.length} secured</span></div>
   <section class="monitor"><div id="actHost"></div></section>`;
   Activities.mount(L, $('#actHost'), { tag:'Incident response', nextAct:'incBack', nextLabel:'Return to campus', onDone: sc => {
@@ -383,28 +385,28 @@ function homeStage(){ const n=healthDone(); return n===0 ? 0 : n<4 ? 1 : n<HEALT
 const dormIcons = new Map(); const dormIcon = (n,c) => { const k=n+c; if (!dormIcons.has(k)) dormIcons.set(k, iconCanvas(n,c)); return dormIcons.get(k); };
 // Draws the dorm in one of 4 stages: dark and plain -> lights on -> padlock -> glowing shield and sign
 function drawDorm(g, x, y, w, h, stage, t){
-  const lit = stage>0, roof = lit ? HOME_BASE.roof : '#2b3540', cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
+  const lit = stage>0, D = isDay(), roof = lit ? HOME_BASE.roof : (D ? '#8a8f99' : '#2b3540'), cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
   if (stage===3){ const grd = g.createRadialGradient(cx,y+h/2,6,cx,y+h/2,w*0.8); grd.addColorStop(0,`rgba(71,245,154,${0.18+0.14*pulse})`); grd.addColorStop(1,'rgba(71,245,154,0)'); g.fillStyle=grd; g.fillRect(x-w*0.35,y-26,w*1.7,h+40); }
   g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
   // wall
   g.fillStyle='#05061a'; g.fillRect(x-1,y+21,w+2,h-20);
-  g.fillStyle = lit ? '#1b2054' : '#11142c'; g.fillRect(x,y+22,w,h-22);
-  g.fillStyle = lit ? '#232a6a' : '#171a38'; g.fillRect(x,y+22,w,3);
-  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? '#181d4c' : '#0e1126'; g.fillRect(x+i,y+25,1,h-25); }
+  g.fillStyle = lit ? (D ? '#f3e2c0' : '#1b2054') : (D ? '#cfc8b8' : '#11142c'); g.fillRect(x,y+22,w,h-22);
+  g.fillStyle = lit ? (D ? '#fff2d8' : '#232a6a') : (D ? '#ddd6c6' : '#171a38'); g.fillRect(x,y+22,w,3);
+  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? (D ? '#e3cc9e' : '#181d4c') : (D ? '#bdb5a3' : '#0e1126'); g.fillRect(x+i,y+25,1,h-25); }
   // roof
   g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,24); g.fillStyle=roof; g.fillRect(x-3,y,w+6,22);
   for (let j=4;j<22;j+=5){ g.fillStyle=shade(roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
   g.fillStyle=shade(roof,0.25); g.fillRect(x-3,y,w+6,2);
   // sign plate
   if (stage===3){ g.fillStyle=`rgba(71,245,154,${0.25+0.3*pulse})`; g.fillRect(x+8,y+9,w-16,15); }
-  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle='#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
+  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle = D ? '#3b2a1e' : '#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
   g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle';
-  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : '#3a4166'; g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
+  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : (D ? '#9a917e' : '#3a4166'); g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
   // windows
   const winY = y+29;
   [x+6, x+18, x+w-28, x+w-16].forEach((wx,i)=>{ const on = lit && (stage>1 || (Math.floor(t*0.6+i*1.7)%6)!==0);
-    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : '#1a1f45'; g.fillRect(wx,winY,10,10);
-    g.fillStyle = on ? '#fff6c8' : '#262c5a'; g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
+    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : (D ? '#9aa3ad' : '#1a1f45'); g.fillRect(wx,winY,10,10);
+    g.fillStyle = on ? '#fff6c8' : (D ? '#c4cbd3' : '#262c5a'); g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
     if (on){ g.fillStyle='rgba(255,212,71,0.16)'; g.fillRect(wx-3,winY+11,16,4); } });
   // door
   const dx = cx-10, dy = y+h-22;
@@ -421,8 +423,8 @@ function drawDorm(g, x, y, w, h, stage, t){
 function animateDorm(cv, sc){
   if (!cv) return; const g = cv.getContext('2d'); g.imageSmoothingEnabled=false;
   const draw = () => { const t = performance.now()/1000; g.setTransform(sc,0,0,sc,0,0);
-    g.fillStyle='#12322a'; g.fillRect(0,0,128,104); g.fillStyle='#2a3070'; g.fillRect(0,92,128,12); g.fillStyle='#1d2358'; g.fillRect(0,92,128,1);
-    for (let i=0;i<40;i++){ g.fillStyle = i%2 ? '#174034' : '#0e2a22'; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
+    const P = pal(); g.fillStyle=P.grass; g.fillRect(0,0,128,104); g.fillStyle=P.path[1]; g.fillRect(0,92,128,12); g.fillStyle=P.pathLine; g.fillRect(0,92,128,1);
+    for (let i=0;i<40;i++){ g.fillStyle = P.grassDots[i%2]; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
     drawDorm(g, 16, 28, 96, 64, homeStage(), t);
     const age = (Date.now() - (UI.dormFlash||0))/1000;
     if (age < 1.4){ const k = 1-age/1.4; g.fillStyle=`rgba(255,255,255,${0.55*k*k})`; g.fillRect(0,0,128,104);
@@ -436,7 +438,7 @@ function viewHome(el){
   <div class="grid home-grid">
     <section class="panel home-dorm">
       <canvas id="dormCanvas" class="px" width="384" height="312" aria-label="Your dorm, stage ${st+1} of 4: ${esc(HOME_STAGES[st].t)}"></canvas>
-      <div class="label" style="color:var(--green); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
+      <div class="label" style="color:var(--green-ink); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
       <div class="home-score"><b class="pixel" id="safetyScore">${sc}%</b><span class="label muted">Safety Score</span></div>
       <div class="bar green"><i style="width:${sc}%"></i></div>
       <p class="muted" style="margin-top:10px; font-size:14px">${esc(HOME_STAGES[st].d)}</p>

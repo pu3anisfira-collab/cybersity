@@ -110,7 +110,7 @@ function viewMentor(el){
     <aside class="grid" style="align-content:start">
       <div class="mentor-card"><img class="px" src="${BOT_URL}" alt=""><h2>BYTE</h2><p class="muted" style="font-size:13px; margin-top:6px">AI Cybersecurity Mentor · Online</p>${l?`<div class="pill purple" style="margin-top:12px; display:inline-block">Context: ${esc(l.title)}</div>`:''}</div>
       <div class="panel"><div class="section-title">I can help you</div><ul class="recap-list" style="margin:0; font-size:14px">${['Explain a lesson in simpler words','Give real-world examples','Quiz you for practice','Suggest what to do in a security situation'].map(t=>`<li>${t}</li>`).join('')}</ul></div>
-      <div class="panel" style="border-color:#000; background:#2a1030"><div class="section-title" style="color:var(--pink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
+      <div class="panel safety-panel"><div class="section-title" style="color:var(--pink-ink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
     </aside>
     <div id="mentorPage">${Mentor.chatHTML('page')}</div>
   </div>`;
@@ -164,9 +164,9 @@ const Community = (() => {
   ];
   function look(n){ return n===S.user?.name ? S.user.look : (U(n)?.look || COMMUNITY_USERS[0].look); }
   function msgHTML(m){
-    if (m.system) return `<div class="cmsg" style="background:#4a121c55; border:2px solid #000"><div class="av" style="background:#4a121c">${icon('shield','#ff5d6e',20)}</div><div style="min-width:0"><span class="nm" style="color:#ffb0b8">Cybersity Safety</span><span class="tm">only visible to you</span><div class="tx">${m.text}</div></div></div>`;
+    if (m.system) return `<div class="cmsg sys"><div class="av">${icon('shield','#ff5d6e',20)}</div><div style="min-width:0"><span class="nm">Cybersity Safety</span><span class="tm">only visible to you</span><div class="tx">${m.text}</div></div></div>`;
     const me = m.user===S.user?.name;
-    return `<div class="cmsg"><div class="av"><img class="px" alt="" src="${avatarURL(look(m.user))}"></div><div style="min-width:0; flex:1"><span class="nm" style="color:${me?'var(--cyan)':'#fff'}">${esc(m.user)}${me?' (you)':''}</span><span class="tm">${hhmm(new Date(m.t))}</span>
+    return `<div class="cmsg"><div class="av"><img class="px" alt="" src="${avatarURL(look(m.user))}"></div><div style="min-width:0; flex:1"><span class="nm" style="color:${me?'var(--cyan-ink)':'var(--text)'}">${esc(m.user)}${me?' (you)':''}</span><span class="tm">${hhmm(new Date(m.t))}</span>
       <div class="tx">${m.removed?'<i class="muted">[Message removed by a moderator]</i>':esc(m.text)}</div>
       ${m.share && !m.removed?`<div class="share-card"><img class="px" alt="" src="${iconURL(m.share.icon, m.share.color)}"><span>${esc(m.user)} ${m.share.html}</span></div>`:''}</div>
       ${!me && !m.removed?`<button class="rep" data-act="reportMsg" data-arg="${m.id}">${m.reported?'Reported':'Report'}</button>`:''}</div>`;
@@ -205,7 +205,7 @@ function viewCommunity(el){
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Community Hub</div><h1>Community Hub</h1><p>Join a room and chat with other learners in real time. Be kind, help each other and keep personal details private.</p></div></div>
   <div class="comm-layout">
     <aside><div class="rooms">${ROOMS.map(r=>`<button class="room ${r.id===room.id?'on':''}" data-act="room" data-arg="${r.id}"><span># ${esc(r.name)}</span><small>${Community.msgCount(r.id)}</small></button>`).join('')}</div>
-      <div class="rules"><b class="label" style="color:var(--gold)">Room rules</b><br>Be respectful · No personal info (phone, email, IC, passwords) · Report anything harmful. Messages are checked automatically.</div></aside>
+      <div class="rules"><b class="label" style="color:var(--gold-ink)">Room rules</b><br>Be respectful · No personal info (phone, email, IC, passwords) · Report anything harmful. Messages are checked automatically.</div></aside>
     <section class="chat" style="height:min(640px,74vh)">
       <div class="chat-head"><div style="flex:1; min-width:0"><b># ${esc(room.name)}</b><div class="muted" style="font-size:12px">${esc(room.d)}</div></div><span class="pill green" style="font-size:9px">● ${people.filter(p=>p.status==='on').length} online</span></div>
       <div class="chat-log" id="commLog" style="gap:6px"></div>
@@ -221,7 +221,7 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
   mentorSuggest: s => Mentor.ask(s),
   room: r => { UI.room = r; renderView(); },
   reportMsg: id => { const f = Community.find(+id); if (!f || f.m.reported) return;
-    showModal(`<div class="label" style="color:var(--pink)">Report message</div><h2>Why are you reporting this?</h2><p style="background:#0b0f2c; border:2px solid #000; padding:10px; text-align:left; font-size:14px; margin:10px 0"><b>${esc(f.m.user)}:</b> ${esc(f.m.text)}</p>
+    showModal(`<div class="label" style="color:var(--pink-ink)">Report message</div><h2>Why are you reporting this?</h2><p class="quote-box"><b>${esc(f.m.user)}:</b> ${esc(f.m.text)}</p>
       <div style="display:grid; gap:8px; text-align:left">${['Spam or scam','Harassment or bullying','Sharing personal information','Harmful or illegal content'].map((r,i)=>`<label style="display:flex; gap:10px; align-items:center; padding:8px 10px; background:var(--panel-2); border:2px solid #000"><input type="radio" name="rr" value="${r}" ${i===0?'checked':''}> ${r}</label>`).join('')}</div>
       <div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="submitReport" data-arg="${id}">Send report</button></div>`); },
   submitReport: id => { const f = Community.find(+id); const reason = (document.querySelector('input[name="rr"]:checked')||{}).value || 'Other';

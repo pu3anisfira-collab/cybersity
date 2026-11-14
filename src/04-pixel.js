@@ -73,7 +73,21 @@ const BOT_ROWS = ['.....AA.....','.....AA.....','..KKKKKKKK..','..KVVVVVVK..','.
 function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'}); }
 let BOT_URL = '';
 
+/* Canvas palette: night (default) or day (bright grass, brick paths, cream walls, sky-blue windows) */
+const isDay = () => document.documentElement.dataset.theme === 'day';
+const PAL_NIGHT = { path:['#262c66','#2a3070'], pathLine:'#1d2358', grass:'#12322a', grassDots:['#174034','#0e2a22'], sparkle:['#ff4fae','#ffd447','#2ee6ff'], trace:['#2ee6ff33','#ff4fae33'],
+  trees:[['#0f4a36','#16664a','#22825c'],['#123f40','#1a5c5a','#28807a'],['#2a1d55','#3d2a7a','#5a3fa8']], trunk:'#3b2516',
+  wall:'#1b2054', wallTop:'#232a6a', wallLine:'#181d4c', plate:'#0b0f2c', winOn:null, winOff:'#262c66', winGlintOff:'#3a4596', doorIn:'#0b0f2c', lamps:true, coreBase:['#303b8f','#3d4aa8'], coreBody:'#141a4a',
+  sky:['#0b0f2c','#161c50'], stars:true };
+const PAL_DAY = { path:['#e8cf9c','#e1c58e'], pathLine:'#c9a970', grass:'#5cb83c', grassDots:['#72cc50','#4ea532'], sparkle:['#ff6fa8','#ffe14d','#ffffff'], trace:['#ffffff66','#ffffff44'],
+  trees:[['#2f7d2a','#45a33a','#6cc94f'],['#2a7a52','#3fa56d','#66cc8e'],['#c2577f','#e486a8','#ffc2d6']], trunk:'#7a4a26',
+  wall:'#f3e2c0', wallTop:'#fff2d8', wallLine:'#e3cc9e', plate:'#3b2a1e', winOn:'#bfe7ff', winOff:'#8fd0ff', winGlintOff:'#e6f6ff', doorIn:'#6b4a2e', lamps:false, coreBase:['#b9a37a','#cdb98f'], coreBody:'#2b3a7a',
+  sky:['#6cc4ff','#bfe7ff'], stars:false };
+const pal = () => isDay() ? PAL_DAY : PAL_NIGHT;
+
 const ICONS = {
+  sun:['....XX....','.X..XX..X.','..XXXXXX..','..XWWWWX..','XXXWWWWXXX','XXXWWWWXXX','..XWWWWX..','..XXXXXX..','.X..XX..X.','....XX....'],
+  moon:['..XXXX....','.XWWX.....','XWWX......','XWX.......','XWX.......','XWX.......','XWWX......','XWWWX..XX.','.XWWWXXWX.','..XXXXXX..'],
   compass:['...XXXX...','.XXWWWWXX.','.XWWWFWWX.','XWWWFFFWWX','XWWWWDWWWX','XWWWZZZWWX','.XWWWZWWX.','.XXWWWWXX.','...XXXX...','..........'],
   home:['....XX....','...XXXX...','..XXXXXX..','.XXXXXXXX.','XXXXXXXXXX','.XWWXXWWX.','.XWWXXWWX.','.XXXXDDXX.','.XXXXDDXX.','.XXXXDDXX.'],
   campus:['....F.....','....FFF...','....F.....','...XXXX...','..XXXXXX..','.XXXXXXXX.','.XWXWWXWX.','.XXXXXXXX.','.XWXDDXWX.','.XXXDDXXX.'],

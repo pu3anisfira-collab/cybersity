@@ -71,6 +71,19 @@ build tooling unless the owner asks.
   player. A Full map / Zoom in toggle sets `UI.campusFull`. Draw in world coordinates with `world()`; use
   `screen()` with `vw`/`vh` for overlays that belong to the visible view. Map pointer input through `toLogical()`.
 
+## Day mode
+- A sun/moon button (top bar; top-right corner on the sign-in screens) switches between Night (default) and Day.
+  The choice is saved in `localStorage` key `cybersity-theme` and applied as `<html data-theme="day">`.
+- Day look, from the owner's reference art: sky gradient with pixel clouds, a grass and dirt strip at the
+  bottom, cream panels with black pixel outlines, yellow titles outlined in brown, green pixel buttons. All Day
+  CSS is in one block at the end of `01-head.html`, under `:root[data-theme="day"]`.
+- Text in accent colours uses `--cyan-ink`, `--gold-ink` and so on (never `color:var(--cyan)`). In Day mode these
+  turn deeper so they stay readable on cream. Device screens that stay dark (router, log lines, tooltips,
+  incident banner) reset the ink tokens to the bright values.
+- Canvas art reads its colours from `pal()` (`PAL_NIGHT` / `PAL_DAY` in `04-pixel.js`). Check `isDay()`
+  for one-off colours. Switching theme re-renders the app so the canvases repaint. Building banners are cached
+  per theme.
+
 ## Conventions
 - UI is rendered as HTML strings; clicks are handled by event delegation on `data-act` / `data-arg`
   attributes. Add new handlers to `ACTIONS` (05) or `window.EXTRA_ACTIONS` (06–10). The dispatcher calls
