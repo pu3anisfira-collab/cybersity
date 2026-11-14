@@ -443,7 +443,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -458,7 +458,63 @@ const BADGES = [
   {id:'detective', t:'Log Detective', d:'Found every suspicious log line', icon:'eye', c:'#47f59a'},
   {id:'halfway', t:'Halfway Hero', d:'Passed 3 module assessments', icon:'shield', c:'#4c78ff'},
   {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
-  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'}
+  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'},
+  {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'}
+];
+
+/* Career Compass: signpost on the plaza, role quiz, role pages with taster missions and roadmaps */
+const CAREER_SIGN = {id:'compass', name:'Career Compass', view:'career', color:'#ffd447', icon:'compass', desc:'Find the cyber role that fits you and your roadmap to a first job'};
+const CAREERS = [
+  {id:'soc', t:'SOC Analyst', icon:'eye', c:'#47f59a', tag:'The detective who watches for attacks',
+    what:'A SOC (Security Operations Centre) analyst watches an organisation\'s alerts and logs, spots the signs of an attack and raises the alarm early. Many people start their cyber career here.',
+    day:['Check new alerts from security tools and decide which ones are real','Dig through logs to see what a suspicious account or device did','Write up findings and pass serious cases to the incident response team'],
+    fit:'You enjoy spotting patterns and the small details other people miss.',
+    mission:{lesson:'m5l2', brief:'A SOC analyst\'s day starts with logs. Find every suspicious line before the attacker gets further.'},
+    road:{basics:'Module 5: Logs & Monitoring', next:'Networking basics, Linux and Windows command line, reading alerts in a SIEM tool', practice:'TryHackMe SOC Level 1 path, LetsDefend, Blue Team Labs Online', cert:'ISC2 CC or CompTIA Security+, later CompTIA CySA+', exp:'Home lab with a free SIEM, blue-team CTFs, IT helpdesk or SOC internship', job:'Junior SOC Analyst (Tier 1)'}},
+  {id:'pentest', t:'Penetration Tester', icon:'key', c:'#ff4fae', tag:'The ethical hacker who breaks in first',
+    what:'A penetration tester is paid, with written permission, to find a way into systems, websites or even staff inboxes before criminals do, then explains exactly how to fix each hole.',
+    day:['Agree with the client what may be tested and what is off-limits','Probe websites, networks and people (for example with a phishing test) for weaknesses','Write a clear report of every weakness and how to fix it'],
+    fit:'You love puzzles, asking "what if?" and finding loopholes.',
+    mission:{lesson:'m2l1', brief:'Pen testers run phishing tests to check whether staff can be tricked. Can you spot every trick in this email?'},
+    road:{basics:'Module 2: Phishing & Malware', next:'Networking, Linux, how websites work, basic Python or Bash scripting', practice:'TryHackMe Jr Penetration Tester path, Hack The Box Academy, picoCTF', cert:'CompTIA Security+, then an entry pen-test certificate such as eJPT or CompTIA PenTest+', exp:'CTF competitions, legal practice labs, bug bounty programmes, internship', job:'Junior Penetration Tester'}},
+  {id:'ir', t:'Incident Responder', icon:'flag', c:'#ff9a3d', tag:'The firefighter when an attack hits',
+    what:'When an attack gets through, the incident responder takes charge: contains the damage, removes the attacker and gets the organisation running again, step by step.',
+    day:['Lead the response when ransomware or a breach is confirmed','Isolate infected devices and collect evidence','Help restore systems and run the "lessons learned" review'],
+    fit:'You stay calm under pressure and like fixing things fast.',
+    mission:{lesson:'m6l2', brief:'Ransomware just hit a small office. Put the response plan in the right order before it spreads.'},
+    road:{basics:'Module 6: Incident Response', next:'How operating systems work, malware basics, digital forensics, clear communication', practice:'CyberDefenders, LetsDefend, Blue Team Labs Online', cert:'CompTIA Security+, later CompTIA CySA+ or GIAC GCIH', exp:'Start in a SOC, join incident simulation exercises, blue-team CTFs', job:'Junior Incident Response Analyst'}},
+  {id:'grc', t:'GRC / Risk Analyst', icon:'scroll', c:'#a46bff', tag:'The planner who keeps the rules strong',
+    what:'GRC means Governance, Risk and Compliance. These analysts decide which risks matter most, write security policies and check that the organisation follows laws and standards.',
+    day:['Run risk assessments and update the risk register','Write or update policies such as the Acceptable Use Policy','Prepare the organisation for audits against standards like ISO/IEC 27001'],
+    fit:'You like organising, writing clearly and seeing the big picture.',
+    mission:{lesson:'m6l1', brief:'A GRC analyst decides how to handle each risk. Match every decision to the right risk response.'},
+    road:{basics:'Module 6: Risk & Security Policies', next:'Risk management, frameworks such as NIST CSF and ISO/IEC 27001, data protection laws such as Malaysia\'s PDPA', practice:'NIST CSF 2.0 quick-start guides, ISO/IEC 27001 introduction courses, a practice risk assessment for a small business', cert:'ISC2 CC or CompTIA Security+, then ISO/IEC 27001 Foundation; later ISACA CISA', exp:'Write a security policy for a club or small business, audit or compliance internship', job:'Junior GRC Analyst'}},
+  {id:'net', t:'Network Security Engineer', icon:'network', c:'#2ee6ff', tag:'The builder of safe networks',
+    what:'A network security engineer designs and looks after the networks that keep data moving, and builds the defences around them: firewalls, secure Wi-Fi, VPNs and separated network zones.',
+    day:['Set up and review firewall rules','Configure secure Wi-Fi and VPN access for staff','Monitor network health and fix weak settings'],
+    fit:'You like building things and making technology work together.',
+    mission:{lesson:'m3l2', brief:'A router has been left with unsafe settings. Secure the network before anyone notices.'},
+    road:{basics:'Module 3: Network Security', next:'Networking in depth (IP addressing, routing, switching), firewalls and VPNs, Linux', practice:'Cisco Packet Tracer (with Cisco Networking Academy), TryHackMe Pre Security path, a home lab', cert:'Cisco CCST Networking or CompTIA Network+, then CompTIA Security+ or Cisco CCNA', exp:'Build a home lab, IT support or network internship, campus IT volunteering', job:'Junior Network Security Engineer'}}
+];
+const ROADMAP_STEPS = [
+  {k:'basics', t:'Cybersity basics', cover:'full'},
+  {k:'next', t:'Next skills', cover:'part'},
+  {k:'practice', t:'Practice platforms', cover:'none'},
+  {k:'cert', t:'Entry-level certificate', cover:'none'},
+  {k:'exp', t:'Experience', cover:'none'},
+  {k:'job', t:'First job', cover:'none'}
+];
+const CAREER_QUIZ = [
+  {q:'You have a free afternoon. What sounds most fun?', o:[
+    {t:'Spotting patterns in a pile of data', r:'soc'},{t:'Solving a tricky puzzle or escape room', r:'pentest'},{t:'Helping a friend fix a problem fast', r:'ir'},{t:'Planning an event so nothing goes wrong', r:'grc'},{t:'Building or setting up gadgets', r:'net'}]},
+  {q:'In a group project, you are usually the one who…', o:[
+    {t:'Notices the small detail everyone missed', r:'soc'},{t:'Tests the idea to see where it breaks', r:'pentest'},{t:'Steps up when things go wrong', r:'ir'},{t:'Organises the tasks and deadlines', r:'grc'},{t:'Sets up the tools so everything works', r:'net'}]},
+  {q:'Which Cybersity game did you enjoy most (or sounds best)?', o:[
+    {t:'Log Detective', r:'soc'},{t:'Spot the Phishing Email', r:'pentest'},{t:'Incident Response Order', r:'ir'},{t:'Choose the Risk Response', r:'grc'},{t:'Secure the Network', r:'net'}]},
+  {q:'Which way of working suits you best?', o:[
+    {t:'Steady shifts, watching screens for clues', r:'soc'},{t:'Short projects, hacking with permission', r:'pentest'},{t:'Fast action whenever the alarm rings', r:'ir'},{t:'Meetings, documents and advising managers', r:'grc'},{t:'Hands-on with routers, firewalls and settings', r:'net'}]},
+  {q:'What would make you proudest at work?', o:[
+    {t:'Catching an attacker early', r:'soc'},{t:'Finding a weakness before criminals do', r:'pentest'},{t:'Getting a company back online after an attack', r:'ir'},{t:'Helping a company pass a security audit', r:'grc'},{t:'Designing a network attackers cannot get into', r:'net'}]}
 ];
 
 /* Home Base: the learner's dorm on campus. Real-life actions, self-reported, raise the Safety Score. */

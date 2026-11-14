@@ -3,8 +3,8 @@
    ============================================================ */
 const Campus = (() => {
   const T=16, COLS=30, ROWS=25, W=COLS*T, H=ROWS*T, SC=3;
-  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4] };
-  const B = [...BUILDINGS, HOME_BASE].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
+  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4], compass:[21,7,1,2] };
+  const B = [...BUILDINGS, HOME_BASE, CAREER_SIGN].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
@@ -46,8 +46,8 @@ const Campus = (() => {
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
     // benches
     bench(g,5*T,10*T); bench(g,23*T,10*T); bench(g,5*T,21*T); bench(g,23*T,21*T);
-    // buildings (Home Base is drawn live because it upgrades)
-    B.forEach(b=>{ if (b.id!=='home') building(g,b); });
+    // buildings (Home Base and the signpost are drawn live because they animate)
+    B.forEach(b=>{ if (b.id!=='home' && b.id!=='compass') building(g,b); });
   }
   function tree(g,x,y,v){
     g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
@@ -117,6 +117,7 @@ const Campus = (() => {
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
       if (b.id==='home'){ drawDorm(ctx, b.px, b.py, b.pw, b.ph, homeStage(), t); }
+      else if (b.id==='compass'){ drawSignpost(ctx, b.cx, b.py+b.ph, t); }
       else {
       const locked = b.id==='cert' && !finalPassed();
       const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
@@ -130,7 +131,7 @@ const Campus = (() => {
       }
       // door glow on the path
       ctx.fillStyle = b.color + (nearDoor===b ? '66' : '22'); ctx.fillRect(b.door.c*T, b.door.r*T, T, T);
-      if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
+      if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; if (b.id==='compass') ctx.strokeRect(b.px-14, b.py-14, b.pw+28, b.ph+16); else ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
     });
     // cyber core
     const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); ctx.fillStyle='#303b8f'; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle='#3d4aa8'; ctx.fillRect(cx-16,cy+19,32,2);
@@ -163,7 +164,7 @@ const Campus = (() => {
 
   function loop(){ if (!active) return; update(); if (!active) return; draw(); raf = requestAnimationFrame(loop); }
   function toLogical(e){ const r = canvas.getBoundingClientRect(); return [ (e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H ]; }
-  const bAt = (x,y) => B.find(b=> x>=b.px-3 && x<=b.px+b.pw+3 && y>=b.py && y<=b.py+b.ph);
+  const bAt = (x,y) => B.find(b=> b.id==='compass' ? (x>=b.px-12 && x<=b.px+b.pw+12 && y>=b.py-12 && y<=b.py+b.ph) : (x>=b.px-3 && x<=b.px+b.pw+3 && y>=b.py && y<=b.py+b.ph));
   function onClick(e){
     const [x,y]=toLogical(e); const b = bAt(x,y); const [pc,pr]=tileOf(player);
     if (b){ const p = bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if (!p.length) { pendingEnter=null; enter(b); } } return; }
@@ -208,6 +209,23 @@ function viewCampus(el){
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=b.id==='cert'&&!finalPassed(); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
+}
+
+// Career Compass signpost on the plaza: a post with two glowing arrow boards and a floating compass
+function drawSignpost(g, x, base, t){
+  const pulse = 0.5+0.5*Math.sin(t*2.4);
+  const grd = g.createRadialGradient(x, base-20, 2, x, base-20, 30); grd.addColorStop(0, `rgba(255,212,71,${0.22+0.18*pulse})`); grd.addColorStop(1, 'rgba(255,212,71,0)'); g.fillStyle=grd; g.fillRect(x-30, base-50, 60, 56);
+  g.fillStyle='#0007'; g.fillRect(x-6, base-2, 12, 3);
+  g.fillStyle='#05061a'; g.fillRect(x-3, base-30, 6, 30); g.fillStyle='#8a5a34'; g.fillRect(x-2, base-29, 4, 29); g.fillStyle='#6b4226'; g.fillRect(x+1, base-29, 1, 29);
+  const board = (y, left, label, col) => { const x0 = left ? x-17 : x-12, x1 = left ? x+12 : x+17;
+    g.fillStyle='#05061a'; g.beginPath(); if (left){ g.moveTo(x0-4,y+4); g.lineTo(x0+1,y-1); g.lineTo(x1+1,y-1); g.lineTo(x1+1,y+9); g.lineTo(x0+1,y+9); } else { g.moveTo(x1+4,y+4); g.lineTo(x1-1,y-1); g.lineTo(x0-1,y-1); g.lineTo(x0-1,y+9); g.lineTo(x1-1,y+9); } g.closePath(); g.fill();
+    g.fillStyle='#0b0f2c'; g.beginPath(); if (left){ g.moveTo(x0-2,y+4); g.lineTo(x0+2,y); g.lineTo(x1,y); g.lineTo(x1,y+8); g.lineTo(x0+2,y+8); } else { g.moveTo(x1+2,y+4); g.lineTo(x1-2,y); g.lineTo(x0,y); g.lineTo(x0,y+8); g.lineTo(x1-2,y+8); } g.closePath(); g.fill();
+    g.strokeStyle=col; g.globalAlpha=0.6+0.4*pulse; g.lineWidth=1; g.stroke(); g.globalAlpha=1;
+    g.font='5px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=col; g.fillText(label, (x0+x1)/2 + (left?-1:1), y+4.5); };
+  board(base-28, false, 'CAREERS', '#ffd447'); board(base-17, true, 'SKILLS', '#2ee6ff');
+  const by = base-44+Math.round(Math.sin(t*2)*1.5);
+  g.fillStyle=`rgba(255,212,71,${0.3+0.25*pulse})`; g.beginPath(); g.arc(x, by+6, 9, 0, Math.PI*2); g.fill();
+  g.drawImage(dormIcon('compass','#ffd447'), x-6, by);
 }
 
 /* ---------- Home Base: Security Health Check ---------- */

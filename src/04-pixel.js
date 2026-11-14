@@ -74,6 +74,7 @@ function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'
 let BOT_URL = '';
 
 const ICONS = {
+  compass:['...XXXX...','.XXWWWWXX.','.XWWWFWWX.','XWWWFFFWWX','XWWWWDWWWX','XWWWZZZWWX','.XWWWZWWX.','.XXWWWWXX.','...XXXX...','..........'],
   home:['....XX....','...XXXX...','..XXXXXX..','.XXXXXXXX.','XXXXXXXXXX','.XWWXXWWX.','.XWWXXWWX.','.XXXXDDXX.','.XXXXDDXX.','.XXXXDDXX.'],
   campus:['....F.....','....FFF...','....F.....','...XXXX...','..XXXXXX..','.XXXXXXXX.','.XWXWWXWX.','.XXXXXXXX.','.XWXDDXWX.','.XXXDDXXX.'],
   book:['.XXX..XXX.','XWWWXXWWWX','XWZWXXWZWX','XWWWXXWWWX','XWZWXXWZWX','XWWWXXWWWX','XWWWXXWWWX','XXXXXXXXXX','....XX....','..........'],

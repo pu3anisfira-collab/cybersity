@@ -23,7 +23,8 @@ build tooling unless the owner asks.
 | `src/06-activities.js` | Six activity engines: sort, select (email/logs), match, toggle (router), password, order |
 | `src/07-campus.js` | Canvas campus: 30×20 tile map, buildings, BFS pathfinding, NPC learners, door prompts |
 | `src/08-social.js` | BYTE scripted mentor (keyword knowledge base, safety refusals, lesson context, quiz-me) and Community Hub (rooms, bot replies, personal-info filter, reporting) |
-| `src/09-init.js` | Boot |
+| `src/10-career.js` | Career Compass: role quiz, role pages, taster missions (activities mounted stand-alone), roadmaps |
+| `src/99-init.js` | Boot (always last in `build.sh`) |
 
 ## Conventions
 - UI is rendered as HTML strings; clicks are handled by event delegation on `data-act` / `data-arg`

@@ -207,7 +207,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .qn b{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.06em}
 .qn small{color:var(--muted); font-size:12px; line-height:1.3}
 .qn.locked{opacity:.55}
-@media (min-width:861px){ .quick-nav{grid-template-columns:repeat(7,minmax(0,1fr))} }
+@media (min-width:861px){ .quick-nav{grid-template-columns:repeat(8,minmax(0,1fr))} }
 
 /* ---------- Home Base ---------- */
 .home-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); align-items:start}
@@ -232,6 +232,44 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 @media (max-width:560px){ .hc{grid-template-columns:32px 1fr} .hc-xp{grid-column:2} }
 .home-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
 .home-card canvas{width:96px; height:auto; border:3px solid #000; flex:none}
+
+/* ---------- Career Compass ---------- */
+.cmedal{display:grid; place-items:center; border:3px solid #000; box-shadow:3px 3px 0 #000; clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%)}
+.compass-result{display:flex; gap:18px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.role-grid{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px}
+@media (max-width:1000px){ .role-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:480px){ .role-grid{grid-template-columns:1fr} }
+.role-card{display:flex; flex-direction:column; align-items:flex-start; gap:8px; text-align:left; padding:16px; background:var(--panel); border:3px solid #000; box-shadow:4px 4px 0 #000; border-top:6px solid var(--rc)}
+.role-card:hover{background:var(--panel-2); transform:translate(-1px,-1px)}
+.role-card b{font-family:var(--f-label); font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:#fff}
+.role-card small{color:var(--muted); font-size:13px; line-height:1.35}
+.role-pills{display:flex; gap:6px; flex-wrap:wrap; margin-top:auto}
+.role-head{border-left:6px solid var(--rc); padding-left:16px}
+.fit-box{margin-top:16px; padding:12px 14px; background:#fff1b8; border:3px solid var(--ink); font-size:15px}
+.taster{border-top:6px solid var(--rc); align-self:start}
+.roadmap{list-style:none; margin:4px 0 0; padding:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; position:relative}
+.roadmap::before{content:""; position:absolute; left:4%; right:4%; top:19px; height:4px; background:repeating-linear-gradient(90deg,var(--line) 0 8px,transparent 8px 12px)}
+.rm{position:relative; display:flex; flex-direction:column; gap:10px}
+.rm-n{flex:none; width:42px; height:42px; display:grid; place-items:center; font-family:var(--f-pixel); font-size:12px; border:3px solid #000; box-shadow:3px 3px 0 #000; background:var(--navy); color:var(--muted); z-index:1}
+.rm.full .rm-n{background:var(--green)} .rm.part .rm-n{background:var(--gold); color:#05061a}
+.rm:last-child .rm-n{background:var(--rc); color:#05061a}
+.rm-body{display:flex; flex-direction:column; gap:4px; font-size:13px; line-height:1.4; color:var(--muted)}
+.rm-body b{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#fff}
+.rm-tag{font-family:var(--f-label); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+.rm.full .rm-tag{color:var(--green)} .rm.part .rm-tag{color:var(--gold)}
+@media (max-width:860px){
+  .roadmap{grid-template-columns:1fr; gap:16px}
+  .roadmap::before{left:19px; right:auto; top:8px; bottom:8px; width:4px; height:auto; background:repeating-linear-gradient(180deg,var(--line) 0 8px,transparent 8px 12px)}
+  .rm{flex-direction:row; align-items:flex-start; gap:14px}
+}
+.other-roles{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:22px}
+
+/* Laptop widths: stack nav labels under icons so all nine sections fit */
+@media (min-width:761px) and (max-width:1500px){
+  .nav{gap:2px}
+  .nav button{flex-direction:column; gap:3px; padding:5px 6px; font-size:10px; letter-spacing:.03em}
+  .nav button img{width:16px; height:16px}
+}
 
 /* ---------- Library ---------- */
 .mod-card{display:flex; flex-direction:column; gap:12px; background:var(--panel); border:3px solid #000; box-shadow:var(--hard); padding:0; overflow:hidden; text-align:left; color:var(--text)}
@@ -992,7 +1030,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -1007,7 +1045,63 @@ const BADGES = [
   {id:'detective', t:'Log Detective', d:'Found every suspicious log line', icon:'eye', c:'#47f59a'},
   {id:'halfway', t:'Halfway Hero', d:'Passed 3 module assessments', icon:'shield', c:'#4c78ff'},
   {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
-  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'}
+  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'},
+  {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'}
+];
+
+/* Career Compass: signpost on the plaza, role quiz, role pages with taster missions and roadmaps */
+const CAREER_SIGN = {id:'compass', name:'Career Compass', view:'career', color:'#ffd447', icon:'compass', desc:'Find the cyber role that fits you and your roadmap to a first job'};
+const CAREERS = [
+  {id:'soc', t:'SOC Analyst', icon:'eye', c:'#47f59a', tag:'The detective who watches for attacks',
+    what:'A SOC (Security Operations Centre) analyst watches an organisation\'s alerts and logs, spots the signs of an attack and raises the alarm early. Many people start their cyber career here.',
+    day:['Check new alerts from security tools and decide which ones are real','Dig through logs to see what a suspicious account or device did','Write up findings and pass serious cases to the incident response team'],
+    fit:'You enjoy spotting patterns and the small details other people miss.',
+    mission:{lesson:'m5l2', brief:'A SOC analyst\'s day starts with logs. Find every suspicious line before the attacker gets further.'},
+    road:{basics:'Module 5: Logs & Monitoring', next:'Networking basics, Linux and Windows command line, reading alerts in a SIEM tool', practice:'TryHackMe SOC Level 1 path, LetsDefend, Blue Team Labs Online', cert:'ISC2 CC or CompTIA Security+, later CompTIA CySA+', exp:'Home lab with a free SIEM, blue-team CTFs, IT helpdesk or SOC internship', job:'Junior SOC Analyst (Tier 1)'}},
+  {id:'pentest', t:'Penetration Tester', icon:'key', c:'#ff4fae', tag:'The ethical hacker who breaks in first',
+    what:'A penetration tester is paid, with written permission, to find a way into systems, websites or even staff inboxes before criminals do, then explains exactly how to fix each hole.',
+    day:['Agree with the client what may be tested and what is off-limits','Probe websites, networks and people (for example with a phishing test) for weaknesses','Write a clear report of every weakness and how to fix it'],
+    fit:'You love puzzles, asking "what if?" and finding loopholes.',
+    mission:{lesson:'m2l1', brief:'Pen testers run phishing tests to check whether staff can be tricked. Can you spot every trick in this email?'},
+    road:{basics:'Module 2: Phishing & Malware', next:'Networking, Linux, how websites work, basic Python or Bash scripting', practice:'TryHackMe Jr Penetration Tester path, Hack The Box Academy, picoCTF', cert:'CompTIA Security+, then an entry pen-test certificate such as eJPT or CompTIA PenTest+', exp:'CTF competitions, legal practice labs, bug bounty programmes, internship', job:'Junior Penetration Tester'}},
+  {id:'ir', t:'Incident Responder', icon:'flag', c:'#ff9a3d', tag:'The firefighter when an attack hits',
+    what:'When an attack gets through, the incident responder takes charge: contains the damage, removes the attacker and gets the organisation running again, step by step.',
+    day:['Lead the response when ransomware or a breach is confirmed','Isolate infected devices and collect evidence','Help restore systems and run the "lessons learned" review'],
+    fit:'You stay calm under pressure and like fixing things fast.',
+    mission:{lesson:'m6l2', brief:'Ransomware just hit a small office. Put the response plan in the right order before it spreads.'},
+    road:{basics:'Module 6: Incident Response', next:'How operating systems work, malware basics, digital forensics, clear communication', practice:'CyberDefenders, LetsDefend, Blue Team Labs Online', cert:'CompTIA Security+, later CompTIA CySA+ or GIAC GCIH', exp:'Start in a SOC, join incident simulation exercises, blue-team CTFs', job:'Junior Incident Response Analyst'}},
+  {id:'grc', t:'GRC / Risk Analyst', icon:'scroll', c:'#a46bff', tag:'The planner who keeps the rules strong',
+    what:'GRC means Governance, Risk and Compliance. These analysts decide which risks matter most, write security policies and check that the organisation follows laws and standards.',
+    day:['Run risk assessments and update the risk register','Write or update policies such as the Acceptable Use Policy','Prepare the organisation for audits against standards like ISO/IEC 27001'],
+    fit:'You like organising, writing clearly and seeing the big picture.',
+    mission:{lesson:'m6l1', brief:'A GRC analyst decides how to handle each risk. Match every decision to the right risk response.'},
+    road:{basics:'Module 6: Risk & Security Policies', next:'Risk management, frameworks such as NIST CSF and ISO/IEC 27001, data protection laws such as Malaysia\'s PDPA', practice:'NIST CSF 2.0 quick-start guides, ISO/IEC 27001 introduction courses, a practice risk assessment for a small business', cert:'ISC2 CC or CompTIA Security+, then ISO/IEC 27001 Foundation; later ISACA CISA', exp:'Write a security policy for a club or small business, audit or compliance internship', job:'Junior GRC Analyst'}},
+  {id:'net', t:'Network Security Engineer', icon:'network', c:'#2ee6ff', tag:'The builder of safe networks',
+    what:'A network security engineer designs and looks after the networks that keep data moving, and builds the defences around them: firewalls, secure Wi-Fi, VPNs and separated network zones.',
+    day:['Set up and review firewall rules','Configure secure Wi-Fi and VPN access for staff','Monitor network health and fix weak settings'],
+    fit:'You like building things and making technology work together.',
+    mission:{lesson:'m3l2', brief:'A router has been left with unsafe settings. Secure the network before anyone notices.'},
+    road:{basics:'Module 3: Network Security', next:'Networking in depth (IP addressing, routing, switching), firewalls and VPNs, Linux', practice:'Cisco Packet Tracer (with Cisco Networking Academy), TryHackMe Pre Security path, a home lab', cert:'Cisco CCST Networking or CompTIA Network+, then CompTIA Security+ or Cisco CCNA', exp:'Build a home lab, IT support or network internship, campus IT volunteering', job:'Junior Network Security Engineer'}}
+];
+const ROADMAP_STEPS = [
+  {k:'basics', t:'Cybersity basics', cover:'full'},
+  {k:'next', t:'Next skills', cover:'part'},
+  {k:'practice', t:'Practice platforms', cover:'none'},
+  {k:'cert', t:'Entry-level certificate', cover:'none'},
+  {k:'exp', t:'Experience', cover:'none'},
+  {k:'job', t:'First job', cover:'none'}
+];
+const CAREER_QUIZ = [
+  {q:'You have a free afternoon. What sounds most fun?', o:[
+    {t:'Spotting patterns in a pile of data', r:'soc'},{t:'Solving a tricky puzzle or escape room', r:'pentest'},{t:'Helping a friend fix a problem fast', r:'ir'},{t:'Planning an event so nothing goes wrong', r:'grc'},{t:'Building or setting up gadgets', r:'net'}]},
+  {q:'In a group project, you are usually the one who…', o:[
+    {t:'Notices the small detail everyone missed', r:'soc'},{t:'Tests the idea to see where it breaks', r:'pentest'},{t:'Steps up when things go wrong', r:'ir'},{t:'Organises the tasks and deadlines', r:'grc'},{t:'Sets up the tools so everything works', r:'net'}]},
+  {q:'Which Cybersity game did you enjoy most (or sounds best)?', o:[
+    {t:'Log Detective', r:'soc'},{t:'Spot the Phishing Email', r:'pentest'},{t:'Incident Response Order', r:'ir'},{t:'Choose the Risk Response', r:'grc'},{t:'Secure the Network', r:'net'}]},
+  {q:'Which way of working suits you best?', o:[
+    {t:'Steady shifts, watching screens for clues', r:'soc'},{t:'Short projects, hacking with permission', r:'pentest'},{t:'Fast action whenever the alarm rings', r:'ir'},{t:'Meetings, documents and advising managers', r:'grc'},{t:'Hands-on with routers, firewalls and settings', r:'net'}]},
+  {q:'What would make you proudest at work?', o:[
+    {t:'Catching an attacker early', r:'soc'},{t:'Finding a weakness before criminals do', r:'pentest'},{t:'Getting a company back online after an attack', r:'ir'},{t:'Helping a company pass a security audit', r:'grc'},{t:'Designing a network attackers cannot get into', r:'net'}]}
 ];
 
 /* Home Base: the learner's dorm on campus. Real-life actions, self-reported, raise the Safety Score. */
@@ -1136,6 +1230,7 @@ function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'
 let BOT_URL = '';
 
 const ICONS = {
+  compass:['...XXXX...','.XXWWWWXX.','.XWWWFWWX.','XWWWFFFWWX','XWWWWDWWWX','XWWWZZZWWX','.XWWWZWWX.','.XXWWWWXX.','...XXXX...','..........'],
   home:['....XX....','...XXXX...','..XXXXXX..','.XXXXXXXX.','XXXXXXXXXX','.XWWXXWWX.','.XWWXXWWX.','.XXXXDDXX.','.XXXXDDXX.','.XXXXDDXX.'],
   campus:['....F.....','....FFF...','....F.....','...XXXX...','..XXXXXX..','.XXXXXXXX.','.XWXWWXWX.','.XXXXXXXX.','.XWXDDXWX.','.XXXDDXXX.'],
   book:['.XXX..XXX.','XWWWXXWWWX','XWZWXXWZWX','XWWWXXWWWX','XWZWXXWZWX','XWWWXXWWWX','XWWWXXWWWX','XXXXXXXXXX','....XX....','..........'],
@@ -1180,7 +1275,7 @@ const now = () => new Date();
 const hhmm = d => d.toTimeString().slice(0,5);
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], view:'dashboard', params:{} }; }
+function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], career:{pick:null, second:null, tasters:[]}, view:'dashboard', params:{} }; }
 let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
@@ -1250,7 +1345,7 @@ function award(id){
 
 /* ---------- Shell ---------- */
 const NAV = [
-  ['dashboard','Dashboard','home'],['campus','Campus','campus'],['library','Library','book'],['challenge','Challenges','flag'],
+  ['dashboard','Dashboard','home'],['campus','Campus','campus'],['library','Library','book'],['challenge','Challenges','flag'],['career','Careers','compass'],
   ['mentor','AI Lab','chip'],['community','Community','chat'],['achievements','Achievements','trophy'],['certificate','Certificate','scroll']
 ];
 function renderApp(){
@@ -1281,6 +1376,7 @@ function updateHUD(){
 }
 function go(view, params={}){
   if (view !== 'lesson' && view !== 'quiz') UI.quiz = null;
+  if (view !== 'career') UI.cq = null;
   S.view = view; S.params = params; save(); renderView(); window.scrollTo({top:0});
 }
 function renderView(){
@@ -1290,7 +1386,7 @@ function renderView(){
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer };
   (views[v] || viewDashboard)(el);
 }
 
@@ -1613,7 +1709,7 @@ function viewAchievements(el){
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -1767,10 +1863,11 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ if (modalQueue.
    INTERACTIVE ACTIVITY ENGINES — sort, select, match, toggle, password, order
    ============================================================ */
 const Activities = (() => {
-  let L, host, st;
+  let L, host, st, O = {};  // O: standalone options {onDone(score), nextAct, nextArg, nextLabel} for games played outside a lesson
   const head = a => `<div class="act-head"><span class="pill purple">Practice activity</span><span class="label" style="color:#4a5180">Not graded · instant feedback</span></div><h2 style="margin:6px 0 6px">${esc(a.title)}</h2><p class="lesson-body" style="margin-bottom:6px">${esc(a.intro)}</p>`;
 
   function complete(score, badge){
+    if (O.onDone){ if (badge) award(badge); O.onDone(score); return; }
     const p = prog(L.id), first = !p.activity;
     p.activity = true; p.actScore = Math.max(p.actScore||0, score); save();
     if (first){ addXP(XP.activity, `Activity complete: ${L.activity.title}`); if (score===100) addXP(XP.perfectActivity, 'Perfect activity bonus'); }
@@ -1782,7 +1879,7 @@ const Activities = (() => {
   }
   const resultBox = (score, msg, retry) => `<div class="act-result"><div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap"><div class="score-ring" style="width:84px;height:84px;font-size:16px;margin:0;background:${score>=70?'#c9f7de':'#fff1b8'}">${score}%</div>
     <div style="flex:1; min-width:200px"><b style="font-size:17px">${score===100?'Perfect run!':score>=70?'Activity complete':'Activity complete. Worth another try?'}</b><p style="margin-top:4px; color:var(--ink-2)">${msg}</p></div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap">${retry?`<button class="btn ghost small" data-act="actRetry">Try again</button>`:''}<button class="btn small" data-act="stage" data-arg="6">Continue to quiz ▸</button></div></div></div>`;
+    <div style="display:flex; gap:8px; flex-wrap:wrap">${retry?`<button class="btn ghost small" data-act="actRetry">Try again</button>`:''}${O.onDone ? `<button class="btn small" data-act="${O.nextAct}" data-arg="${O.nextArg||''}">${esc(O.nextLabel)} ▸</button>` : `<button class="btn small" data-act="stage" data-arg="6">Continue to quiz ▸</button>`}</div></div></div>`;
 
   /* ---- SORT ---- */
   function sort(){
@@ -1909,7 +2006,7 @@ const Activities = (() => {
     if (a.type==='toggle') a.settings.forEach(s=> st.ch[s.id] = s.good===0 ? 1 : 0);
   }
   function draw(){ ENGINES[L.activity.type](); }
-  function mount(lesson, el){ L = lesson; host = el; init(); draw(); }
+  function mount(lesson, el, opts={}){ L = lesson; host = el; O = opts; init(); draw(); }
 
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
     actSort: b => { st.ans = b; st.res[st.i] = (b === L.activity.items[st.i].a); draw(); },
@@ -1941,8 +2038,8 @@ const Activities = (() => {
    ============================================================ */
 const Campus = (() => {
   const T=16, COLS=30, ROWS=25, W=COLS*T, H=ROWS*T, SC=3;
-  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4] };
-  const B = [...BUILDINGS, HOME_BASE].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
+  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4], compass:[21,7,1,2] };
+  const B = [...BUILDINGS, HOME_BASE, CAREER_SIGN].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
@@ -1984,8 +2081,8 @@ const Campus = (() => {
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
     // benches
     bench(g,5*T,10*T); bench(g,23*T,10*T); bench(g,5*T,21*T); bench(g,23*T,21*T);
-    // buildings (Home Base is drawn live because it upgrades)
-    B.forEach(b=>{ if (b.id!=='home') building(g,b); });
+    // buildings (Home Base and the signpost are drawn live because they animate)
+    B.forEach(b=>{ if (b.id!=='home' && b.id!=='compass') building(g,b); });
   }
   function tree(g,x,y,v){
     g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
@@ -2055,6 +2152,7 @@ const Campus = (() => {
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
       if (b.id==='home'){ drawDorm(ctx, b.px, b.py, b.pw, b.ph, homeStage(), t); }
+      else if (b.id==='compass'){ drawSignpost(ctx, b.cx, b.py+b.ph, t); }
       else {
       const locked = b.id==='cert' && !finalPassed();
       const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
@@ -2068,7 +2166,7 @@ const Campus = (() => {
       }
       // door glow on the path
       ctx.fillStyle = b.color + (nearDoor===b ? '66' : '22'); ctx.fillRect(b.door.c*T, b.door.r*T, T, T);
-      if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
+      if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; if (b.id==='compass') ctx.strokeRect(b.px-14, b.py-14, b.pw+28, b.ph+16); else ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
     });
     // cyber core
     const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); ctx.fillStyle='#303b8f'; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle='#3d4aa8'; ctx.fillRect(cx-16,cy+19,32,2);
@@ -2101,7 +2199,7 @@ const Campus = (() => {
 
   function loop(){ if (!active) return; update(); if (!active) return; draw(); raf = requestAnimationFrame(loop); }
   function toLogical(e){ const r = canvas.getBoundingClientRect(); return [ (e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H ]; }
-  const bAt = (x,y) => B.find(b=> x>=b.px-3 && x<=b.px+b.pw+3 && y>=b.py && y<=b.py+b.ph);
+  const bAt = (x,y) => B.find(b=> b.id==='compass' ? (x>=b.px-12 && x<=b.px+b.pw+12 && y>=b.py-12 && y<=b.py+b.ph) : (x>=b.px-3 && x<=b.px+b.pw+3 && y>=b.py && y<=b.py+b.ph));
   function onClick(e){
     const [x,y]=toLogical(e); const b = bAt(x,y); const [pc,pr]=tileOf(player);
     if (b){ const p = bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if (!p.length) { pendingEnter=null; enter(b); } } return; }
@@ -2146,6 +2244,23 @@ function viewCampus(el){
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=b.id==='cert'&&!finalPassed(); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
+}
+
+// Career Compass signpost on the plaza: a post with two glowing arrow boards and a floating compass
+function drawSignpost(g, x, base, t){
+  const pulse = 0.5+0.5*Math.sin(t*2.4);
+  const grd = g.createRadialGradient(x, base-20, 2, x, base-20, 30); grd.addColorStop(0, `rgba(255,212,71,${0.22+0.18*pulse})`); grd.addColorStop(1, 'rgba(255,212,71,0)'); g.fillStyle=grd; g.fillRect(x-30, base-50, 60, 56);
+  g.fillStyle='#0007'; g.fillRect(x-6, base-2, 12, 3);
+  g.fillStyle='#05061a'; g.fillRect(x-3, base-30, 6, 30); g.fillStyle='#8a5a34'; g.fillRect(x-2, base-29, 4, 29); g.fillStyle='#6b4226'; g.fillRect(x+1, base-29, 1, 29);
+  const board = (y, left, label, col) => { const x0 = left ? x-17 : x-12, x1 = left ? x+12 : x+17;
+    g.fillStyle='#05061a'; g.beginPath(); if (left){ g.moveTo(x0-4,y+4); g.lineTo(x0+1,y-1); g.lineTo(x1+1,y-1); g.lineTo(x1+1,y+9); g.lineTo(x0+1,y+9); } else { g.moveTo(x1+4,y+4); g.lineTo(x1-1,y-1); g.lineTo(x0-1,y-1); g.lineTo(x0-1,y+9); g.lineTo(x1-1,y+9); } g.closePath(); g.fill();
+    g.fillStyle='#0b0f2c'; g.beginPath(); if (left){ g.moveTo(x0-2,y+4); g.lineTo(x0+2,y); g.lineTo(x1,y); g.lineTo(x1,y+8); g.lineTo(x0+2,y+8); } else { g.moveTo(x1+2,y+4); g.lineTo(x1-2,y); g.lineTo(x0,y); g.lineTo(x0,y+8); g.lineTo(x1-2,y+8); } g.closePath(); g.fill();
+    g.strokeStyle=col; g.globalAlpha=0.6+0.4*pulse; g.lineWidth=1; g.stroke(); g.globalAlpha=1;
+    g.font='5px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=col; g.fillText(label, (x0+x1)/2 + (left?-1:1), y+4.5); };
+  board(base-28, false, 'CAREERS', '#ffd447'); board(base-17, true, 'SKILLS', '#2ee6ff');
+  const by = base-44+Math.round(Math.sin(t*2)*1.5);
+  g.fillStyle=`rgba(255,212,71,${0.3+0.25*pulse})`; g.beginPath(); g.arc(x, by+6, 9, 0, Math.PI*2); g.fill();
+  g.drawImage(dormIcon('compass','#ffd447'), x-6, by);
 }
 
 /* ---------- Home Base: Security Health Check ---------- */
@@ -2472,6 +2587,97 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
       <div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="submitReport" data-arg="${id}">Send report</button></div>`); },
   submitReport: id => { const f = Community.find(+id); const reason = (document.querySelector('input[name="rr"]:checked')||{}).value || 'Other';
     f.m.reported = true; S.reports.unshift({mid:f.m.id, user:f.m.user, room:f.room, text:f.m.text, reason, status:'open', at:Date.now()}); save(); closeModal(); Community.paint(); toast('Report sent to moderators. Thanks for keeping Cybersity safe.'); }
+});
+/* ============================================================
+   CAREER COMPASS — role quiz, role pages, taster missions, roadmaps
+   ============================================================ */
+const careerById = id => CAREERS.find(c=>c.id===id);
+const careerMedal = (c, size=56) => `<div class="cmedal" style="width:${size}px;height:${size}px;background:${c.c}; flex:none">${icon(c.icon,'#05061a',Math.round(size*0.55))}</div>`;
+
+function viewCareer(el){
+  const P = S.params||{}, c = careerById(P.role);
+  if (c && P.mission) careerMission(el, c);
+  else if (c) careerRole(el, c);
+  else careerHub(el);
+}
+
+function careerHub(el){
+  const C = S.career, top = careerById(C.pick), second = careerById(C.second);
+  el.innerHTML = `<div class="page-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>Career Compass</span></div><h1>Career Compass</h1><p>Cybersecurity has many different jobs. Take a 5-question quiz to find the role that fits you, try a taster mission from that job, and see the roadmap from Cybersity to your first job.</p></div>${C.tasters.length?`<span class="pill gold">${C.tasters.length}/${CAREERS.length} taster missions done</span>`:''}</div>
+  <section class="monitor compass-quiz">${UI.cq ? careerQuizCard() : top ? careerResultCard(top, second) : careerIntroCard()}</section>
+  <div class="section-title" style="margin-top:30px">Five cyber roles to explore</div>
+  <div class="role-grid">${CAREERS.map(c=>{ const done=C.tasters.includes(c.id); return `<button class="role-card" data-act="careerOpen" data-arg="${c.id}" style="--rc:${c.c}">
+    ${careerMedal(c,48)}<b>${esc(c.t)}</b><small>${esc(c.tag)}</small>
+    <span class="role-pills">${C.pick===c.id?'<span class="pill gold">Top match</span>':C.second===c.id?'<span class="pill purple">Also fits</span>':''}${done?'<span class="pill green">Taster done</span>':''}</span></button>`; }).join('')}</div>`;
+}
+function careerIntroCard(){
+  return `<div class="kicker">Which role fits me?</div><h2 style="margin:8px 0 8px">Find your cyber role</h2>
+    <p class="lesson-body" style="font-size:15.5px">Five quick questions about what you enjoy. There are no wrong answers, and you can retake it any time.</p>
+    <div style="margin-top:18px"><button class="btn gold" data-act="cqStart">Start the quiz ▸</button></div>`;
+}
+function careerQuizCard(){
+  const Q = UI.cq, q = CAREER_QUIZ[Q.i];
+  return `<div class="kicker">Question ${Q.i+1} of ${CAREER_QUIZ.length}</div>
+    <div class="progress-dots" style="margin-top:10px">${CAREER_QUIZ.map((_,i)=>`<i class="${i<Q.i?'ok':i===Q.i?'cur':''}"></i>`).join('')}</div>
+    <h2 style="margin:12px 0 4px">${esc(q.q)}</h2>
+    <div class="choices">${Q.order[Q.i].map(k=>`<button class="choice" data-act="cqPick" data-arg="${k}">${esc(q.o[k].t)}</button>`).join('')}</div>`;
+}
+function careerResultCard(top, second){
+  return `<div class="kicker">Your best match</div>
+    <div class="compass-result">${careerMedal(top,84)}<div style="min-width:0"><h2 style="margin:4px 0 4px">${esc(top.t)}</h2><p style="color:var(--ink-2); font-weight:600">${esc(top.tag)}</p>
+      <p class="lesson-body" style="font-size:15px; margin-top:6px">${esc(top.fit)}${second?` Also a good fit: <b>${esc(second.t)}</b>.`:''}</p></div></div>
+    <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap"><button class="btn gold" data-act="careerOpen" data-arg="${top.id}">Explore ${esc(top.t)} ▸</button><button class="btn ghost" data-act="cqStart">Retake quiz</button></div>`;
+}
+
+function careerRole(el, c){
+  const done = S.career.tasters.includes(c.id), L = lessonById(c.mission.lesson);
+  el.innerHTML = `<div class="page-head role-head" style="--rc:${c.c}"><div style="display:flex; gap:16px; align-items:center; min-width:0">${careerMedal(c,64)}<div style="min-width:0"><div class="crumbs"><button data-act="careerHub">Career Compass</button><span>›</span><span>${esc(c.t)}</span></div><h1>${esc(c.t)}</h1><p style="margin-top:4px">${esc(c.tag)}</p></div></div>${S.career.pick===c.id?'<span class="pill gold">Your top match</span>':''}</div>
+  <div class="grid g-wide">
+    <section class="monitor" style="margin-top:8px"><div class="kicker">The job in plain words</div><h2 style="margin:8px 0 10px">What does a ${esc(c.t)} do?</h2>
+      <p class="lesson-body">${esc(c.what)}</p>
+      <div class="label" style="color:#4a5180; margin-top:18px">A day might include</div>
+      <ul class="recap-list lesson-body">${c.day.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>
+      <div class="fit-box"><b>Sounds like you?</b> ${esc(c.fit)}</div></section>
+    <section class="panel taster" style="--rc:${c.c}">
+      <div class="label" style="color:var(--gold)">Taster mission</div>
+      <h2 class="pixel" style="font-size:14px; margin:10px 0">${esc(L.activity.title)}</h2>
+      <p>${esc(c.mission.brief)}</p>
+      <p class="muted" style="font-size:13px; margin-top:10px">About 3 minutes. The same game as Lesson ${L.mod.n}.${L.li+1}, played as a stand-alone taster, so it does not change your lesson progress.</p>
+      <div style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap"><button class="btn gold" data-act="careerMission" data-arg="${c.id}">${done?'Play again':'Start taster mission'} ▸</button>${done?'<span class="pill green">Completed</span>':`<span class="label muted">+${XP.taster} XP</span>`}</div>
+    </section>
+  </div>
+  <section class="panel" style="margin-top:24px"><div class="section-title">Roadmap: from Cybersity to ${esc(c.road.job)}</div>
+    <ol class="roadmap" style="--rc:${c.c}">${ROADMAP_STEPS.map((s,i)=>{ const d = s.k==='basics' ? `Cybersity Fundamentals, especially ${c.road.basics}.` : s.k==='next' ? `${c.road.next}. Your taster mission is a first step.` : c.road[s.k];
+      return `<li class="rm ${s.cover}"><span class="rm-n">${s.cover==='full'?icon('check','#05061a',16):i+1}</span><div class="rm-body"><span class="rm-tag">${s.cover==='full'?'Covered by Cybersity':s.cover==='part'?'Started in Cybersity':'Your next level'}</span><b>${esc(s.t)}</b><span>${esc(d)}</span></div></li>`; }).join('')}</ol>
+    <p class="muted" style="font-size:12.5px; margin-top:16px">Platforms and certificates are examples to research, not endorsements. Check current requirements and costs before you sign up.</p>
+  </section>
+  <div class="other-roles"><span class="label muted">Other roles</span>${CAREERS.filter(x=>x!==c).map(x=>`<button class="btn ghost small" data-act="careerOpen" data-arg="${x.id}">${esc(x.t)}</button>`).join('')}</div>`;
+}
+
+function careerMission(el, c){
+  const L = lessonById(c.mission.lesson);
+  el.innerHTML = `<div class="page-head role-head" style="--rc:${c.c}"><div style="min-width:0"><div class="crumbs"><button data-act="careerHub">Career Compass</button><span>›</span><button data-act="careerOpen" data-arg="${c.id}">${esc(c.t)}</button><span>›</span><span>Taster mission</span></div><h1>Taster mission</h1><p>${esc(c.mission.brief)}</p></div><span class="pill gold">${esc(c.t)}</span></div>
+  <section class="monitor"><div id="actHost"></div></section>`;
+  Activities.mount(L, $('#actHost'), { onDone: () => careerTasterDone(c), nextAct:'careerOpen', nextArg:c.id, nextLabel:`Back to ${c.t}` });
+}
+function careerTasterDone(c){
+  if (!S.career.tasters.includes(c.id)){ S.career.tasters.push(c.id); save(); addXP(XP.taster, `Taster mission: ${c.t}`); }
+  award('explorer');
+}
+
+window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
+  careerHub: () => go('career'),
+  careerOpen: id => go('career', {role:id}),
+  careerMission: id => go('career', {role:id, mission:true}),
+  cqStart: () => { UI.cq = { i:0, picks:[], order:CAREER_QUIZ.map(q=>shuffle(q.o.map((_,k)=>k))) }; renderView(); },
+  cqPick: k => { const Q = UI.cq; if (!Q) return; Q.picks.push(CAREER_QUIZ[Q.i].o[+k].r); Q.i++;
+    if (Q.i >= CAREER_QUIZ.length){
+      // most picks wins; on a tie, the role chosen most recently wins
+      const rank = CAREERS.map(c=>({id:c.id, n:Q.picks.filter(r=>r===c.id).length, last:Q.picks.lastIndexOf(c.id)})).sort((a,b)=>b.n-a.n || b.last-a.last);
+      S.career.pick = rank[0].id; S.career.second = rank[1].n ? rank[1].id : null; UI.cq = null; save();
+      log(`Career Compass match: ${careerById(S.career.pick).t}`); toast(`Your best match: ${esc(careerById(S.career.pick).t)}`);
+    }
+    renderView(); }
 });
 /* ---------- Boot ---------- */
 BOT_URL = botCanvas().toDataURL();

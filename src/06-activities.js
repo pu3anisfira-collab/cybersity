@@ -2,10 +2,11 @@
    INTERACTIVE ACTIVITY ENGINES — sort, select, match, toggle, password, order
    ============================================================ */
 const Activities = (() => {
-  let L, host, st;
+  let L, host, st, O = {};  // O: standalone options {onDone(score), nextAct, nextArg, nextLabel} for games played outside a lesson
   const head = a => `<div class="act-head"><span class="pill purple">Practice activity</span><span class="label" style="color:#4a5180">Not graded · instant feedback</span></div><h2 style="margin:6px 0 6px">${esc(a.title)}</h2><p class="lesson-body" style="margin-bottom:6px">${esc(a.intro)}</p>`;
 
   function complete(score, badge){
+    if (O.onDone){ if (badge) award(badge); O.onDone(score); return; }
     const p = prog(L.id), first = !p.activity;
     p.activity = true; p.actScore = Math.max(p.actScore||0, score); save();
     if (first){ addXP(XP.activity, `Activity complete: ${L.activity.title}`); if (score===100) addXP(XP.perfectActivity, 'Perfect activity bonus'); }
@@ -17,7 +18,7 @@ const Activities = (() => {
   }
   const resultBox = (score, msg, retry) => `<div class="act-result"><div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap"><div class="score-ring" style="width:84px;height:84px;font-size:16px;margin:0;background:${score>=70?'#c9f7de':'#fff1b8'}">${score}%</div>
     <div style="flex:1; min-width:200px"><b style="font-size:17px">${score===100?'Perfect run!':score>=70?'Activity complete':'Activity complete. Worth another try?'}</b><p style="margin-top:4px; color:var(--ink-2)">${msg}</p></div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap">${retry?`<button class="btn ghost small" data-act="actRetry">Try again</button>`:''}<button class="btn small" data-act="stage" data-arg="6">Continue to quiz ▸</button></div></div></div>`;
+    <div style="display:flex; gap:8px; flex-wrap:wrap">${retry?`<button class="btn ghost small" data-act="actRetry">Try again</button>`:''}${O.onDone ? `<button class="btn small" data-act="${O.nextAct}" data-arg="${O.nextArg||''}">${esc(O.nextLabel)} ▸</button>` : `<button class="btn small" data-act="stage" data-arg="6">Continue to quiz ▸</button>`}</div></div></div>`;
 
   /* ---- SORT ---- */
   function sort(){
@@ -144,7 +145,7 @@ const Activities = (() => {
     if (a.type==='toggle') a.settings.forEach(s=> st.ch[s.id] = s.good===0 ? 1 : 0);
   }
   function draw(){ ENGINES[L.activity.type](); }
-  function mount(lesson, el){ L = lesson; host = el; init(); draw(); }
+  function mount(lesson, el, opts={}){ L = lesson; host = el; O = opts; init(); draw(); }
 
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
     actSort: b => { st.ans = b; st.res[st.i] = (b === L.activity.items[st.i].a); draw(); },
