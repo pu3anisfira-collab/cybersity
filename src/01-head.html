@@ -264,6 +264,17 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 }
 .other-roles{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:22px}
 
+/* ---------- Building-themed page headers ---------- */
+.bhead{position:relative; overflow:hidden; align-items:center; padding:14px 18px 14px 14px; border:3px solid #000; border-bottom:4px solid var(--bc); box-shadow:var(--hard);
+  background:linear-gradient(100deg, color-mix(in srgb, var(--bc) 28%, var(--navy)) 0%, var(--navy) 62%)}
+.bhead::after{content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.03) 3px 4px)}
+.bhead > div:first-of-type{flex:1; min-width:0}
+.bhead h1{text-shadow:3px 3px 0 #000, 0 0 16px color-mix(in srgb, var(--bc) 55%, transparent)}
+.bhead .crumbs, .bhead .crumbs button{color:color-mix(in srgb, var(--bc) 70%, #fff)}
+.bhead p{color:#c3c9ee}
+.bbanner{flex:none; width:173px; height:120px; border:3px solid #000; background:#0b0f2c; box-shadow:3px 3px 0 #000, 0 0 18px color-mix(in srgb, var(--bc) 50%, transparent)}
+@media (max-width:560px){ .bhead{padding:12px} .bbanner{width:96px; height:67px} }
+
 /* ---------- Campus Incident ---------- */
 .inc-banner{display:flex; align-items:center; gap:10px 18px; flex-wrap:wrap; margin:0 auto 14px; max-width:max(560px, calc((100vh - 110px) * 1.2)); padding:10px 14px; background:#3a0d1a; border:3px solid #000; box-shadow:0 0 0 3px var(--red), var(--hard); animation:incPulse 1s steps(2) infinite}
 .inc-banner.saved{background:#0f3e2b; box-shadow:0 0 0 3px var(--green), var(--hard); animation:none}

@@ -123,6 +123,15 @@ function renderView(){
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
     challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, incident:viewIncident };
   (views[v] || viewDashboard)(el);
+  themeHead(el, v);
+}
+// Inside a building, the page header takes the building's colour and a pixel banner of it
+const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
+function themeHead(el, v){
+  const head = el.querySelector('.page-head'); if (!head || head.classList.contains('role-head')) return;
+  const hacked = v==='incident', id = hacked ? (S.params||{}).b : VIEW_BUILDING[v], b = id && Campus.buildings.find(x=>x.id===id); if (!b) return;
+  head.classList.add('bhead'); head.style.setProperty('--bc', hacked ? '#ff5d6e' : b.color);
+  head.insertAdjacentHTML('afterbegin', `<img class="bbanner px" src="${Campus.banner(id, hacked)}" alt="">`);
 }
 
 /* ---------- Onboarding ---------- */

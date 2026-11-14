@@ -122,6 +122,9 @@ const fs = require('fs');
   await page.evaluate(()=>go('admin')); await page.waitForTimeout(300); await shot('33-admin');
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(500); await shot('34-dashboard');
   await page.evaluate(()=>go('challenge')); await page.waitForTimeout(300); await shot('35-challenge');
+  // building-themed headers: every building page gets its colour and a pixel banner
+  for (const v of ['library','mentor','community','home','career']){ await page.evaluate(v=>go(v), v); await page.waitForTimeout(300); await shot('35-theme-'+v); }
+  console.log('themed headers:', await page.evaluate(()=>Object.keys(VIEW_BUILDING).map(v=>{ go(v); const h=document.querySelector('.page-head'); return v+':'+(h.classList.contains('bhead')&&!!h.querySelector('.bbanner')); }).join(' ')));
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(900); await shot('36-campus-unlocked');
   await page.click('#fab',{force:true}); await page.waitForTimeout(200); await page.waitForTimeout(300); await shot('37-drawer');
   // mobile
@@ -129,6 +132,7 @@ const fs = require('fs');
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(400); await shot('38-m-dashboard');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(700); await shot('39-m-campus');
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(300); await shot('40-m-lesson');
+await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');  await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
   const ow = await page.evaluate(()=>document.documentElement.scrollWidth); console.log('mobile scrollWidth', ow);
   await page.evaluate(()=>{ HEALTH_CHECKS.slice(0,5).forEach(c=>S.health[c.id]=true); go('home'); }); await page.waitForTimeout(400);
   await page.screenshot({ path: __dirname + '/shots/41-m-home.png', fullPage: true });

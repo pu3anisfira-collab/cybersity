@@ -238,7 +238,35 @@ const Campus = (() => {
   }
   function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); keys={}; }
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
-  return { start, stop, buildings:B };
+  // Small pixel banner of one building (as seen on the campus) for its page header; cached once fonts are ready
+  const bannerCache = new Map();
+  function bannerURL(id, hacked){
+    const b = B.find(x=>x.id===id); if (!b) return '';
+    const stage = id==='home' ? homeStage() : 0, locked = bLocked(id), k = [id, !!hacked, stage, locked].join('|');
+    if (bannerCache.has(k)) return bannerCache.get(k);
+    const BW=144, BH=100, s=2, c=document.createElement('canvas'); c.width=BW*s; c.height=BH*s;
+    const g=c.getContext('2d'); g.imageSmoothingEnabled=false; g.setTransform(s,0,0,s,0,0);
+    const sky=g.createLinearGradient(0,0,0,BH); sky.addColorStop(0, hacked?'#3a0d1a':'#0b0f2c'); sky.addColorStop(1, hacked?'#1f0811':'#161c50'); g.fillStyle=sky; g.fillRect(0,0,BW,BH);
+    for (let i=0;i<20;i++){ g.fillStyle = i%3 ? '#ffffff55' : (b.color||'#ffd447')+'99'; g.fillRect((i*47+5)%BW, (i*29+3)%46, 1, 1); }
+    g.fillStyle='#12322a'; g.fillRect(0,BH-12,BW,12); g.fillStyle='#174034'; for (let i=0;i<24;i++) g.fillRect((i*13)%BW, BH-11+(i*7)%9, 1, 2);
+    g.fillStyle='#262c66'; g.fillRect(BW/2-14,BH-12,28,12); g.fillStyle='#1d2358'; g.fillRect(BW/2-14,BH-12,28,1);
+    if (id==='home') drawDorm(g, (BW-96)/2, BH-12-64, 96, 64, stage, 1);
+    else if (id==='compass'){ g.translate(BW/2, BH-12); g.scale(1.7,1.7); drawSignpost(g, 0, 0, 1); g.setTransform(s,0,0,s,0,0); }
+    else {
+      const x=Math.round((BW-b.pw)/2), y=BH-12-b.ph, col = hacked ? '#ff5d6e' : b.color; building(g, {...b, px:x, py:y});
+      [x+6, x+18, x+b.pw-28, x+b.pw-16].forEach((wx,i)=>{ const on = !locked && (hacked ? i%2===0 : i!==2);
+        g.fillStyle='#05061a'; g.fillRect(wx-1,y+35,12,12); g.fillStyle = on ? col : '#262c66'; g.fillRect(wx,y+36,10,10);
+        g.fillStyle = on ? '#ffffffaa' : '#3a4596'; g.fillRect(wx+1,y+37,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,y+36,1,10); });
+      const dx = x+b.pw/2-10, dy = y+b.ph-22;
+      g.fillStyle='#05061a'; g.fillRect(dx-2,dy-2,24,24); g.fillStyle=col; g.fillRect(dx-1,dy-1,22,23); g.fillStyle='#0b0f2c'; g.fillRect(dx+1,dy+1,18,21);
+      if (locked) g.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); else { g.fillStyle=col+'55'; g.fillRect(dx+1,dy+8,18,2); g.fillStyle='#ffffff22'; g.fillRect(dx+1,dy+1,18,4); }
+      if (hacked){ g.fillStyle='rgba(255,60,80,0.22)'; g.fillRect(x-3,y,b.pw+6,b.ph);
+        [[y+14,3,4],[y+40,4,-5],[y+58,2,3]].forEach(([sy,sh,off])=>g.drawImage(c, (x-3)*s, sy*s, (b.pw+6)*s, sh*s, x-3+off, sy, b.pw+6, sh));
+        g.font='6px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#05061a'; g.fillRect(BW/2-18, BH-11, 36, 9); g.fillStyle='#ff5d6e'; g.fillText('HACKED', BW/2, BH-6.5); }
+    }
+    const u = c.toDataURL(); if (!document.fonts || document.fonts.status==='loaded') bannerCache.set(k,u); return u;
+  }
+  return { start, stop, buildings:B, banner:bannerURL };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 
