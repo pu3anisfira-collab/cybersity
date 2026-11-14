@@ -443,7 +443,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20, incident:150 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -459,8 +459,28 @@ const BADGES = [
   {id:'halfway', t:'Halfway Hero', d:'Passed 3 module assessments', icon:'shield', c:'#4c78ff'},
   {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
   {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'},
-  {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'}
+  {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'},
+  {id:'defender', t:'Campus Defender', d:'Secured all six buildings during the campus incident', icon:'shield', c:'#ff5d6e'}
 ];
+
+/* Campus Incident: a presenter-started attack event, unlocked after Module 2. One challenge per building, reusing the game engines. */
+const INCIDENT = [
+  {b:'library', lesson:'m2l1', t:'Planted phishing email', brief:'Attackers planted a phishing email in the Library inbox. Find the warning signs before anyone clicks the link.'},
+  {b:'ailab', lesson:'m4l1', t:'BYTE is locked out', brief:'Hackers guessed BYTE\'s weak password and took over the AI Lab. Build a strong passphrase to lock them out.'},
+  {b:'community', lesson:'inc-community', t:'Fake admin in the chat', brief:'A fake "admin" is asking learners for their passwords. Sort the messages: genuine, or a scam to report?'},
+  {b:'challenge', lesson:'m3l2', t:'Router settings changed', brief:'Someone changed the Challenge Centre router to unsafe settings. Put every setting back to secure.'},
+  {b:'achieve', lesson:'m5l2', t:'Intruder in the logs', brief:'An intruder is hiding in the Achievement Hall server. Find every suspicious log line.'},
+  {b:'cert', lesson:'m6l2', t:'Ransomware on the certificate server', brief:'Ransomware hit the Certificate Hall. Put the incident response steps in the right order to recover.'}
+];
+const FAKE_ADMIN = {id:'inc-community', title:'Spot the Fake Admin', activity:{type:'sort', title:'Spot the Fake Admin', intro:'Read each Community Hub message and decide: genuine, or a scam to report?',
+  buckets:[{id:'ok', t:'Genuine', d:'A normal, safe message', c:'vt-green'},{id:'scam', t:'Fake admin / scam', d:'Report it and never reply', c:'vt-red'}],
+  items:[
+    {t:'[ADMIN] Security check: reply with your password in 10 minutes or your account will be deleted.', a:'scam', fb:'Real admins never ask for your password, and the countdown is a pressure trick.'},
+    {t:'Anyone want to revise Module 3 together tonight in Study Squad?', a:'ok', fb:'A normal study invite. It asks for nothing personal.'},
+    {t:'Cybersity Support here. Send us the 6-digit code we just texted you to verify your badge.', a:'scam', fb:'One-time codes are never shared with anyone. This is how accounts get taken over.'},
+    {t:'Moderator reminder: never share passwords or OTP codes in chat, even with staff.', a:'ok', fb:'A genuine safety reminder. It warns you instead of asking for anything.'},
+    {t:'Admin_Official: free 500 XP! Log in at cybersity-bonus.xyz with your student account.', a:'scam', fb:'A look-alike website and a too-good-to-be-true prize: classic credential phishing.'},
+    {t:'Just got the Log Detective badge! The 2 AM logins were the giveaway.', a:'ok', fb:'A classmate sharing progress. Nothing suspicious.'}]}};
 
 /* Career Compass: signpost on the plaza, role quiz, role pages with taster missions and roadmaps */
 const CAREER_SIGN = {id:'compass', name:'Career Compass', view:'career', color:'#ffd447', icon:'compass', desc:'Find the cyber role that fits you and your roadmap to a first job'};

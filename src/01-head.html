@@ -264,6 +264,25 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 }
 .other-roles{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:22px}
 
+/* ---------- Campus Incident ---------- */
+.inc-banner{display:flex; align-items:center; gap:10px 18px; flex-wrap:wrap; margin:0 auto 14px; max-width:max(560px, calc((100vh - 110px) * 1.2)); padding:10px 14px; background:#3a0d1a; border:3px solid #000; box-shadow:0 0 0 3px var(--red), var(--hard); animation:incPulse 1s steps(2) infinite}
+.inc-banner.saved{background:#0f3e2b; box-shadow:0 0 0 3px var(--green), var(--hard); animation:none}
+.inc-title{display:flex; align-items:center; gap:10px; font-family:var(--f-pixel); font-size:12px; color:#fff; text-shadow:2px 2px 0 #000}
+.inc-banner.saved .inc-title{color:var(--green)}
+.inc-count{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#ffc2cb}
+.inc-count b{font-family:var(--f-pixel); font-size:13px; color:#fff}
+.inc-banner.saved .inc-count{color:var(--green)}
+.inc-chips{display:flex; gap:6px; flex-wrap:wrap; flex-basis:100%}
+.inc-chip{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:5px 8px; background:#5a1a26; color:#ffd6db; border:2px solid #000; box-shadow:2px 2px 0 #000}
+.inc-chip:hover{background:#7a2232; color:#fff}
+.inc-chip.ok{background:#0f3e2b; color:var(--green); cursor:default}
+.siren{width:14px; height:14px; background:var(--red); border:2px solid #000; box-shadow:0 0 12px 3px #ff5d6e; animation:siren .5s steps(2) infinite}
+.campus-wrap.alarm{box-shadow:0 0 0 3px var(--red), 8px 8px 0 3px #000; animation:incGlow 1s steps(2) infinite}
+.inc-head h1{color:#ffd6db; text-shadow:3px 3px 0 #5a1a26}
+@keyframes siren{50%{background:#5a1a26; box-shadow:none}}
+@keyframes incPulse{50%{background:#4d1222}}
+@keyframes incGlow{50%{box-shadow:0 0 0 3px #7a2232, 8px 8px 0 3px #000}}
+
 /* Laptop widths: stack nav labels under icons so all nine sections fit */
 @media (min-width:761px) and (max-width:1500px){
   .nav{gap:2px}

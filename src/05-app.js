@@ -10,7 +10,7 @@ const now = () => new Date();
 const hhmm = d => d.toTimeString().slice(0,5);
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], career:{pick:null, second:null, tasters:[]}, view:'dashboard', params:{} }; }
+function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], career:{pick:null, second:null, tasters:[]}, incident:{active:false, secured:[]}, view:'dashboard', params:{} }; }
 let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
@@ -117,11 +117,11 @@ function go(view, params={}){
 function renderView(){
   clearTimers(); if (window.Campus) Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
-  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || (v==='home'&&b.dataset.nav==='campus')));
+  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, incident:viewIncident };
   (views[v] || viewDashboard)(el);
 }
 
@@ -522,8 +522,13 @@ function renderMenu(){
     <button class="item" data-act="go" data-arg="achievements">My progress</button>
     <hr><span class="label">Presenter shortcuts</span>
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
+    <button class="item" data-act="demoComplete" data-arg="2">Complete Modules 1–2 (incident unlocked)</button>
     <button class="item" data-act="demoComplete" data-arg="5">Complete Modules 1–5</button>
     <button class="item" data-act="demoComplete" data-arg="6">Complete all modules (final unlocked)</button>
+    <hr><span class="label">Campus incident</span>
+    ${incActive() ? `<button class="item" data-act="incNext">Secure next building (${S.incident.secured.length}/${INCIDENT.length})</button><button class="item" data-act="incEnd">End incident</button>`
+      : `<button class="item" data-act="incStart">${incUnlocked() ? '⚠ Start "Campus under attack!"' : '🔒 Campus under attack! (after Module 2)'}</button>`}
+    <hr>
     <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
     <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>
     <button class="item" data-act="go" data-arg="admin">Switch to admin view</button>

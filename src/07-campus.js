@@ -119,32 +119,33 @@ const Campus = (() => {
       if (b.id==='home'){ drawDorm(ctx, b.px, b.py, b.pw, b.ph, homeStage(), t); }
       else if (b.id==='compass'){ drawSignpost(ctx, b.cx, b.py+b.ph, t); }
       else {
-      const locked = b.id==='cert' && !finalPassed();
+      const locked = bLocked(b.id), hacked = incHacked(b.id), col = hacked ? '#ff5d6e' : b.color;
       const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
-      positions.forEach((wx,i)=>{ const on = locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
-        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? b.color : '#262c66'; ctx.fillRect(wx,winY,10,10);
+      positions.forEach((wx,i)=>{ const on = hacked ? Math.random()<0.6 : locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
+        ctx.fillStyle='#05061a'; ctx.fillRect(wx-1,winY-1,12,12); ctx.fillStyle = on ? col : '#262c66'; ctx.fillRect(wx,winY,10,10);
         ctx.fillStyle = on ? '#ffffffaa' : '#3a4596'; ctx.fillRect(wx+1,winY+1,3,3); ctx.fillStyle='#05061a'; ctx.fillRect(wx+4.5,winY,1,10); });
       const dx = b.cx-10, dy = b.py+b.ph-22;
-      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=b.color; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
-      if (!locked){ ctx.fillStyle = b.color+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
+      ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=col; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
+      if (!locked){ ctx.fillStyle = col+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
       if (locked){ ctx.strokeStyle='#9aa3da'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+1,dy+1); ctx.lineTo(dx+19,dy+21); ctx.moveTo(dx+19,dy+1); ctx.lineTo(dx+1,dy+21); ctx.stroke(); ctx.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); }
       }
       // door glow on the path
       ctx.fillStyle = b.color + (nearDoor===b ? '66' : '22'); ctx.fillRect(b.door.c*T, b.door.r*T, T, T);
       if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; if (b.id==='compass') ctx.strokeRect(b.px-14, b.py-14, b.pw+28, b.ph+16); else ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
     });
-    // cyber core
+    // cyber core (turns red while the campus is under attack)
+    const alarm = incActive(), coreC = alarm ? '#ff5d6e' : '#2ee6ff';
     const cx=15*T, cy=9*T; ctx.fillStyle='#05061a'; ctx.fillRect(cx-17,cy+18,34,12); ctx.fillStyle='#303b8f'; ctx.fillRect(cx-16,cy+19,32,10); ctx.fillStyle='#3d4aa8'; ctx.fillRect(cx-16,cy+19,32,2);
     ctx.fillStyle='#05061a'; ctx.fillRect(cx-9,cy-10,18,30); ctx.fillStyle='#141a4a'; ctx.fillRect(cx-8,cy-9,16,28);
-    for (let i=0;i<5;i++){ const on = (Math.floor(t*4)+i)%5; ctx.fillStyle = on? '#2ee6ff' : '#ff4fae'; ctx.fillRect(cx-6, cy-6+i*5, on?10:6, 2); ctx.fillStyle='#47f59a'; if ((Math.floor(t*3)+i)%3===0) ctx.fillRect(cx+5, cy-6+i*5, 1, 2); }
-    const bob = Math.round(Math.sin(t*2)*2); ctx.fillStyle='#2ee6ff33'; ctx.beginPath(); ctx.arc(cx, cy-20+bob, 10, 0, Math.PI*2); ctx.fill();
+    for (let i=0;i<5;i++){ const on = (Math.floor(t*4)+i)%5; ctx.fillStyle = on? coreC : (alarm ? '#ffd447' : '#ff4fae'); ctx.fillRect(cx-6, cy-6+i*5, on?10:6, 2); ctx.fillStyle='#47f59a'; if ((Math.floor(t*3)+i)%3===0) ctx.fillRect(cx+5, cy-6+i*5, 1, 2); }
+    const bob = Math.round(Math.sin(t*2)*2); ctx.fillStyle=coreC+(alarm && frame%20<10 ? '66' : '33'); ctx.beginPath(); ctx.arc(cx, cy-20+bob, alarm ? 13 : 10, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle='#05061a'; ctx.beginPath(); ctx.moveTo(cx,cy-29+bob); ctx.lineTo(cx+7,cy-20+bob); ctx.lineTo(cx,cy-11+bob); ctx.lineTo(cx-7,cy-20+bob); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#2ee6ff'; ctx.beginPath(); ctx.moveTo(cx,cy-27+bob); ctx.lineTo(cx+5,cy-20+bob); ctx.lineTo(cx,cy-13+bob); ctx.lineTo(cx-5,cy-20+bob); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=coreC; ctx.beginPath(); ctx.moveTo(cx,cy-27+bob); ctx.lineTo(cx+5,cy-20+bob); ctx.lineTo(cx,cy-13+bob); ctx.lineTo(cx-5,cy-20+bob); ctx.closePath(); ctx.fill();
     ctx.fillStyle='#eef0fb'; ctx.fillRect(cx-2,cy-23+bob,2,3);
     // lamps
-    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = 0.75+0.25*Math.sin(t*3+i);
-      const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(255,212,71,${0.28*fl})`); grd.addColorStop(1,'rgba(255,212,71,0)'); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
-      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle='#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
+    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = alarm ? ((Math.floor(t*4)+i)%2 ? 1.6 : 0.15) : 0.75+0.25*Math.sin(t*3+i), rgb = alarm ? '255,70,90' : '255,212,71';
+      const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(${rgb},${0.28*fl})`); grd.addColorStop(1,`rgba(${rgb},0)`); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
+      ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle = alarm ? (fl>1 ? '#ff5d6e' : '#5a1a26') : '#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
     // target marker
     if (marker){ const s = 3+Math.sin(t*8); ctx.strokeStyle='#ffd447'; ctx.lineWidth=1; ctx.strokeRect(marker[0]*T+8-s, marker[1]*T+10-s/2, s*2, s); }
     // characters (y-sorted)
@@ -160,6 +161,46 @@ const Campus = (() => {
         ctx.fillStyle='#05061a'; ctx.fillRect(bx-1,by-1,w2+2,12); ctx.fillStyle='#eef0fb'; ctx.fillRect(bx,by,w2,10); ctx.fillRect(Math.round(ch.x)-1,by+10,3,3);
         ctx.fillStyle='#151a3e'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(ch.bubble.text, bx+4, by+5.5, w2-8); }
     });
+    drawIncident(t);
+  }
+
+  // Campus Incident layer: red sky, glitching hacked buildings, restore animation, alert text and the win celebration
+  function bigText(txt, y, size, col){ ctx.font=`${size}px "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(W/2-w/2-10, y-size, w+20, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, W/2+1.5, y+1.5); ctx.fillStyle=col; ctx.fillText(txt, W/2, y); }
+  function drawIncident(t){
+    const act = incActive(), now = Date.now();
+    if (act){
+      const pulse = 0.5+0.5*Math.sin(t*4);
+      ctx.fillStyle = `rgba(255,40,70,${0.03+0.03*pulse})`; ctx.fillRect(0,0,W,H);
+      const sky = ctx.createLinearGradient(0,0,0,H*0.3); sky.addColorStop(0,`rgba(255,30,60,${0.3+0.1*pulse})`); sky.addColorStop(1,'rgba(255,30,60,0)'); ctx.fillStyle=sky; ctx.fillRect(0,0,W,H*0.3);
+      const vig = ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.75); vig.addColorStop(0,'rgba(255,30,60,0)'); vig.addColorStop(1,`rgba(255,30,60,${0.22+0.12*pulse})`); ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+      INCIDENT.forEach(x=>{ if (!S.incident.secured.includes(x.b) || (UI.incFx && UI.incFx.id===x.b)) return; const b = B.find(v=>v.id===x.b);
+        ctx.strokeStyle='rgba(71,245,154,0.75)'; ctx.lineWidth=1.5; ctx.strokeRect(b.px-4, b.py-2, b.pw+8, b.ph+3); ctx.drawImage(dormIcon('shield','#47f59a'), b.cx-6, b.py-14); });
+      B.forEach(b=>{ if (!incHacked(b.id)) return; const x=b.px-3, w=b.pw+6;
+        ctx.fillStyle = `rgba(255,60,80,${0.1+0.14*Math.random()})`; ctx.fillRect(x, b.py, w, b.ph);
+        if (Math.random()<0.55) for (let k=0;k<3;k++){ const sy = b.py+Math.floor(Math.random()*(b.ph-5)), sh = 2+Math.floor(Math.random()*4), off = Math.round((Math.random()-0.5)*10);
+          ctx.drawImage(canvas, x*SC, sy*SC, w*SC, sh*SC, x+off, sy, w, sh); }
+        if (Math.random()<0.06){ ctx.fillStyle='rgba(5,6,26,0.6)'; ctx.fillRect(x, b.py, w, b.ph); }
+        if (frame%40 < 28){ ctx.font='6px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; const tw=ctx.measureText('HACKED').width;
+          ctx.fillStyle='#05061a'; ctx.fillRect(b.cx-tw/2-3, b.py-11, tw+6, 9); ctx.fillStyle='#ff5d6e'; ctx.fillText('HACKED', b.cx, b.py-6.5); } });
+    }
+    const fx = UI.incFx;
+    if (fx){ if (!fx.at) fx.at = now; const age = (now-fx.at)/1000, b = B.find(x=>x.id===fx.id);
+      if (b && age < 2.6){ const k = 1-age/2.6, mx = b.cx, my = b.py+b.ph/2;
+        ctx.fillStyle=`rgba(71,245,154,${age<0.25 ? 0.85 : 0.75*k})`; ctx.fillRect(b.px-3, b.py, b.pw+6, b.ph);
+        ctx.strokeStyle=`rgba(71,245,154,${k})`; ctx.lineWidth=3; for (const d of [0, 0.35]){ const a2 = age-d; if (a2>0){ ctx.beginPath(); ctx.arc(mx, my, 8+a2*90, 0, Math.PI*2); ctx.stroke(); } }
+        for (let i=0;i<24;i++){ const a=i/24*Math.PI*2, r=10+age*70; ctx.fillStyle = i%2 ? '#ffd447' : '#47f59a'; ctx.globalAlpha=k; ctx.fillRect(mx+Math.cos(a)*r, my+Math.sin(a)*r*0.8, 3, 3); }
+        ctx.globalAlpha=1; const s = 12*(1+Math.min(age*5,1)*1.2); ctx.drawImage(dormIcon('shield','#47f59a'), mx-s/2, b.py-s-4-Math.min(age,0.5)*8, s, s);
+        ctx.font='8px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#05061a'; ctx.fillRect(mx-28, b.py+b.ph+3, 56, 12); ctx.fillStyle='#47f59a'; ctx.fillText('SECURED', mx, b.py+b.ph+9.5); }
+      else if (age >= 2.6){ UI.incFx = null; if (act && incAllSecured()) incWin(); } }
+    if (UI.incAlert){ const age = (now-UI.incAlert)/1000; if (act && age < 3){ if (Math.floor(age*4)%2===0) bigText('! CAMPUS UNDER ATTACK !', H*0.42, 12, '#ff5d6e'); } else UI.incAlert = 0; }
+    if (UI.incWin){ const age = (now-UI.incWin)/1000;
+      if (age < 6.5){
+        for (let j=0;j<12;j++){ const a2 = age-j*0.4; if (a2<=0 || a2>=1.8) continue; const bx = W*(0.1+0.8*((j*37)%11)/10), by = H*(0.08+0.5*((j*53)%10)/10);
+          ctx.globalAlpha = 1-a2/1.8; for (let p=0;p<30;p++){ const ang=p/30*Math.PI*2, r=a2*(55+(p%3)*12); ctx.fillStyle=['#47f59a','#ffd447','#2ee6ff','#ff4fae'][(p+j)%4]; ctx.fillRect(bx+Math.cos(ang)*r, by+Math.sin(ang)*r+a2*a2*12, 3, 3); }
+          if (a2 < 0.25){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(bx, by, 6-a2*16, 0, Math.PI*2); ctx.fill(); } }
+        ctx.globalAlpha=1; if (age < 4.5) bigText('CAMPUS SAVED!', H*0.42, 16, '#47f59a');
+      } else UI.incWin = 0; }
   }
 
   function loop(){ if (!active) return; update(); if (!active) return; draw(); raf = requestAnimationFrame(loop); }
@@ -171,13 +212,13 @@ const Campus = (() => {
     const c=Math.floor(x/T), r=Math.floor(y/T); const p = bfs(pc,pr,c,r); if (p){ player.path=p; pendingEnter=null; marker=[c,r]; }
   }
   function onMove(e){ const [x,y]=toLogical(e); const b=bAt(x,y); hover=b||null; canvas.style.cursor = b?'pointer':'crosshair';
-    const tip=$('#campusTip'); if (!tip) return; if (b){ const r=canvas.getBoundingClientRect(); const locked = b.id==='cert' && !finalPassed();
-      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${locked?'<br><span style="color:var(--gold)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
+    const tip=$('#campusTip'); if (!tip) return; if (b){ const r=canvas.getBoundingClientRect(); const locked = bLocked(b.id), hk = incHacked(b.id);
+      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
       const lx = e.clientX - r.left + 14, ly = e.clientY - r.top + 14; tip.style.left = Math.min(lx, r.width-250)+'px'; tip.style.top = Math.min(ly, r.height-90)+'px'; } else tip.classList.add('hidden'); }
   function renderPrompt(){ const el=$('#campusPrompt'); if (!el) return; if (!nearDoor){ el.classList.add('hidden'); return; }
-    const locked = nearDoor.id==='cert' && !finalPassed();
-    el.classList.remove('hidden'); el.innerHTML = `<span>${locked?'🔒 ':''}${esc(nearDoor.name)}</span><kbd>E</kbd><button class="btn small" data-act="campusEnter">${locked?'View requirements':'Enter'}</button>`; }
-  function enter(b){ S.lastDoor=b.view; toast(`Entering ${esc(b.name)}…`); stop(); go(b.view); }
+    const locked = bLocked(nearDoor.id), hk = incHacked(nearDoor.id);
+    el.classList.remove('hidden'); el.innerHTML = `<span>${hk?'⚠ ':locked?'🔒 ':''}${esc(nearDoor.name)}</span><kbd>E</kbd><button class="btn small ${hk?'pink':''}" data-act="campusEnter">${hk?'Secure it':locked?'View requirements':'Enter'}</button>`; }
+  function enter(b){ if (incHacked(b.id)){ S.lastDoor=b.view; stop(); go('incident',{b:b.id}); return; } S.lastDoor=b.view; toast(`Entering ${esc(b.name)}…`); stop(); go(b.view); }
   const kd = e => { if (!active || e.target.matches('input,textarea')) return; const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(k)){ keys[k]=true; if (k.startsWith('Arrow')) e.preventDefault(); }
     if ((k==='e'||k==='Enter') && nearDoor){ e.preventDefault(); enter(nearDoor); } };
@@ -196,7 +237,7 @@ const Campus = (() => {
     loop();
   }
   function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); keys={}; }
-  window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } go(b.view); } });
+  window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
   return { start, stop, buildings:B };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
@@ -204,12 +245,71 @@ const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The p
 function viewCampus(el){
   const online = COMMUNITY_USERS.filter(u=>u.status!=='off').length + 1;
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
-  <div class="campus-wrap"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
+  <div id="incBanner">${incBannerHTML()}</div>
+  <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
     <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} Night shift · Sector 7</span></div>
     <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
-  <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=b.id==='cert'&&!finalPassed(); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
+  <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
 }
+
+/* ---------- Campus Incident ---------- */
+const incActive = () => !!(S.incident && S.incident.active);
+const incHacked = id => incActive() && INCIDENT.some(x=>x.b===id) && !S.incident.secured.includes(id);
+const incAllSecured = () => INCIDENT.every(x=>S.incident.secured.includes(x.b));
+const incUnlocked = () => modPassed(MODULES[1]);
+const bLocked = id => id==='cert' && !finalPassed() && !incHacked('cert');
+const bName = id => Campus.buildings.find(b=>b.id===id).name;
+function incBannerHTML(){
+  if (incActive()){ const n = S.incident.secured.length;
+    return `<div class="inc-banner"><div class="inc-title"><span class="siren"></span>Campus under attack!</div><div class="inc-count"><b>${n}/${INCIDENT.length}</b> buildings secured</div>
+      <div class="inc-chips">${INCIDENT.map(x=>{ const ok = S.incident.secured.includes(x.b); return `<button class="inc-chip ${ok?'ok':''}" data-act="incOpen" data-arg="${x.b}" ${ok?'disabled':''}>${ok?'✓':'⚠'} ${esc(bName(x.b))}</button>`; }).join('')}</div></div>`; }
+  if (UI.incSaved) return `<div class="inc-banner saved"><div class="inc-title">${icon('shield','#47f59a',18)} Campus saved!</div><div class="inc-count"><b>${INCIDENT.length}/${INCIDENT.length}</b> buildings secured</div></div>`;
+  return '';
+}
+function renderIncBanner(){ const el = $('#incBanner'); if (el) el.innerHTML = incBannerHTML(); const w = $('.campus-wrap'); if (w) w.classList.toggle('alarm', incActive()); }
+function incStart(){
+  if (!incUnlocked()){ toast('The campus incident unlocks after you pass the Module 2 assessment.'); return; }
+  S.incident = { active:true, secured:[], started:Date.now() }; UI.incAlert = Date.now(); UI.incWin = 0; UI.incSaved = false; UI.incFx = null;
+  log('Campus incident started'); save(); go('campus');
+}
+function incSecure(id){
+  if (!incActive() || S.incident.secured.includes(id)) return;
+  S.incident.secured.push(id); save(); UI.incFx = { id, at:0 };
+  log(`Secured ${bName(id)} during the campus incident`);
+}
+function incWin(){
+  const secs = Math.round((Date.now() - S.incident.started)/1000);
+  S.incident.active = false; S.incident.done = true; S.incident.best = Math.min(S.incident.best || Infinity, secs); save();
+  UI.incWin = Date.now(); UI.incSaved = true; renderIncBanner();
+  setTimeout(()=>{
+    showModal(`<div class="label" style="color:var(--green)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
+      <p class="muted">You secured all ${INCIDENT.length} buildings in ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}, using phishing spotting, strong passphrases, network hardening, log analysis, scam reporting and incident response.</p>
+      <div class="actions"><button class="btn green" data-act="closeModal">Back to campus</button></div>`);
+    addXP(XP.incident, 'Campus saved from the incident'); award('defender');
+  }, 2600);
+}
+function viewIncident(el){
+  const x = INCIDENT.find(i=>i.b===(S.params||{}).b);
+  if (!x || !incActive()){ go('campus'); return; }
+  const b = Campus.buildings.find(v=>v.id===x.b), L = x.lesson===FAKE_ADMIN.id ? FAKE_ADMIN : lessonById(x.lesson), n = S.incident.secured.length;
+  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red)">Incident</span></div>
+    <h1>⚠ ${esc(b.name)} is hacked</h1><p><b style="color:#fff">${esc(x.t)}.</b> ${esc(x.brief)}</p></div><span class="pill red">${n}/${INCIDENT.length} secured</span></div>
+  <section class="monitor"><div id="actHost"></div></section>`;
+  Activities.mount(L, $('#actHost'), { tag:'Incident response', nextAct:'incBack', nextLabel:'Return to campus', onDone: sc => {
+    if (sc < 60){ toast('Not secure yet. Try again to lock the attacker out.'); return; }
+    incSecure(x.b); toast(`${esc(b.name)} secured!`); timers.push(setTimeout(()=>go('campus'), 1800)); } });
+}
+window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
+  incOpen: id => { const b = Campus.buildings.find(v=>v.id===id); if (b) S.lastDoor = b.view; go('incident', {b:id}); },
+  incBack: () => go('campus'),
+  incStart: () => { UI.menu=false; renderMenu(); incStart(); },
+  incNext: () => { UI.menu=false; renderMenu(); if (!incActive()){ toast('Start the campus incident first.'); return; }
+    const x = INCIDENT.find(i=>!S.incident.secured.includes(i.b)); if (!x) return;
+    incSecure(x.b); toast(`${esc(bName(x.b))} secured!`); S.lastDoor = Campus.buildings.find(v=>v.id===x.b).view;
+    if (S.view==='campus') renderIncBanner(); else go('campus'); },
+  incEnd: () => { UI.menu=false; renderMenu(); S.incident = { active:false, secured:[] }; UI.incWin = 0; UI.incSaved = false; UI.incFx = null; save(); toast('Incident ended'); renderView(); }
+});
 
 // Career Compass signpost on the plaza: a post with two glowing arrow boards and a floating compass
 function drawSignpost(g, x, base, t){

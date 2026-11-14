@@ -86,6 +86,24 @@ const fs = require('fs');
   await openAct('m5l2'); await click('[data-act="actFlag"][data-arg="l3"]'); await click('[data-act="actCheck"]'); await closeModals(); await shot('25-logs');
   await openAct('m6l2'); for (const id of ['prep','ident','cont','erad','rec','less']) await click(`[data-act="actPlace"][data-arg="${id}"]`); await click('[data-act="actCheck"]'); await closeModals(); await shot('26-order');
   await page.evaluate(()=>{ UI.lessonId='m5l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(500); await shot('27-hash');
+  // Campus Incident: start from the gear menu, play three challenges for real, fast-forward the rest
+  const toCampus = async () => { await page.waitForFunction(()=>S.view==="campus", null, {timeout:6000}).catch(()=>{}); await page.waitForTimeout(700); };
+  await click('[data-act="toggleMenu"]'); await shot('27a-menu-incident');
+  await click('[data-act="incStart"]'); await page.waitForTimeout(600); await shot('27b-incident-alert');
+  await page.waitForTimeout(2700); await shot('27c-incident-campus');
+  await click('.inc-chip[data-arg="library"]'); await shot('27d-incident-library');
+  for (const id of await page.evaluate(()=>lessonById('m2l1').activity.targets)) await page.click(`.sel-email [data-arg="${id}"]`).catch(()=>{});
+  await click('[data-act="actCheck"]'); await closeModals(); await toCampus(); await shot('27e-library-restoring');
+  await click('.inc-chip[data-arg="ailab"]'); await page.fill('#pwIn', 'violet-durian-kites-at-dawn-7'); await page.waitForTimeout(200); await shot('27f-incident-ailab'); await click('#pwLock'); await closeModals(); await toCampus();
+  await click('.inc-chip[data-arg="community"]'); await shot('27g-incident-community');
+  for (let i=0;i<6;i++){ const a = await page.evaluate(i=>FAKE_ADMIN.activity.items[i].a, i); await click(`[data-act="actSort"][data-arg="${a}"]`); await click('[data-act="actNext"]'); }
+  await closeModals(); await toCampus();
+  console.log('secured after 3 real challenges:', await page.evaluate(()=>S.incident.secured.join(',')));
+  await click('[data-act="toggleMenu"]'); await click('[data-act="incNext"]'); await page.waitForTimeout(450); await shot('27h-incident-fastforward');
+  await page.waitForTimeout(2300); await page.evaluate(()=>EXTRA_ACTIONS.incNext()); await page.waitForTimeout(2700); await page.evaluate(()=>EXTRA_ACTIONS.incNext());
+  await page.waitForTimeout(3300); await shot('27i-campus-saved');
+  await page.waitForTimeout(2600); await shot('27j-campus-saved-modal'); await closeModals();
+  console.log('incident done / defender badge / cert relocked:', await page.evaluate(()=>[!!S.incident.done, S.badges.includes('defender'), bLocked('cert')]));
   // mentor
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300);
   await page.fill('.mentor-form input', 'what is phishing'); await page.press('.mentor-form input', 'Enter'); await page.waitForTimeout(1700);
@@ -122,6 +140,12 @@ const fs = require('fs');
   await page.evaluate(()=>go('career',{role:'grc'})); await page.waitForTimeout(300);
   await page.screenshot({ path: __dirname + '/shots/44-m-role.png', fullPage: true });
   console.log('mobile role scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
+  await page.evaluate(()=>{ incStart(); S.incident.secured=['library','ailab']; save(); renderView(); }); await page.waitForTimeout(3200);
+  await page.screenshot({ path: __dirname + '/shots/45-m-incident-campus.png', fullPage: true });
+  await click('.inc-chip[data-arg="cert"]'); await page.waitForTimeout(300);
+  await page.screenshot({ path: __dirname + '/shots/46-m-incident-cert.png', fullPage: true });
+  console.log('mobile incident scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
+  await page.evaluate(()=>EXTRA_ACTIONS.incEnd());
   console.log('ERRORS:', errs.length ? errs.join('\n') : 'none');
   await browser.close();
 })();

@@ -3,7 +3,7 @@
    ============================================================ */
 const Activities = (() => {
   let L, host, st, O = {};  // O: standalone options {onDone(score), nextAct, nextArg, nextLabel} for games played outside a lesson
-  const head = a => `<div class="act-head"><span class="pill purple">Practice activity</span><span class="label" style="color:#4a5180">Not graded · instant feedback</span></div><h2 style="margin:6px 0 6px">${esc(a.title)}</h2><p class="lesson-body" style="margin-bottom:6px">${esc(a.intro)}</p>`;
+  const head = a => `<div class="act-head"><span class="pill ${O.tag?'red':'purple'}">${esc(O.tag||'Practice activity')}</span><span class="label" style="color:#4a5180">Not graded · instant feedback</span></div><h2 style="margin:6px 0 6px">${esc(a.title)}</h2><p class="lesson-body" style="margin-bottom:6px">${esc(a.intro)}</p>`;
 
   function complete(score, badge){
     if (O.onDone){ if (badge) award(badge); O.onDone(score); return; }
