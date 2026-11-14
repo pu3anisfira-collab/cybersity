@@ -2,9 +2,9 @@
    VIRTUAL CAMPUS — canvas, tile map, buildings, walking avatars
    ============================================================ */
 const Campus = (() => {
-  const T=16, COLS=30, ROWS=20, W=COLS*T, H=ROWS*T, SC=3;
-  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5] };
-  const B = BUILDINGS.map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
+  const T=16, COLS=30, ROWS=25, W=COLS*T, H=ROWS*T, SC=3;
+  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4] };
+  const B = [...BUILDINGS, HOME_BASE].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
@@ -13,10 +13,11 @@ const Campus = (() => {
     for (let c=0;c<COLS;c++){ blocked.add(key(c,0)); blocked.add(key(c,ROWS-1)); }
     for (let r=0;r<ROWS;r++){ blocked.add(key(0,r)); blocked.add(key(COLS-1,r)); }
     B.forEach(b=>{ for(let c=b.x;c<b.x+b.w;c++) for(let r=b.y;r<b.y+b.h;r++) blocked.add(key(c,r)); });
-    [[14,9],[15,9],[14,10],[15,10],[5,10],[6,10],[23,10],[24,10]].forEach(([c,r])=>blocked.add(key(c,r)));
+    [[14,9],[15,9],[14,10],[15,10],[5,10],[6,10],[23,10],[24,10],[5,21],[6,21],[23,21],[24,21]].forEach(([c,r])=>blocked.add(key(c,r)));
   }
   const isBlocked = (c,r) => c<0||r<0||c>=COLS||r>=ROWS||blocked.has(key(c,r));
-  const isPath = (c,r) => (r>=7&&r<=11&&c>=1&&c<=28) || (r>=17&&r<=18&&c>=1&&c<=28) || ((c===9||c===10||c===19||c===20)&&r>=12&&r<=16) || ((c===9||c===10||c===19||c===20)&&r>=1&&r<=6);
+  const isPath = (c,r) => (r>=7&&r<=11&&c>=1&&c<=28) || (r>=17&&r<=18&&c>=1&&c<=28) || ((c===9||c===10||c===19||c===20)&&r>=12&&r<=16) || ((c===9||c===10||c===19||c===20)&&r>=1&&r<=6)
+    || ((c===9||c===10||c===19||c===20)&&r>=19&&r<=22) || (r===23&&c>=9&&c<=20);
 
   // seeded random for stable decoration
   let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
@@ -44,9 +45,9 @@ const Campus = (() => {
     for (let c=0;c<COLS;c++){ tree(g,c*T,-4,c%3); tree(g,c*T,(ROWS-1)*T-2,(c+1)%3); }
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
     // benches
-    bench(g,5*T,10*T); bench(g,23*T,10*T);
-    // buildings
-    B.forEach(b=>building(g,b));
+    bench(g,5*T,10*T); bench(g,23*T,10*T); bench(g,5*T,21*T); bench(g,23*T,21*T);
+    // buildings (Home Base is drawn live because it upgrades)
+    B.forEach(b=>{ if (b.id!=='home') building(g,b); });
   }
   function tree(g,x,y,v){
     g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
@@ -103,7 +104,7 @@ const Campus = (() => {
     if (!player.path.length && pendingEnter){ const b=pendingEnter; pendingEnter=null; enter(b); return; }
     if (!player.path.length) marker=null;
     // npcs wander
-    npcs.forEach(n=>{ if (!n.path.length){ if (n.wait>0) n.wait--; else { for (let k=0;k<20;k++){ const c=1+Math.floor(Math.random()*28), r=1+Math.floor(Math.random()*18); if (!isBlocked(c,r)){ const [sc,sr]=tileOf(n); const p=bfs(sc,sr,c,r); if (p && p.length<30){ n.path=p; break; } } } n.wait = 90+Math.random()*240; } } updateChar(n, 0.55); if (n.bubble && n.bubble.until<frame) n.bubble=null; });
+    npcs.forEach(n=>{ if (!n.path.length){ if (n.wait>0) n.wait--; else { for (let k=0;k<20;k++){ const c=1+Math.floor(Math.random()*(COLS-2)), r=1+Math.floor(Math.random()*(ROWS-2)); if (!isBlocked(c,r)){ const [sc,sr]=tileOf(n); const p=bfs(sc,sr,c,r); if (p && p.length<30){ n.path=p; break; } } } n.wait = 90+Math.random()*240; } } updateChar(n, 0.55); if (n.bubble && n.bubble.until<frame) n.bubble=null; });
     if (++bubbleT > 260){ bubbleT=0; const n=pick(npcs); if (n) n.bubble={text:pick(BUBBLES), until:frame+200}; }
     // door detection
     const [pc,pr]=tileOf(player); const nd = B.find(b=>b.door.c===pc && b.door.r===pr) || null;
@@ -115,6 +116,8 @@ const Campus = (() => {
     const t = frame/60;
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
+      if (b.id==='home'){ drawDorm(ctx, b.px, b.py, b.pw, b.ph, homeStage(), t); }
+      else {
       const locked = b.id==='cert' && !finalPassed();
       const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
       positions.forEach((wx,i)=>{ const on = locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
@@ -124,6 +127,7 @@ const Campus = (() => {
       ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=b.color; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
       if (!locked){ ctx.fillStyle = b.color+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
       if (locked){ ctx.strokeStyle='#9aa3da'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+1,dy+1); ctx.lineTo(dx+19,dy+21); ctx.moveTo(dx+19,dy+1); ctx.lineTo(dx+1,dy+21); ctx.stroke(); ctx.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); }
+      }
       // door glow on the path
       ctx.fillStyle = b.color + (nearDoor===b ? '66' : '22'); ctx.fillRect(b.door.c*T, b.door.r*T, T, T);
       if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
@@ -137,7 +141,7 @@ const Campus = (() => {
     ctx.fillStyle='#2ee6ff'; ctx.beginPath(); ctx.moveTo(cx,cy-27+bob); ctx.lineTo(cx+5,cy-20+bob); ctx.lineTo(cx,cy-13+bob); ctx.lineTo(cx-5,cy-20+bob); ctx.closePath(); ctx.fill();
     ctx.fillStyle='#eef0fb'; ctx.fillRect(cx-2,cy-23+bob,2,3);
     // lamps
-    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = 0.75+0.25*Math.sin(t*3+i);
+    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = 0.75+0.25*Math.sin(t*3+i);
       const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(255,212,71,${0.28*fl})`); grd.addColorStop(1,'rgba(255,212,71,0)'); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
       ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle='#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
     // target marker
@@ -205,3 +209,100 @@ function viewCampus(el){
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=b.id==='cert'&&!finalPassed(); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
 }
+
+/* ---------- Home Base: Security Health Check ---------- */
+const healthDone = () => HEALTH_CHECKS.filter(c=>S.health[c.id]).length;
+const healthScore = () => Math.round(healthDone()/HEALTH_CHECKS.length*100);
+function homeStage(){ const n=healthDone(); return n===0 ? 0 : n<4 ? 1 : n<HEALTH_CHECKS.length ? 2 : 3; }
+const dormIcons = new Map(); const dormIcon = (n,c) => { const k=n+c; if (!dormIcons.has(k)) dormIcons.set(k, iconCanvas(n,c)); return dormIcons.get(k); };
+// Draws the dorm in one of 4 stages: dark and plain -> lights on -> padlock -> glowing shield and sign
+function drawDorm(g, x, y, w, h, stage, t){
+  const lit = stage>0, roof = lit ? HOME_BASE.roof : '#2b3540', cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
+  if (stage===3){ const grd = g.createRadialGradient(cx,y+h/2,6,cx,y+h/2,w*0.8); grd.addColorStop(0,`rgba(71,245,154,${0.18+0.14*pulse})`); grd.addColorStop(1,'rgba(71,245,154,0)'); g.fillStyle=grd; g.fillRect(x-w*0.35,y-26,w*1.7,h+40); }
+  g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
+  // wall
+  g.fillStyle='#05061a'; g.fillRect(x-1,y+21,w+2,h-20);
+  g.fillStyle = lit ? '#1b2054' : '#11142c'; g.fillRect(x,y+22,w,h-22);
+  g.fillStyle = lit ? '#232a6a' : '#171a38'; g.fillRect(x,y+22,w,3);
+  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? '#181d4c' : '#0e1126'; g.fillRect(x+i,y+25,1,h-25); }
+  // roof
+  g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,24); g.fillStyle=roof; g.fillRect(x-3,y,w+6,22);
+  for (let j=4;j<22;j+=5){ g.fillStyle=shade(roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
+  g.fillStyle=shade(roof,0.25); g.fillRect(x-3,y,w+6,2);
+  // sign plate
+  if (stage===3){ g.fillStyle=`rgba(71,245,154,${0.25+0.3*pulse})`; g.fillRect(x+8,y+9,w-16,15); }
+  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle='#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
+  g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : '#3a4166'; g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
+  // windows
+  const winY = y+29;
+  [x+6, x+18, x+w-28, x+w-16].forEach((wx,i)=>{ const on = lit && (stage>1 || (Math.floor(t*0.6+i*1.7)%6)!==0);
+    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : '#1a1f45'; g.fillRect(wx,winY,10,10);
+    g.fillStyle = on ? '#fff6c8' : '#262c5a'; g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
+    if (on){ g.fillStyle='rgba(255,212,71,0.16)'; g.fillRect(wx-3,winY+11,16,4); } });
+  // door
+  const dx = cx-10, dy = y+h-22;
+  g.fillStyle='#05061a'; g.fillRect(dx-2,dy-2,24,24); g.fillStyle = stage>=2 ? green : lit ? '#8a5a34' : '#3a2a20'; g.fillRect(dx-1,dy-1,22,23);
+  g.fillStyle = lit ? '#2a1d15' : '#160f0b'; g.fillRect(dx+1,dy+1,18,21);
+  if (stage===1){ g.fillStyle='#ffd447'; g.fillRect(dx+14,dy+11,2,2); }
+  if (stage>=2) g.drawImage(dormIcon('lock','#ffd447'), Math.round(cx-6), dy+5);
+  // floating shield
+  if (stage===3){ const sy = y-17+Math.round(Math.sin(t*2)*1.5);
+    g.fillStyle=`rgba(71,245,154,${0.25+0.2*pulse})`; g.beginPath(); g.arc(cx, sy+6, 10, 0, Math.PI*2); g.fill();
+    g.drawImage(dormIcon('shield',green), Math.round(cx-6), sy); }
+}
+// Animates a dorm canvas (logical 128x104) with an upgrade flash after a new stage
+function animateDorm(cv, sc){
+  if (!cv) return; const g = cv.getContext('2d'); g.imageSmoothingEnabled=false;
+  const draw = () => { const t = performance.now()/1000; g.setTransform(sc,0,0,sc,0,0);
+    g.fillStyle='#12322a'; g.fillRect(0,0,128,104); g.fillStyle='#2a3070'; g.fillRect(0,92,128,12); g.fillStyle='#1d2358'; g.fillRect(0,92,128,1);
+    for (let i=0;i<40;i++){ g.fillStyle = i%2 ? '#174034' : '#0e2a22'; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
+    drawDorm(g, 16, 28, 96, 64, homeStage(), t);
+    const age = (Date.now() - (UI.dormFlash||0))/1000;
+    if (age < 1.4){ const k = 1-age/1.4; g.fillStyle=`rgba(255,255,255,${0.55*k*k})`; g.fillRect(0,0,128,104);
+      g.strokeStyle=`rgba(71,245,154,${k})`; g.lineWidth=2; g.beginPath(); g.arc(64,60,10+age*60,0,Math.PI*2); g.stroke();
+      for (let i=0;i<10;i++){ const a=i/10*Math.PI*2, r=12+age*46; g.fillStyle = i%2 ? '#ffd447' : '#47f59a'; g.fillRect(64+Math.cos(a)*r, 60+Math.sin(a)*r*0.8, 2, 2); } } };
+  draw(); timers.push(setInterval(draw, 60));
+}
+function viewHome(el){
+  const sc = healthScore(), st = homeStage(), n = healthDone();
+  el.innerHTML = `<div class="page-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>Home Base</span></div><h1>Home Base</h1><p>Your dorm on campus. Every real security action you take in your own life upgrades it. Ticks are self-reported and saved only on this device.</p></div><span class="pill green">Safety Score ${sc}%</span></div>
+  <div class="grid home-grid">
+    <section class="panel home-dorm">
+      <canvas id="dormCanvas" class="px" width="384" height="312" aria-label="Your dorm, stage ${st+1} of 4: ${esc(HOME_STAGES[st].t)}"></canvas>
+      <div class="label" style="color:var(--green); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
+      <div class="home-score"><b class="pixel" id="safetyScore">${sc}%</b><span class="label muted">Safety Score</span></div>
+      <div class="bar green"><i style="width:${sc}%"></i></div>
+      <p class="muted" style="margin-top:10px; font-size:14px">${esc(HOME_STAGES[st].d)}</p>
+      <div class="home-stages">${HOME_STAGES.map((s,i)=>`<span class="${i<=st?'on':''}">${i+1}. ${esc(s.t)}</span>`).join('')}</div>
+    </section>
+    <section class="monitor" style="margin-top:8px">
+      <div class="kicker">Security Health Check · ${n}/${HEALTH_CHECKS.length} done</div>
+      <h2 style="margin:8px 0 6px">Do it for real</h2>
+      <p class="lesson-body" style="font-size:15px">Lessons teach you what to do. These seven actions make you safer today. Tick each one when you have done it on your own phone or account.</p>
+      <div class="hc-list">${HEALTH_CHECKS.map(c=>{ const on=!!S.health[c.id]; return `<button class="hc ${on?'done':''}" data-act="healthTick" data-arg="${c.id}" aria-pressed="${on}">
+        <span class="hc-box">${on?icon('check','#05061a',18):''}</span>
+        <span class="hc-body"><b>${esc(c.t)}</b><span><i>How:</i> ${esc(c.how)}</span><span><i>Why it matters:</i> ${esc(c.why)}</span></span>
+        <span class="hc-xp">${S.healthXP.includes(c.id)?'':`+${XP.health} XP`}</span></button>`; }).join('')}</div>
+    </section>
+  </div>`;
+  animateDorm($('#dormCanvas'), 3);
+}
+function healthAfter(before){
+  save(); const after = homeStage();
+  if (after > before){ UI.dormFlash = Date.now(); toast(`Home Base upgraded: ${esc(HOME_STAGES[after].t)}!`); }
+  if (healthScore()===100 && !S.healthXP.includes('full')){ S.healthXP.push('full'); addXP(XP.healthFull, 'Home Base fully secured'); award('homesafe'); }
+}
+window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
+  healthTick: id => { const c = HEALTH_CHECKS.find(x=>x.id===id); if (!c) return; const before = homeStage();
+    S.health[id] = !S.health[id];
+    if (S.health[id] && !S.healthXP.includes(id)){ S.healthXP.push(id); addXP(XP.health, `Home Base: ${c.t}`); }
+    healthAfter(before); renderView();
+    // on phones the checklist sits below the dorm, so bring the upgrade into view
+    if (homeStage() > before && innerWidth <= 860){ const d = $('#dormCanvas'); if (d) d.scrollIntoView({behavior:'smooth', block:'center'}); } },
+  demoHome: a => { UI.menu=false; renderMenu(); const before = homeStage();
+    if (a==='clear'){ S.health = {}; save(); toast('Home Base checklist cleared'); renderView(); return; }
+    let gained = 0; HEALTH_CHECKS.forEach(c=>{ S.health[c.id]=true; if (!S.healthXP.includes(c.id)){ S.healthXP.push(c.id); gained += XP.health; } });
+    if (gained){ S.xp += gained; log('Presenter shortcut: Home Base checklist complete', gained); updateHUD(); }
+    healthAfter(before); renderView(); }
+});

@@ -190,8 +190,8 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .tip-card .label{color:var(--cyan)}
 
 /* ---------- Campus ---------- */
-.campus-wrap{position:relative; border:4px solid #000; box-shadow:0 0 0 3px var(--line), 8px 8px 0 3px #000; background:#000}
-#campus{display:block; width:100%; height:auto; aspect-ratio:3/2; cursor:crosshair; touch-action:manipulation}
+.campus-wrap{position:relative; max-width:max(560px, calc((100vh - 110px) * 1.2)); margin:0 auto; border:4px solid #000; box-shadow:0 0 0 3px var(--line), 8px 8px 0 3px #000; background:#000}
+#campus{display:block; width:100%; height:auto; aspect-ratio:6/5; cursor:crosshair; touch-action:manipulation}
 .campus-hud{position:absolute; left:10px; top:10px; display:flex; gap:8px; flex-wrap:wrap; pointer-events:none}
 .campus-hud .pill{pointer-events:auto}
 .prompt{position:absolute; left:50%; bottom:14px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; background:#0b0f2ce6; border:3px solid #000; box-shadow:var(--hard); padding:8px 10px 8px 14px; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; font-size:12px; white-space:nowrap; max-width:calc(100% - 20px)}
@@ -207,6 +207,31 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .qn b{font-family:var(--f-label); font-size:12px; text-transform:uppercase; letter-spacing:.06em}
 .qn small{color:var(--muted); font-size:12px; line-height:1.3}
 .qn.locked{opacity:.55}
+@media (min-width:861px){ .quick-nav{grid-template-columns:repeat(7,minmax(0,1fr))} }
+
+/* ---------- Home Base ---------- */
+.home-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); align-items:start}
+@media (min-width:861px){ .home-dorm{position:sticky; top:88px} }
+@media (max-width:860px){ .home-grid{grid-template-columns:1fr} }
+.home-dorm canvas{display:block; width:100%; max-width:384px; height:auto; margin:0 auto; border:3px solid #000}
+.home-score{display:flex; align-items:baseline; gap:10px; margin:10px 0 8px}
+.home-score b{font-size:26px; color:var(--green); text-shadow:3px 3px 0 #000}
+.home-stages{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:14px}
+.home-stages span{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 8px; border:2px solid #000; background:var(--navy); color:var(--muted)}
+.home-stages span.on{background:#0f3e2b; color:var(--green)}
+.hc-list{display:grid; gap:10px; margin-top:16px}
+.hc{display:grid; grid-template-columns:32px 1fr auto; gap:12px; align-items:start; text-align:left; padding:12px 14px; background:#fff; color:var(--ink); border:3px solid var(--ink); box-shadow:3px 3px 0 var(--ink)}
+.hc:hover{background:#f4f6ff}
+.hc.done{background:#c9f7de}
+.hc-box{width:32px; height:32px; border:3px solid var(--ink); background:#fff; display:grid; place-items:center}
+.hc.done .hc-box{background:var(--green)}
+.hc-body{display:flex; flex-direction:column; gap:3px; font-size:14px; line-height:1.45; color:var(--ink-2)}
+.hc-body b{font-size:16px; color:var(--ink)}
+.hc-body i{font-style:normal; font-weight:600; color:var(--ink)}
+.hc-xp{font-family:var(--f-label); font-size:11px; text-transform:uppercase; color:#1f7a4a; white-space:nowrap}
+@media (max-width:560px){ .hc{grid-template-columns:32px 1fr} .hc-xp{grid-column:2} }
+.home-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.home-card canvas{width:96px; height:auto; border:3px solid #000; flex:none}
 
 /* ---------- Library ---------- */
 .mod-card{display:flex; flex-direction:column; gap:12px; background:var(--panel); border:3px solid #000; box-shadow:var(--hard); padding:0; overflow:hidden; text-align:left; color:var(--text)}
@@ -967,7 +992,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -981,7 +1006,40 @@ const BADGES = [
   {id:'netguard', t:'Network Guardian', d:'Secured the router with every setting right', icon:'network', c:'#2ee6ff'},
   {id:'detective', t:'Log Detective', d:'Found every suspicious log line', icon:'eye', c:'#47f59a'},
   {id:'halfway', t:'Halfway Hero', d:'Passed 3 module assessments', icon:'shield', c:'#4c78ff'},
-  {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'}
+  {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
+  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'}
+];
+
+/* Home Base: the learner's dorm on campus. Real-life actions, self-reported, raise the Safety Score. */
+const HOME_BASE = {id:'home', name:'Home Base', view:'home', color:'#47f59a', roof:'#1f7a4a', icon:'home', desc:'Your dorm: real-life security checklist and Safety Score'};
+const HEALTH_CHECKS = [
+  {id:'mfa', t:'Turn on 2FA for your email', icon:'key',
+    how:'Open your email account settings, go to Security and turn on 2-Step Verification. Choose an authenticator app if it is offered.',
+    why:'Your email can reset every other password, so it is the master key to all your accounts.'},
+  {id:'update', t:'Update your phone', icon:'shield',
+    how:'Go to Settings, then System or Software update, install anything waiting and switch on automatic updates.',
+    why:'Most attacks use security holes that already have a fix. Updating closes them.'},
+  {id:'unique', t:'Use a unique password for your main account', icon:'lock',
+    how:'Change it to a long passphrase you use nowhere else, or let a password manager create one for you.',
+    why:'If another site leaks your password, attackers cannot reuse it to get into your main account.'},
+  {id:'screen', t:'Set a screen lock', icon:'lock',
+    how:'Go to Settings, then Security or Face ID & Passcode, and set a 6-digit PIN, fingerprint or face unlock.',
+    why:'A lost, stolen or borrowed phone stays private: your chats, photos and banking apps stay locked.'},
+  {id:'backup', t:'Back up your photos', icon:'star',
+    how:'Turn on Google Photos or iCloud backup, or copy your photos to an external drive.',
+    why:'A broken phone, theft or ransomware will not wipe out your memories.'},
+  {id:'perms', t:'Review app permissions', icon:'eye',
+    how:'Go to Settings, then Privacy or Permission manager, and remove location, camera, microphone and contacts access that apps do not need.',
+    why:'Fewer permissions means less of your data leaks if an app turns out to be malicious.'},
+  {id:'nsrc', t:'Save the scam hotline 997', icon:'chat',
+    how:'Add a contact called "NSRC Scam Hotline" with the number 997.',
+    why:'If you are scammed, calling the National Scam Response Centre quickly gives the best chance of freezing the money.'}
+];
+const HOME_STAGES = [
+  {t:'Dark and plain', d:'Tick your first action to switch the lights on.'},
+  {t:'Lights on', d:'Your dorm is waking up. Reach 4 actions to lock the door.'},
+  {t:'Locked down', d:'The door is padlocked. Finish every action to raise the shield.'},
+  {t:'Shield up', d:'Fully secured. Your dorm glows with a shield and sign.'}
 ];
 
 const BUILDINGS = [
@@ -1122,7 +1180,7 @@ const now = () => new Date();
 const hhmm = d => d.toTimeString().slice(0,5);
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], view:'dashboard', params:{} }; }
+function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], view:'dashboard', params:{} }; }
 let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
@@ -1228,11 +1286,11 @@ function go(view, params={}){
 function renderView(){
   clearTimers(); if (window.Campus) Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
-  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || (v==='admin'&&false)));
+  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || (v==='home'&&b.dataset.nav==='campus')));
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome };
   (views[v] || viewDashboard)(el);
 }
 
@@ -1363,6 +1421,12 @@ function viewDashboard(el){
           <canvas id="miniCampus" class="px" width="240" height="96" style="width:100%; display:block; border-bottom:3px solid #000"></canvas>
           <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap"><div><b>Virtual Campus</b><div class="muted" style="font-size:13px">${COMMUNITY_USERS.filter(u=>u.status==='on').length+1} learners online now</div></div><button class="btn" data-act="go" data-arg="campus">Enter</button></div>
         </section>
+        <section class="panel home-card">
+          <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
+          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
+            <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
+          <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
+        </section>
         <section class="panel">
           <div class="section-title">Recent badges</div>
           ${recent.length ? `<div style="display:flex; gap:12px; flex-wrap:wrap">${recent.map(b=>`<div class="badge" style="padding:10px; flex:1; min-width:90px"><div class="medal" style="width:46px;height:46px;background:${b.c}">${icon(b.icon,'#05061a',24)}</div><b style="font-size:10px">${esc(b.t)}</b></div>`).join('')}</div>` : `<p class="muted">Complete your first lesson to earn a badge.</p>`}
@@ -1370,7 +1434,7 @@ function viewDashboard(el){
         <section class="tip-card"><div class="label">Security tip of the day</div><p style="margin-top:6px">${esc(TIPS[new Date().getDate()%TIPS.length])}</p></section>
       </div>
     </div>`;
-  drawMiniCampus();
+  drawMiniCampus(); animateDorm($('#miniDorm'), 2);
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
@@ -1549,7 +1613,7 @@ function viewAchievements(el){
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -1629,6 +1693,8 @@ function renderMenu(){
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
     <button class="item" data-act="demoComplete" data-arg="5">Complete Modules 1–5</button>
     <button class="item" data-act="demoComplete" data-arg="6">Complete all modules (final unlocked)</button>
+    <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
+    <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>
     <button class="item" data-act="go" data-arg="admin">Switch to admin view</button>
     <hr>
     <button class="item" data-act="resetDemo">Reset demo progress</button>
@@ -1874,9 +1940,9 @@ const Activities = (() => {
    VIRTUAL CAMPUS — canvas, tile map, buildings, walking avatars
    ============================================================ */
 const Campus = (() => {
-  const T=16, COLS=30, ROWS=20, W=COLS*T, H=ROWS*T, SC=3;
-  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5] };
-  const B = BUILDINGS.map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
+  const T=16, COLS=30, ROWS=25, W=COLS*T, H=ROWS*T, SC=3;
+  const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4] };
+  const B = [...BUILDINGS, HOME_BASE].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
@@ -1885,10 +1951,11 @@ const Campus = (() => {
     for (let c=0;c<COLS;c++){ blocked.add(key(c,0)); blocked.add(key(c,ROWS-1)); }
     for (let r=0;r<ROWS;r++){ blocked.add(key(0,r)); blocked.add(key(COLS-1,r)); }
     B.forEach(b=>{ for(let c=b.x;c<b.x+b.w;c++) for(let r=b.y;r<b.y+b.h;r++) blocked.add(key(c,r)); });
-    [[14,9],[15,9],[14,10],[15,10],[5,10],[6,10],[23,10],[24,10]].forEach(([c,r])=>blocked.add(key(c,r)));
+    [[14,9],[15,9],[14,10],[15,10],[5,10],[6,10],[23,10],[24,10],[5,21],[6,21],[23,21],[24,21]].forEach(([c,r])=>blocked.add(key(c,r)));
   }
   const isBlocked = (c,r) => c<0||r<0||c>=COLS||r>=ROWS||blocked.has(key(c,r));
-  const isPath = (c,r) => (r>=7&&r<=11&&c>=1&&c<=28) || (r>=17&&r<=18&&c>=1&&c<=28) || ((c===9||c===10||c===19||c===20)&&r>=12&&r<=16) || ((c===9||c===10||c===19||c===20)&&r>=1&&r<=6);
+  const isPath = (c,r) => (r>=7&&r<=11&&c>=1&&c<=28) || (r>=17&&r<=18&&c>=1&&c<=28) || ((c===9||c===10||c===19||c===20)&&r>=12&&r<=16) || ((c===9||c===10||c===19||c===20)&&r>=1&&r<=6)
+    || ((c===9||c===10||c===19||c===20)&&r>=19&&r<=22) || (r===23&&c>=9&&c<=20);
 
   // seeded random for stable decoration
   let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
@@ -1916,9 +1983,9 @@ const Campus = (() => {
     for (let c=0;c<COLS;c++){ tree(g,c*T,-4,c%3); tree(g,c*T,(ROWS-1)*T-2,(c+1)%3); }
     for (let r=1;r<ROWS-1;r++){ tree(g,-2,r*T-4,r%3); tree(g,(COLS-1)*T+2,r*T-4,(r+2)%3); }
     // benches
-    bench(g,5*T,10*T); bench(g,23*T,10*T);
-    // buildings
-    B.forEach(b=>building(g,b));
+    bench(g,5*T,10*T); bench(g,23*T,10*T); bench(g,5*T,21*T); bench(g,23*T,21*T);
+    // buildings (Home Base is drawn live because it upgrades)
+    B.forEach(b=>{ if (b.id!=='home') building(g,b); });
   }
   function tree(g,x,y,v){
     g.fillStyle='#3b2516'; g.fillRect(x+6,y+12,4,7);
@@ -1975,7 +2042,7 @@ const Campus = (() => {
     if (!player.path.length && pendingEnter){ const b=pendingEnter; pendingEnter=null; enter(b); return; }
     if (!player.path.length) marker=null;
     // npcs wander
-    npcs.forEach(n=>{ if (!n.path.length){ if (n.wait>0) n.wait--; else { for (let k=0;k<20;k++){ const c=1+Math.floor(Math.random()*28), r=1+Math.floor(Math.random()*18); if (!isBlocked(c,r)){ const [sc,sr]=tileOf(n); const p=bfs(sc,sr,c,r); if (p && p.length<30){ n.path=p; break; } } } n.wait = 90+Math.random()*240; } } updateChar(n, 0.55); if (n.bubble && n.bubble.until<frame) n.bubble=null; });
+    npcs.forEach(n=>{ if (!n.path.length){ if (n.wait>0) n.wait--; else { for (let k=0;k<20;k++){ const c=1+Math.floor(Math.random()*(COLS-2)), r=1+Math.floor(Math.random()*(ROWS-2)); if (!isBlocked(c,r)){ const [sc,sr]=tileOf(n); const p=bfs(sc,sr,c,r); if (p && p.length<30){ n.path=p; break; } } } n.wait = 90+Math.random()*240; } } updateChar(n, 0.55); if (n.bubble && n.bubble.until<frame) n.bubble=null; });
     if (++bubbleT > 260){ bubbleT=0; const n=pick(npcs); if (n) n.bubble={text:pick(BUBBLES), until:frame+200}; }
     // door detection
     const [pc,pr]=tileOf(player); const nd = B.find(b=>b.door.c===pc && b.door.r===pr) || null;
@@ -1987,6 +2054,8 @@ const Campus = (() => {
     const t = frame/60;
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
+      if (b.id==='home'){ drawDorm(ctx, b.px, b.py, b.pw, b.ph, homeStage(), t); }
+      else {
       const locked = b.id==='cert' && !finalPassed();
       const winY = b.py+36, positions = [b.px+6, b.px+18, b.px+b.pw-28, b.px+b.pw-16];
       positions.forEach((wx,i)=>{ const on = locked ? false : ((Math.floor(t*0.7+i*1.3+b.x)%5)!==0);
@@ -1996,6 +2065,7 @@ const Campus = (() => {
       ctx.fillStyle='#05061a'; ctx.fillRect(dx-2,dy-2,24,24); ctx.fillStyle=b.color; ctx.fillRect(dx-1,dy-1,22,23); ctx.fillStyle='#0b0f2c'; ctx.fillRect(dx+1,dy+1,18,21);
       if (!locked){ ctx.fillStyle = b.color+'55'; ctx.fillRect(dx+1, dy+1+((frame>>2)%21), 18, 2); ctx.fillStyle='#ffffff22'; ctx.fillRect(dx+1,dy+1,18,4); }
       if (locked){ ctx.strokeStyle='#9aa3da'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(dx+1,dy+1); ctx.lineTo(dx+19,dy+21); ctx.moveTo(dx+19,dy+1); ctx.lineTo(dx+1,dy+21); ctx.stroke(); ctx.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); }
+      }
       // door glow on the path
       ctx.fillStyle = b.color + (nearDoor===b ? '66' : '22'); ctx.fillRect(b.door.c*T, b.door.r*T, T, T);
       if (hover===b || nearDoor===b){ ctx.strokeStyle = '#ffd447'; ctx.lineWidth = 1.5; ctx.strokeRect(b.px-5, b.py-3, b.pw+10, b.ph+5); }
@@ -2009,7 +2079,7 @@ const Campus = (() => {
     ctx.fillStyle='#2ee6ff'; ctx.beginPath(); ctx.moveTo(cx,cy-27+bob); ctx.lineTo(cx+5,cy-20+bob); ctx.lineTo(cx,cy-13+bob); ctx.lineTo(cx-5,cy-20+bob); ctx.closePath(); ctx.fill();
     ctx.fillStyle='#eef0fb'; ctx.fillRect(cx-2,cy-23+bob,2,3);
     // lamps
-    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = 0.75+0.25*Math.sin(t*3+i);
+    [[3,7],[26,7],[3,11],[26,11],[8,17],[21,17],[11,23],[18,23]].forEach(([c,r],i)=>{ const x=c*T+8, y=r*T+4, fl = 0.75+0.25*Math.sin(t*3+i);
       const grd = ctx.createRadialGradient(x,y-10,1,x,y-10,26); grd.addColorStop(0,`rgba(255,212,71,${0.28*fl})`); grd.addColorStop(1,'rgba(255,212,71,0)'); ctx.fillStyle=grd; ctx.fillRect(x-26,y-36,52,52);
       ctx.fillStyle='#05061a'; ctx.fillRect(x-1,y-12,3,14); ctx.fillRect(x-3,y-16,7,5); ctx.fillStyle='#ffd447'; ctx.fillRect(x-2,y-15,5,3); });
     // target marker
@@ -2077,6 +2147,103 @@ function viewCampus(el){
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=b.id==='cert'&&!finalPassed(); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
 }
+
+/* ---------- Home Base: Security Health Check ---------- */
+const healthDone = () => HEALTH_CHECKS.filter(c=>S.health[c.id]).length;
+const healthScore = () => Math.round(healthDone()/HEALTH_CHECKS.length*100);
+function homeStage(){ const n=healthDone(); return n===0 ? 0 : n<4 ? 1 : n<HEALTH_CHECKS.length ? 2 : 3; }
+const dormIcons = new Map(); const dormIcon = (n,c) => { const k=n+c; if (!dormIcons.has(k)) dormIcons.set(k, iconCanvas(n,c)); return dormIcons.get(k); };
+// Draws the dorm in one of 4 stages: dark and plain -> lights on -> padlock -> glowing shield and sign
+function drawDorm(g, x, y, w, h, stage, t){
+  const lit = stage>0, roof = lit ? HOME_BASE.roof : '#2b3540', cx = x+w/2, pulse = 0.5+0.5*Math.sin(t*3), green = HOME_BASE.color;
+  if (stage===3){ const grd = g.createRadialGradient(cx,y+h/2,6,cx,y+h/2,w*0.8); grd.addColorStop(0,`rgba(71,245,154,${0.18+0.14*pulse})`); grd.addColorStop(1,'rgba(71,245,154,0)'); g.fillStyle=grd; g.fillRect(x-w*0.35,y-26,w*1.7,h+40); }
+  g.fillStyle='#0006'; g.fillRect(x+4,y+h-2,w,6);
+  // wall
+  g.fillStyle='#05061a'; g.fillRect(x-1,y+21,w+2,h-20);
+  g.fillStyle = lit ? '#1b2054' : '#11142c'; g.fillRect(x,y+22,w,h-22);
+  g.fillStyle = lit ? '#232a6a' : '#171a38'; g.fillRect(x,y+22,w,3);
+  for (let i=0;i<w;i+=8){ g.fillStyle = lit ? '#181d4c' : '#0e1126'; g.fillRect(x+i,y+25,1,h-25); }
+  // roof
+  g.fillStyle='#05061a'; g.fillRect(x-4,y-1,w+8,24); g.fillStyle=roof; g.fillRect(x-3,y,w+6,22);
+  for (let j=4;j<22;j+=5){ g.fillStyle=shade(roof,-0.25); g.fillRect(x-3,y+j,w+6,1); }
+  g.fillStyle=shade(roof,0.25); g.fillRect(x-3,y,w+6,2);
+  // sign plate
+  if (stage===3){ g.fillStyle=`rgba(71,245,154,${0.25+0.3*pulse})`; g.fillRect(x+8,y+9,w-16,15); }
+  g.fillStyle='#05061a'; g.fillRect(x+10,y+11,w-20,11); g.fillStyle='#0b0f2c'; g.fillRect(x+11,y+12,w-22,9);
+  g.font='7px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillStyle = stage===3 ? green : lit ? '#c9f7de' : '#3a4166'; g.fillText(stage===3 ? 'SECURED' : 'HOME BASE', cx, y+16.5);
+  // windows
+  const winY = y+29;
+  [x+6, x+18, x+w-28, x+w-16].forEach((wx,i)=>{ const on = lit && (stage>1 || (Math.floor(t*0.6+i*1.7)%6)!==0);
+    g.fillStyle='#05061a'; g.fillRect(wx-1,winY-1,12,12); g.fillStyle = on ? '#ffd447' : '#1a1f45'; g.fillRect(wx,winY,10,10);
+    g.fillStyle = on ? '#fff6c8' : '#262c5a'; g.fillRect(wx+1,winY+1,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,winY,1,10);
+    if (on){ g.fillStyle='rgba(255,212,71,0.16)'; g.fillRect(wx-3,winY+11,16,4); } });
+  // door
+  const dx = cx-10, dy = y+h-22;
+  g.fillStyle='#05061a'; g.fillRect(dx-2,dy-2,24,24); g.fillStyle = stage>=2 ? green : lit ? '#8a5a34' : '#3a2a20'; g.fillRect(dx-1,dy-1,22,23);
+  g.fillStyle = lit ? '#2a1d15' : '#160f0b'; g.fillRect(dx+1,dy+1,18,21);
+  if (stage===1){ g.fillStyle='#ffd447'; g.fillRect(dx+14,dy+11,2,2); }
+  if (stage>=2) g.drawImage(dormIcon('lock','#ffd447'), Math.round(cx-6), dy+5);
+  // floating shield
+  if (stage===3){ const sy = y-17+Math.round(Math.sin(t*2)*1.5);
+    g.fillStyle=`rgba(71,245,154,${0.25+0.2*pulse})`; g.beginPath(); g.arc(cx, sy+6, 10, 0, Math.PI*2); g.fill();
+    g.drawImage(dormIcon('shield',green), Math.round(cx-6), sy); }
+}
+// Animates a dorm canvas (logical 128x104) with an upgrade flash after a new stage
+function animateDorm(cv, sc){
+  if (!cv) return; const g = cv.getContext('2d'); g.imageSmoothingEnabled=false;
+  const draw = () => { const t = performance.now()/1000; g.setTransform(sc,0,0,sc,0,0);
+    g.fillStyle='#12322a'; g.fillRect(0,0,128,104); g.fillStyle='#2a3070'; g.fillRect(0,92,128,12); g.fillStyle='#1d2358'; g.fillRect(0,92,128,1);
+    for (let i=0;i<40;i++){ g.fillStyle = i%2 ? '#174034' : '#0e2a22'; g.fillRect((i*37)%126, (i*23)%86, 1, 2); }
+    drawDorm(g, 16, 28, 96, 64, homeStage(), t);
+    const age = (Date.now() - (UI.dormFlash||0))/1000;
+    if (age < 1.4){ const k = 1-age/1.4; g.fillStyle=`rgba(255,255,255,${0.55*k*k})`; g.fillRect(0,0,128,104);
+      g.strokeStyle=`rgba(71,245,154,${k})`; g.lineWidth=2; g.beginPath(); g.arc(64,60,10+age*60,0,Math.PI*2); g.stroke();
+      for (let i=0;i<10;i++){ const a=i/10*Math.PI*2, r=12+age*46; g.fillStyle = i%2 ? '#ffd447' : '#47f59a'; g.fillRect(64+Math.cos(a)*r, 60+Math.sin(a)*r*0.8, 2, 2); } } };
+  draw(); timers.push(setInterval(draw, 60));
+}
+function viewHome(el){
+  const sc = healthScore(), st = homeStage(), n = healthDone();
+  el.innerHTML = `<div class="page-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>Home Base</span></div><h1>Home Base</h1><p>Your dorm on campus. Every real security action you take in your own life upgrades it. Ticks are self-reported and saved only on this device.</p></div><span class="pill green">Safety Score ${sc}%</span></div>
+  <div class="grid home-grid">
+    <section class="panel home-dorm">
+      <canvas id="dormCanvas" class="px" width="384" height="312" aria-label="Your dorm, stage ${st+1} of 4: ${esc(HOME_STAGES[st].t)}"></canvas>
+      <div class="label" style="color:var(--green); margin-top:14px">Stage ${st+1} of 4 · ${esc(HOME_STAGES[st].t)}</div>
+      <div class="home-score"><b class="pixel" id="safetyScore">${sc}%</b><span class="label muted">Safety Score</span></div>
+      <div class="bar green"><i style="width:${sc}%"></i></div>
+      <p class="muted" style="margin-top:10px; font-size:14px">${esc(HOME_STAGES[st].d)}</p>
+      <div class="home-stages">${HOME_STAGES.map((s,i)=>`<span class="${i<=st?'on':''}">${i+1}. ${esc(s.t)}</span>`).join('')}</div>
+    </section>
+    <section class="monitor" style="margin-top:8px">
+      <div class="kicker">Security Health Check · ${n}/${HEALTH_CHECKS.length} done</div>
+      <h2 style="margin:8px 0 6px">Do it for real</h2>
+      <p class="lesson-body" style="font-size:15px">Lessons teach you what to do. These seven actions make you safer today. Tick each one when you have done it on your own phone or account.</p>
+      <div class="hc-list">${HEALTH_CHECKS.map(c=>{ const on=!!S.health[c.id]; return `<button class="hc ${on?'done':''}" data-act="healthTick" data-arg="${c.id}" aria-pressed="${on}">
+        <span class="hc-box">${on?icon('check','#05061a',18):''}</span>
+        <span class="hc-body"><b>${esc(c.t)}</b><span><i>How:</i> ${esc(c.how)}</span><span><i>Why it matters:</i> ${esc(c.why)}</span></span>
+        <span class="hc-xp">${S.healthXP.includes(c.id)?'':`+${XP.health} XP`}</span></button>`; }).join('')}</div>
+    </section>
+  </div>`;
+  animateDorm($('#dormCanvas'), 3);
+}
+function healthAfter(before){
+  save(); const after = homeStage();
+  if (after > before){ UI.dormFlash = Date.now(); toast(`Home Base upgraded: ${esc(HOME_STAGES[after].t)}!`); }
+  if (healthScore()===100 && !S.healthXP.includes('full')){ S.healthXP.push('full'); addXP(XP.healthFull, 'Home Base fully secured'); award('homesafe'); }
+}
+window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
+  healthTick: id => { const c = HEALTH_CHECKS.find(x=>x.id===id); if (!c) return; const before = homeStage();
+    S.health[id] = !S.health[id];
+    if (S.health[id] && !S.healthXP.includes(id)){ S.healthXP.push(id); addXP(XP.health, `Home Base: ${c.t}`); }
+    healthAfter(before); renderView();
+    // on phones the checklist sits below the dorm, so bring the upgrade into view
+    if (homeStage() > before && innerWidth <= 860){ const d = $('#dormCanvas'); if (d) d.scrollIntoView({behavior:'smooth', block:'center'}); } },
+  demoHome: a => { UI.menu=false; renderMenu(); const before = homeStage();
+    if (a==='clear'){ S.health = {}; save(); toast('Home Base checklist cleared'); renderView(); return; }
+    let gained = 0; HEALTH_CHECKS.forEach(c=>{ S.health[c.id]=true; if (!S.healthXP.includes(c.id)){ S.healthXP.push(c.id); gained += XP.health; } });
+    if (gained){ S.xp += gained; log('Presenter shortcut: Home Base checklist complete', gained); updateHUD(); }
+    healthAfter(before); renderView(); }
+});
 /* ============================================================
    BYTE — scripted AI mentor  ·  COMMUNITY — rooms, presence, moderation
    ============================================================ */

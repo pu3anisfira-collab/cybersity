@@ -10,7 +10,7 @@ const now = () => new Date();
 const hhmm = d => d.toTimeString().slice(0,5);
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], view:'dashboard', params:{} }; }
+function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], view:'dashboard', params:{} }; }
 let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
@@ -116,11 +116,11 @@ function go(view, params={}){
 function renderView(){
   clearTimers(); if (window.Campus) Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
-  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || (v==='admin'&&false)));
+  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || (v==='home'&&b.dataset.nav==='campus')));
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome };
   (views[v] || viewDashboard)(el);
 }
 
@@ -251,6 +251,12 @@ function viewDashboard(el){
           <canvas id="miniCampus" class="px" width="240" height="96" style="width:100%; display:block; border-bottom:3px solid #000"></canvas>
           <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap"><div><b>Virtual Campus</b><div class="muted" style="font-size:13px">${COMMUNITY_USERS.filter(u=>u.status==='on').length+1} learners online now</div></div><button class="btn" data-act="go" data-arg="campus">Enter</button></div>
         </section>
+        <section class="panel home-card">
+          <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
+          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
+            <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
+          <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
+        </section>
         <section class="panel">
           <div class="section-title">Recent badges</div>
           ${recent.length ? `<div style="display:flex; gap:12px; flex-wrap:wrap">${recent.map(b=>`<div class="badge" style="padding:10px; flex:1; min-width:90px"><div class="medal" style="width:46px;height:46px;background:${b.c}">${icon(b.icon,'#05061a',24)}</div><b style="font-size:10px">${esc(b.t)}</b></div>`).join('')}</div>` : `<p class="muted">Complete your first lesson to earn a badge.</p>`}
@@ -258,7 +264,7 @@ function viewDashboard(el){
         <section class="tip-card"><div class="label">Security tip of the day</div><p style="margin-top:6px">${esc(TIPS[new Date().getDate()%TIPS.length])}</p></section>
       </div>
     </div>`;
-  drawMiniCampus();
+  drawMiniCampus(); animateDorm($('#miniDorm'), 2);
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
@@ -437,7 +443,7 @@ function viewAchievements(el){
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -517,6 +523,8 @@ function renderMenu(){
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
     <button class="item" data-act="demoComplete" data-arg="5">Complete Modules 1–5</button>
     <button class="item" data-act="demoComplete" data-arg="6">Complete all modules (final unlocked)</button>
+    <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
+    <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>
     <button class="item" data-act="go" data-arg="admin">Switch to admin view</button>
     <hr>
     <button class="item" data-act="resetDemo">Reset demo progress</button>

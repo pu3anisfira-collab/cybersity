@@ -443,7 +443,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -457,7 +457,40 @@ const BADGES = [
   {id:'netguard', t:'Network Guardian', d:'Secured the router with every setting right', icon:'network', c:'#2ee6ff'},
   {id:'detective', t:'Log Detective', d:'Found every suspicious log line', icon:'eye', c:'#47f59a'},
   {id:'halfway', t:'Halfway Hero', d:'Passed 3 module assessments', icon:'shield', c:'#4c78ff'},
-  {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'}
+  {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
+  {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'}
+];
+
+/* Home Base: the learner's dorm on campus. Real-life actions, self-reported, raise the Safety Score. */
+const HOME_BASE = {id:'home', name:'Home Base', view:'home', color:'#47f59a', roof:'#1f7a4a', icon:'home', desc:'Your dorm: real-life security checklist and Safety Score'};
+const HEALTH_CHECKS = [
+  {id:'mfa', t:'Turn on 2FA for your email', icon:'key',
+    how:'Open your email account settings, go to Security and turn on 2-Step Verification. Choose an authenticator app if it is offered.',
+    why:'Your email can reset every other password, so it is the master key to all your accounts.'},
+  {id:'update', t:'Update your phone', icon:'shield',
+    how:'Go to Settings, then System or Software update, install anything waiting and switch on automatic updates.',
+    why:'Most attacks use security holes that already have a fix. Updating closes them.'},
+  {id:'unique', t:'Use a unique password for your main account', icon:'lock',
+    how:'Change it to a long passphrase you use nowhere else, or let a password manager create one for you.',
+    why:'If another site leaks your password, attackers cannot reuse it to get into your main account.'},
+  {id:'screen', t:'Set a screen lock', icon:'lock',
+    how:'Go to Settings, then Security or Face ID & Passcode, and set a 6-digit PIN, fingerprint or face unlock.',
+    why:'A lost, stolen or borrowed phone stays private: your chats, photos and banking apps stay locked.'},
+  {id:'backup', t:'Back up your photos', icon:'star',
+    how:'Turn on Google Photos or iCloud backup, or copy your photos to an external drive.',
+    why:'A broken phone, theft or ransomware will not wipe out your memories.'},
+  {id:'perms', t:'Review app permissions', icon:'eye',
+    how:'Go to Settings, then Privacy or Permission manager, and remove location, camera, microphone and contacts access that apps do not need.',
+    why:'Fewer permissions means less of your data leaks if an app turns out to be malicious.'},
+  {id:'nsrc', t:'Save the scam hotline 997', icon:'chat',
+    how:'Add a contact called "NSRC Scam Hotline" with the number 997.',
+    why:'If you are scammed, calling the National Scam Response Centre quickly gives the best chance of freezing the money.'}
+];
+const HOME_STAGES = [
+  {t:'Dark and plain', d:'Tick your first action to switch the lights on.'},
+  {t:'Lights on', d:'Your dorm is waking up. Reach 4 actions to lock the door.'},
+  {t:'Locked down', d:'The door is padlocked. Finish every action to raise the shield.'},
+  {t:'Shield up', d:'Fully secured. Your dorm glows with a shield and sign.'}
 ];
 
 const BUILDINGS = [
