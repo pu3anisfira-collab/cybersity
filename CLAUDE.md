@@ -74,6 +74,11 @@ build tooling unless the owner asks.
   player. A Full map / Zoom in toggle sets `UI.campusFull`. Draw in world coordinates with `world()`; use
   `screen()` with `vw`/`vh` for overlays that belong to the visible view. Map pointer input through `toLogical()`.
 
+- **Full-screen campus** (07). The Full screen button on the map (or the F key) sets `UI.campusFS`. The map then
+  covers the window above the top bar, and the browser goes full screen where allowed. The view takes the screen's
+  shape, so the camera follows the player along the cut-off side. A gear button, Exit and the incident banner float
+  on top. The mode stays on while visiting buildings and comes back on return. Esc or F exits.
+
 ## Day mode
 - A sun/moon button (top bar; top-right corner on the sign-in screens) switches between Night (default) and Day.
   The choice is saved in `localStorage` key `cybersity-theme` and applied as `<html data-theme="day">`.
@@ -133,4 +138,5 @@ Recording the incident in about 40 seconds:
 3. Use "Secure next building" for the rest, about 2.5s each.
 4. The fireworks and modal take about 6s.
 
-On phones the campus is zoomed; use Full map to show the whole campus.
+On phones the campus is zoomed; use Full map to show the whole campus. For recording, press F (or Full screen) on
+the campus: the gear menu stays available from the map's top-right corner.

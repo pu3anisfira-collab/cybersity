@@ -197,8 +197,25 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 #campus{display:block; width:100%; height:auto; aspect-ratio:6/5; cursor:crosshair; touch-action:manipulation}
 .campus-hud{position:absolute; left:10px; top:10px; display:flex; gap:8px; flex-wrap:wrap; pointer-events:none}
 .campus-hud .pill{pointer-events:auto}
-.cam-toggle{display:none; position:absolute; right:8px; top:8px; z-index:4; font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 9px; background:#0b0f2ce6; color:var(--cyan-ink); border:2px solid #000; box-shadow:2px 2px 0 #000}
-@media (max-width:640px){ .cam-toggle{display:block} }
+/* Map buttons (top-right of the campus): gear (full screen only), Full map / Zoom in (phones), Full screen */
+.cam-tools{position:absolute; right:8px; top:8px; z-index:4; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+.cam-btn{display:flex; align-items:center; gap:5px; font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 9px; background:#0b0f2ce6; color:var(--cyan-ink); border:2px solid #000; box-shadow:2px 2px 0 #000}
+.cam-btn:hover{background:#1f2766}
+.cam-toggle, .fs-only{display:none}
+@media (max-width:640px){ .cam-toggle{display:flex} }
+/* Full-screen campus: the shell covers the window above the top bar; menus, pop-ups and toasts stay above it */
+.campus-shell.fs{position:fixed; inset:0; z-index:100; background:#000}
+.campus-shell.fs .campus-wrap{position:absolute; inset:0; max-width:none; margin:0; border:0; box-shadow:none; animation:none}
+.campus-shell.fs #campus{width:100%; height:100%; aspect-ratio:auto!important}
+.campus-shell.fs .fs-only{display:flex} .campus-shell.fs .cam-toggle{display:none}
+.campus-shell.fs .cam-tools{top:calc(10px + env(safe-area-inset-top,0px)); right:calc(10px + env(safe-area-inset-right,0px))}
+.campus-shell.fs .campus-hud{display:flex; top:calc(10px + env(safe-area-inset-top,0px)); left:calc(10px + env(safe-area-inset-left,0px))}
+@media (max-width:640px){ .campus-shell.fs .campus-hud{display:none} }
+.campus-shell.fs #incBanner{position:absolute; z-index:5; left:50%; transform:translateX(-50%); top:calc(52px + env(safe-area-inset-top,0px)); width:min(760px, calc(100% - 24px))}
+.campus-shell.fs #incBanner .inc-banner{margin:0; max-width:none}
+.campus-shell.fs .prompt{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+body.campus-fs .fab, body.campus-fs .drawer{display:none}
+body.campus-fs{overflow:hidden}
 .prompt{position:absolute; left:50%; bottom:14px; transform:translateX(-50%); display:flex; align-items:center; gap:10px; background:#0b0f2ce6; border:3px solid #000; box-shadow:var(--hard); padding:8px 10px 8px 14px; font-family:var(--f-label); text-transform:uppercase; letter-spacing:.06em; font-size:12px; white-space:nowrap; max-width:calc(100% - 20px)}
 .prompt kbd{font-family:var(--f-pixel); font-size:9px; background:var(--gold); color:#000; padding:4px 6px; border:2px solid #000}
 .tooltip{position:absolute; pointer-events:none; background:#0b0f2cf0; border:2px solid #000; box-shadow:3px 3px 0 #000; padding:8px 10px; font-size:13px; max-width:240px; z-index:5}
@@ -788,7 +805,7 @@ body:has(.hud) .theme-corner{display:none}
 [data-theme="day"] .admin-banner{background:repeating-linear-gradient(45deg,#ffe08a 0 14px,#ffd04a 14px 28px); color:#3a2a00}
 
 /* device screens and alarms stay dark in Day mode, so keep the bright accents inside them */
-[data-theme="day"] :is(.router, .log-line, .hash-out, .tooltip, .prompt, .cam-toggle, .inc-banner, .campus-hud, .quiz-wrap .term){
+[data-theme="day"] :is(.router, .log-line, .hash-out, .tooltip, .prompt, .cam-tools, .inc-banner, .campus-hud, .quiz-wrap .term){
   --cyan-ink:var(--cyan); --blue-ink:var(--blue); --pink-ink:var(--pink); --purple-ink:var(--purple); --gold-ink:var(--gold); --green-ink:var(--green); --red-ink:var(--red); --orange-ink:var(--orange);
   --text:#e9ecff; --muted:#9aa3da; color:#e9ecff}
 [data-theme="day"] .campus-hud .pill{background:#0b0f2ce6; color:#e9ecff}

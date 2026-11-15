@@ -149,6 +149,16 @@ const fs = require('fs');
   await click('#camToggle'); await page.waitForTimeout(300); await shot('39d-m-campus-fullmap');
   console.log('full map toggle canvas (expect 1440x1200):', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width+'x'+c.height; }));
   await click('#camToggle'); await page.waitForTimeout(200);
+  // full-screen campus: fills the window, survives a building visit, F toggles it
+  await click('#fsToggle'); await page.waitForTimeout(600); await shot('39e-m-campus-fullscreen');
+  console.log('phone full screen fills window:', await page.evaluate(()=>{ const r=document.querySelector('#campus').getBoundingClientRect(); return document.querySelector('#campusShell').classList.contains('fs') && Math.round(r.width)===innerWidth && Math.round(r.height)===innerHeight; }));
+  await page.setViewportSize({ width: 1360, height: 900 }); await page.waitForTimeout(400); await shot('39f-campus-fullscreen');
+  await page.evaluate(()=>EXTRA_ACTIONS.campusGo('home')); await page.waitForFunction(()=>S.view==="home", null, {timeout:25000}).catch(()=>{});
+  await page.evaluate(()=>go('campus')); await page.waitForTimeout(500);
+  console.log('full screen kept after visiting a building / desktop fills window:', await page.evaluate(()=>{ const r=document.querySelector('#campus').getBoundingClientRect(); return [UI.campusFS, Math.round(r.width)===innerWidth && Math.round(r.height)===innerHeight]; }));
+  await page.keyboard.press('f'); await page.waitForTimeout(300);
+  console.log('F exits full screen:', await page.evaluate(()=>!UI.campusFS && !document.querySelector('#campusShell').classList.contains('fs')));
+  await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(300);
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(300); await shot('40-m-lesson');
   await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');

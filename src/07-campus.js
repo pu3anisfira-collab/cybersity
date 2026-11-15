@@ -9,8 +9,10 @@ const Campus = (() => {
   // Phone camera: on small screens show a zoomed 12x14-tile window that follows the player (UI.campusFull shows the whole map)
   const CAM_W=12*T, CAM_H=14*T; let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
   const world = () => ctx.setTransform(SC,0,0,SC,-camX*SC,-camY*SC), screen = () => ctx.setTransform(SC,0,0,SC,0,0);
+  // Full screen (UI.campusFS): the view takes the screen's shape and covers it, so the camera follows the player along the cut-off side
   function sizeCanvas(){
-    zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H;
+    if (UI.campusFS){ const a = innerWidth/innerHeight; if (a >= W/H){ vw = W; vh = Math.round(W/a); } else { vh = H; vw = Math.round(H*a); } zoom = vw < W || vh < H; }
+    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H; }
     canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; canvas.style.aspectRatio = `${vw}/${vh}`; camSnap = true;
     const tb = $('#camToggle'); if (tb) tb.textContent = UI.campusFull ? 'Zoom in' : 'Full map';
   }
@@ -20,7 +22,7 @@ const Campus = (() => {
     if (camSnap){ camFX = tx; camFY = ty; camSnap = false; } else { camFX += (tx-camFX)*0.12; camFY += (ty-camFY)*0.12; }
     camX = Math.round(camFX*SC)/SC; camY = Math.round(camFY*SC)/SC;
   }
-  const onResize = () => { if (zoom !== (!UI.campusFull && matchMedia('(max-width:640px)').matches)) sizeCanvas(); };
+  const onResize = () => { if (UI.campusFS || zoom !== (!UI.campusFull && matchMedia('(max-width:640px)').matches)) sizeCanvas(); };
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
   function buildGrid(){
@@ -240,7 +242,8 @@ const Campus = (() => {
   function enter(b){ if (incHacked(b.id)){ S.lastDoor=b.view; stop(); go('incident',{b:b.id}); return; } S.lastDoor=b.view; toast(`Entering ${esc(b.name)}…`); stop(); go(b.view); }
   const kd = e => { if (!active || e.target.matches('input,textarea')) return; const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(k)){ keys[k]=true; if (k.startsWith('Arrow')) e.preventDefault(); }
-    if ((k==='e'||k==='Enter') && nearDoor){ e.preventDefault(); enter(nearDoor); } };
+    if ((k==='e'||k==='Enter') && nearDoor){ e.preventDefault(); enter(nearDoor); }
+    if (k==='f' && !e.ctrlKey && !e.metaKey){ e.preventDefault(); EXTRA_ACTIONS.campusFS(); } };
   const ku = e => { const k = e.key.length===1 ? e.key.toLowerCase() : e.key; keys[k]=false; };
 
   function start(cv){
@@ -252,12 +255,13 @@ const Campus = (() => {
     if (!npcs.length){ const spots=[[5,8],[24,8],[8,18],[17,18],[26,17],[12,11]]; npcs = COMMUNITY_USERS.filter(u=>u.status!=='off').slice(0,6).map((u,i)=>makeChar(u.look, spots[i][0], spots[i][1], u.name, false)); }
     canvas.addEventListener('click', onClick); canvas.addEventListener('mousemove', onMove); canvas.addEventListener('mouseleave', ()=>{ hover=null; const t=$('#campusTip'); if (t) t.classList.add('hidden'); });
     window.addEventListener('keydown', kd); window.addEventListener('keyup', ku);
-    active = true; const go2 = ()=>{ if (active){ renderBG(); } }; if (document.fonts && document.fonts.ready) document.fonts.ready.then(go2);
+    active = true; applyFS(); const go2 = ()=>{ if (active){ renderBG(); } }; if (document.fonts && document.fonts.ready) document.fonts.ready.then(go2);
     loop();
   }
-  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', onResize); keys={}; }
+  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', onResize); keys={}; document.body.classList.remove('campus-fs'); }
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); },
-    campusZoom: () => { UI.campusFull = !UI.campusFull; if (active) sizeCanvas(); }, campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
+    campusZoom: () => { UI.campusFull = !UI.campusFull; if (active) sizeCanvas(); },
+    campusFS: () => setCampusFS(!UI.campusFS), campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
   // Small pixel banner of one building (as seen on the campus) for its page header; cached once fonts are ready
   const bannerCache = new Map();
   function bannerURL(id, hacked){
@@ -287,18 +291,27 @@ const Campus = (() => {
     }
     const u = c.toDataURL(); if (!document.fonts || document.fonts.status==='loaded') bannerCache.set(k,u); return u;
   }
-  return { start, stop, buildings:B, banner:bannerURL };
+  // Full-screen mode: the shell covers the window (CSS) and the browser goes full screen where allowed.
+  // The browser stays full screen while you visit buildings, and the campus comes back full screen.
+  function applyFS(){ const sh = $('#campusShell'); if (sh) sh.classList.toggle('fs', !!UI.campusFS); document.body.classList.toggle('campus-fs', !!(UI.campusFS && active));
+    const b = $('#fsToggle'); if (b){ b.innerHTML = UI.campusFS ? '✕ Exit full screen' : '⛶ Full screen'; b.setAttribute('aria-pressed', !!UI.campusFS); }
+    if (active) sizeCanvas(); }
+  function setCampusFS(on){ UI.campusFS = on; const d = document;
+    try { if (on && !d.fullscreenElement && d.documentElement.requestFullscreen) d.documentElement.requestFullscreen().catch(()=>{}); if (!on && d.fullscreenElement) d.exitFullscreen().catch(()=>{}); } catch(e){}
+    applyFS(); }
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && UI.campusFS){ UI.campusFS = false; applyFS(); } });
+  return { start, stop, buildings:B, banner:bannerURL, applyFS };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 
 function viewCampus(el){
   const online = COMMUNITY_USERS.filter(u=>u.status!=='off').length + 1;
-  el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
-  <div id="incBanner">${incBannerHTML()}</div>
+  el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter. Press F or Full screen to fill the screen.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
+  <div class="campus-shell" id="campusShell"><div id="incBanner">${incBannerHTML()}</div>
   <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
     <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} ${isDay() ? 'Day shift' : 'Night shift'} · Sector 7</span></div>
-    <button class="cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button>
-    <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div>
+    <div class="cam-tools"><button class="cam-btn fs-only" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear','#ffd447',14)}</button><button class="cam-btn cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button><button class="cam-btn" id="fsToggle" data-act="campusFS" aria-pressed="false">⛶ Full screen</button></div>
+    <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div></div>
   <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
   Campus.start($('#campus'));
 }
