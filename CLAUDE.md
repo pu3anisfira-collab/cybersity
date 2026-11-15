@@ -12,7 +12,10 @@ build tooling unless the owner asks.
 - Source lives in `src/` as numbered parts. `build.sh` concatenates them into one self-contained file,
   `cybersity.html`. **Edit files in `src/`, never `cybersity.html` directly, then run `./build.sh`.**
   New script files go in `build.sh` before `99-init.js`, which must stay last.
-- Fonts load from Google Fonts (Press Start 2P, Silkscreen, Lexend, VT323) with fallbacks.
+- Fonts load from Google Fonts with fallbacks: **Jersey 10** (`--f-title`: logo, page titles, big numbers, canvas
+  alert text), Press Start 2P (`--f-pixel`: small number chips), Silkscreen (labels), VT323 (terminal), Lexend (reading text).
+  Page titles, the dashboard welcome and the sign-in logo get the game-title look (`.gt`): `gameTitles()` in 05 copies
+  their text into `data-t`, and CSS draws a two-tone fill, outline and drop shadow (`--gt-*` tokens, per theme).
 - Progress is saved in `localStorage` (key `cybersity-prototype-v1`), wrapped in try/catch. Saved state is merged
   over `freshState()`, so new state keys need a default there.
 

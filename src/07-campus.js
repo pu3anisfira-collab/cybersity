@@ -181,7 +181,7 @@ const Campus = (() => {
   }
 
   // Campus Incident layer: red sky, glitching hacked buildings, restore animation, alert text and the win celebration
-  function bigText(txt, y, size, col){ size = Math.min(size, (vw-16)/txt.length); ctx.font=`${size}px "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  function bigText(txt, y, size, col){ size = Math.min(size*2.2, (vw-16)/(txt.length*0.5)); ctx.font=`${size}px "Jersey 10", "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
     const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(vw/2-w/2-6, y-size, w+12, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, vw/2+1, y+1); ctx.fillStyle=col; ctx.fillText(txt, vw/2, y); }
   function drawIncident(t){
     const act = incActive(), now = Date.now();

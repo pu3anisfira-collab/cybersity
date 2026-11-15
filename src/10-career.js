@@ -50,7 +50,7 @@ function careerRole(el, c){
       <div class="fit-box"><b>Sounds like you?</b> ${esc(c.fit)}</div></section>
     <section class="panel taster" style="--rc:${c.c}">
       <div class="label" style="color:var(--gold-ink)">Taster mission</div>
-      <h2 class="pixel" style="font-size:14px; margin:10px 0">${esc(L.activity.title)}</h2>
+      <h2 class="pixel" style="font-size:30px; margin:10px 0">${esc(L.activity.title)}</h2>
       <p>${esc(c.mission.brief)}</p>
       <p class="muted" style="font-size:13px; margin-top:10px">About 3 minutes. The same game as Lesson ${L.mod.n}.${L.li+1}, played as a stand-alone taster, so it does not change your lesson progress.</p>
       <div style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap"><button class="btn gold" data-act="careerMission" data-arg="${c.id}">${done?'Play again':'Start taster mission'} ▸</button>${done?'<span class="pill green">Completed</span>':`<span class="label muted">+${XP.taster} XP</span>`}</div>

@@ -130,6 +130,9 @@ function renderView(){
   (views[v] || viewDashboard)(el);
   themeHead(el, v);
 }
+// Big titles get the game-title look (see .gt in the CSS): their text is copied into data-t for the outline and fill layers
+function gameTitles(){ document.querySelectorAll('#app :is(.page-head h1, .welcome h1, .hero-logo)').forEach(h=>{ const t = h.innerText.trim(); if (h.dataset.t !== t){ h.dataset.t = t; h.classList.add('gt'); } }); }
+new MutationObserver(gameTitles).observe(document.getElementById('app'), { childList:true, subtree:true });
 // Inside a building, the page header takes the building's colour and a pixel banner of it
 const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
 function themeHead(el, v){
@@ -181,7 +184,7 @@ function renderOnboarding(){
   if (UI.onb==='brief'){
     app.innerHTML = `<div class="auth"><div class="briefing">
       <div class="label" style="color:var(--pink-ink)">Mission briefing</div>
-      <h1 class="pixel" style="font-size:clamp(18px,4vw,28px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
+      <h1 class="pixel" style="font-size:clamp(36px,8vw,56px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
       <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
       <div class="flow">
         <div>${icon('book','#2ee6ff',30)}<b>LEARN</b><small>Short lessons with visuals and real scenarios</small></div>
@@ -211,7 +214,7 @@ function avatarCreatorHTML(){
   const sw = (key, list) => `<div class="swatches">${list.map(v=>`<button class="sw ${L[key]===v?'on':''}" style="background:${v}" data-act="look" data-arg="${key}|${v}" aria-label="${key} ${v}"></button>`).join('')}</div>`;
   const chips = (key, list) => `<div class="swatches">${list.map(v=>`<button class="chip ${L[key]===v?'on':''}" data-act="look" data-arg="${key}|${v}">${v}</button>`).join('')}</div>`;
   return `<div class="panel">
-    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:18px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
+    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:36px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
     <div class="creator">
       <div><div class="ava-stage"><div class="floor"></div><img class="px" id="avaPreview" alt="Avatar preview" src="${avatarURL(L)}"></div>
         <div class="field" style="margin-top:16px"><label for="avaName">Display name</label><input class="input" id="avaName" maxlength="18" value="${esc(UI.draftName)}"></div></div>
@@ -268,7 +271,7 @@ function viewDashboard(el){
         </section>
         <section class="panel home-card">
           <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
-          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green-ink)">Safety Score</div><b class="pixel" style="font-size:18px; display:block; margin:6px 0">${healthScore()}%</b>
+          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green-ink)">Safety Score</div><b class="pixel" style="font-size:38px; display:block; margin:6px 0">${healthScore()}%</b>
             <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
           <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
         </section>
@@ -475,7 +478,7 @@ function viewAchievements(el){
   const L = levelInfo();
   el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Achievement Hall</div><h1>Achievement Hall</h1><p>Your XP, rank, badges and learning history.</p></div></div>
   <div class="grid g-wide">
-    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:16px; margin-top:6px">${esc(L.t)}</h2>
+    <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:34px; margin-top:6px">${esc(L.t)}</h2>
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
