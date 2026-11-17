@@ -6,19 +6,23 @@ const Campus = (() => {
   const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4], compass:[21,7,1,2] };
   const B = [...BUILDINGS, HOME_BASE, CAREER_SIGN].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
+  let guide = null, focusPt = null, tourZoom = false; // campus tour: BYTE walking on the map, and a camera point to look at instead of the player
   // Phone camera: on small screens show a zoomed 12x14-tile window that follows the player (UI.campusFull shows the whole map)
   const CAM_W=12*T, CAM_H=14*T; let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
   const world = () => ctx.setTransform(SC,0,0,SC,-camX*SC,-camY*SC), screen = () => ctx.setTransform(SC,0,0,SC,0,0);
   // Full screen (UI.campusFS): the view takes the screen's shape and covers it, so the camera follows the player along the cut-off side
   function sizeCanvas(){
     if (UI.campusFS){ const a = innerWidth/innerHeight; if (a >= W/H){ vw = W; vh = Math.round(W/a); } else { vh = H; vw = Math.round(H*a); } zoom = vw < W || vh < H; }
-    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H; }
+    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H;
+      if (tourZoom && !zoom){ vw = Math.round(W/1.6); vh = Math.round(H/1.6); zoom = true; } } // the tour zooms in on desktop too
     canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; canvas.style.aspectRatio = `${vw}/${vh}`; camSnap = true;
     const tb = $('#camToggle'); if (tb) tb.textContent = UI.campusFull ? 'Zoom in' : 'Full map';
   }
   function updateCam(){
     if (!zoom){ camX = camY = 0; return; }
-    const tx = Math.max(0, Math.min(W-vw, player.x-vw/2)), ty = Math.max(0, Math.min(H-vh, player.y-10-vh/2));
+    const g = guide && guide.path.length ? guide : null; // while BYTE walks, the camera follows BYTE
+    const fx = g ? g.x : focusPt ? focusPt.x : player.x, fy = g ? g.y : focusPt ? focusPt.y : player.y;
+    const tx = Math.max(0, Math.min(W-vw, fx-vw/2)), ty = Math.max(0, Math.min(H-vh, fy-10-vh/2));
     if (camSnap){ camFX = tx; camFY = ty; camSnap = false; } else { camFX += (tx-camFX)*0.12; camFY += (ty-camFY)*0.12; }
     camX = Math.round(camFX*SC)/SC; camY = Math.round(camFY*SC)/SC;
   }
@@ -114,6 +118,10 @@ const Campus = (() => {
 
   function update(){
     frame++;
+    if (guide){ guide.moving = false;
+      if (guide.path.length){ const [c,r] = guide.path[0]; guide.moving = true; if (stepTo(guide, c*T+8, r*T+12, 3)) guide.path.shift(); if (frame%7===0) guide.f++; }
+      else if (guide.onArrive){ const fn = guide.onArrive; guide.onArrive = null; fn(); }
+      if (guide.beam > 0) guide.beam--; }
     // keyboard
     let vx=0, vy=0; if (keys.ArrowLeft||keys.a) vx-=1; if (keys.ArrowRight||keys.d) vx+=1; if (keys.ArrowUp||keys.w) vy-=1; if (keys.ArrowDown||keys.s) vy+=1;
     if (vx||vy){ player.path=[]; pendingEnter=null; marker=null; const sp=1.4, n=Math.hypot(vx,vy); const nx=player.x+vx/n*sp, ny=player.y+vy/n*sp;
@@ -167,7 +175,8 @@ const Campus = (() => {
     // target marker
     if (marker){ const s = 3+Math.sin(t*8); ctx.strokeStyle='#ffd447'; ctx.lineWidth=1; ctx.strokeRect(marker[0]*T+8-s, marker[1]*T+10-s/2, s*2, s); }
     // characters (y-sorted)
-    [...npcs, player].sort((a,b)=>a.y-b.y).forEach(ch=>{
+    [...npcs, player, ...(guide ? [guide] : [])].sort((a,b)=>a.y-b.y).forEach(ch=>{
+      if (ch === guide){ drawGuide(t); return; }
       const sp = avatarCanvas(ch.look, ch.moving ? (ch.f%2) : 0, ch.back);
       ctx.fillStyle='#0007'; ctx.fillRect(Math.round(ch.x)-5, Math.round(ch.y)-1, 10, 3);
       ctx.drawImage(sp, Math.round(ch.x-7), Math.round(ch.y-18));
@@ -182,6 +191,16 @@ const Campus = (() => {
     drawIncident(t);
   }
 
+  // BYTE on the map during the campus tour: bobbing robot with a name tag, beaming in with a column of light
+  function drawGuide(t){
+    const gx = Math.round(guide.x), gy = Math.round(guide.y), bob = guide.moving ? (guide.f%2) : Math.round(Math.sin(t*3)*1.5);
+    if (guide.beam > 0){ const a = guide.beam/60; ctx.fillStyle = `rgba(46,230,255,${0.5*a})`; ctx.fillRect(gx-8, gy-60, 16, 60); ctx.fillStyle = `rgba(255,255,255,${0.6*a})`; ctx.fillRect(gx-3, gy-60, 6, 60);
+      for (let i=0;i<8;i++){ ctx.fillStyle = i%2 ? '#ffd447' : '#2ee6ff'; ctx.fillRect(gx-10+((i*7+frame)%20), gy-10-((i*13+frame*2)%50), 2, 2); } }
+    ctx.fillStyle='#0007'; ctx.fillRect(gx-5, gy-1, 10, 3);
+    ctx.drawImage(botFace(guide.expr, guide.f, guide.wave), gx-7, gy-17+bob);
+    ctx.font='5px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='bottom'; const tw = ctx.measureText('BYTE').width;
+    ctx.fillStyle='#5d2fb0'; ctx.fillRect(gx-tw/2-2, gy-25+bob, tw+4, 7); ctx.fillStyle='#fff'; ctx.fillText('BYTE', gx, gy-18.5+bob);
+  }
   // Campus Incident layer: red sky, glitching hacked buildings, restore animation, alert text and the win celebration
   function bigText(txt, y, size, col){ size = Math.min(size*2.2, (vw-16)/(txt.length*0.5)); ctx.font=`${size}px "Jersey 10", "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
     const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(vw/2-w/2-6, y-size, w+12, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, vw/2+1, y+1); ctx.fillStyle=col; ctx.fillText(txt, vw/2, y); }
@@ -306,7 +325,32 @@ const Campus = (() => {
     try { if (on && !d.fullscreenElement && d.documentElement.requestFullscreen) d.documentElement.requestFullscreen().catch(()=>{}); if (!on && d.fullscreenElement) d.exitFullscreen().catch(()=>{}); } catch(e){}
     applyFS(); }
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && UI.campusFS){ UI.campusFS = false; applyFS(); } });
-  return { start, stop, buildings:B, banner:bannerURL, applyFS, drawFront, tree, bench };
+  // Campus tour API (used by 11-tutorial.js)
+  const tour = {
+    show(){ const [pc,pr] = tileOf(player); let spot = [pc,pr];
+      for (const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[2,0],[-2,0]]) if (!isBlocked(pc+dc,pr+dr)){ spot = [pc+dc,pr+dr]; break; }
+      guide = { x:spot[0]*T+8, y:spot[1]*T+12, path:[], f:0, back:false, moving:false, expr:'happy', wave:false, beam:60, onArrive:null }; },
+    hide(){ guide = null; focusPt = null; if (tourZoom){ tourZoom = false; if (active) sizeCanvas(); } },
+    zoom(on){ tourZoom = on; if (active) sizeCanvas(); },
+    set(o){ if (guide) Object.assign(guide, o); },
+    // walk BYTE to a building's doorstep (or next to the player); resolves on arrival
+    walk(target){ return new Promise(res=>{ if (!guide){ res(); return; } let tc, tr;
+      if (target==='player'){ [tc,tr] = tileOf(player); tc += isBlocked(tc+1,tr) ? -1 : 1; }
+      else { const b = B.find(v=>v.id===target); if (!b){ res(); return; } tc = b.door.c + (b.id==='compass' ? 1 : -1); tr = b.door.r; if (isBlocked(tc,tr)) tc = b.door.c; }
+      const p = bfs(Math.floor(guide.x/T), Math.floor((guide.y-4)/T), tc, tr); if (!p || !p.length){ res(); return; } guide.path = p; guide.onArrive = res; }); },
+    // jump to the end of the current walk (when the learner clicks to hurry)
+    arrive(){ if (guide && guide.path.length){ const [c,r] = guide.path[guide.path.length-1]; guide.x = c*T+8; guide.y = r*T+12; guide.path = []; } },
+    walking(){ return !!(guide && guide.path.length); },
+    focus(target){ const b = target && target!=='player' && B.find(v=>v.id===target); focusPt = b ? { x:b.cx, y:b.py+b.ph/2+10 } : null; },
+    // a building's (or the player's) box in page coordinates, following the camera
+    rectOf(target){ if (!canvas || !canvas.isConnected) return null; const r = canvas.getBoundingClientRect(), k = r.width/vw; let x, y, w, h;
+      if (target==='player'){ x = Math.min(player.x, guide ? guide.x : player.x)-14; y = player.y-32; w = Math.abs((guide ? guide.x : player.x)-player.x)+28; h = 36; } // you, and BYTE beside you
+      else { const b = B.find(v=>v.id===target); if (!b) return null;
+        if (b.id==='compass'){ x = b.px-18; y = b.py-30; w = b.pw+36; h = b.ph+34; } else { x = b.px-6; y = b.py-4; w = b.pw+12; h = b.ph+10; } }
+      return { left:r.left+(x-camX)*k, top:r.top+(y-camY)*k, width:w*k, height:h*k }; },
+    active(){ return active; }
+  };
+  return { start, stop, buildings:B, banner:bannerURL, applyFS, drawFront, tree, bench, tour };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 

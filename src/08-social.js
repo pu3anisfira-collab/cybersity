@@ -110,6 +110,7 @@ function viewMentor(el){
     <aside class="grid" style="align-content:start">
       <div class="mentor-card"><img class="px" src="${BOT_URL}" alt=""><h2>BYTE</h2><p class="muted" style="font-size:13px; margin-top:6px">AI Cybersecurity Mentor · Online</p>${l?`<div class="pill purple" style="margin-top:12px; display:inline-block">Context: ${esc(l.title)}</div>`:''}</div>
       <div class="panel"><div class="section-title">I can help you</div><ul class="recap-list" style="margin:0; font-size:14px">${['Explain a lesson in simpler words','Give real-world examples','Quiz you for practice','Suggest what to do in a security situation'].map(t=>`<li>${t}</li>`).join('')}</ul></div>
+      <div class="panel"><div class="section-title">Campus tour</div><p style="font-size:13.5px">Want me to walk you around the campus again?</p><button class="btn purple small" style="margin-top:10px" data-act="tourReplay">Replay campus tour</button></div>
       <div class="panel safety-panel"><div class="section-title" style="color:var(--pink-ink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
     </aside>
     <div id="mentorPage">${Mentor.chatHTML('page')}</div>

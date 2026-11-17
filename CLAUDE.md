@@ -31,6 +31,7 @@ build tooling unless the owner asks.
 | `src/07-campus.js` | Canvas campus: 30×25 tile map, buildings, Home Base dorm, Career Compass signpost, BFS pathfinding, NPC learners, door prompts, phone camera, building banners (`Campus.banner`); Home Base page and Security Health Check; Campus Incident (attack effects, banner, challenge pages, celebration) |
 | `src/08-social.js` | BYTE scripted mentor (keyword knowledge base, safety refusals, lesson context, quiz-me) and Community Hub (rooms, bot replies, personal-info filter, reporting) |
 | `src/10-career.js` | Career Compass: role quiz, role pages, taster missions, roadmaps |
+| `src/11-tutorial.js` | Campus tour with BYTE: RPG dialogue engine, spotlight, the tour script (`TOUR_STEPS`), first-visit/skip/replay state |
 | `src/99-init.js` | Boot (always last in `build.sh`) |
 
 ## Features added for IIMaCC 2026
@@ -85,6 +86,16 @@ build tooling unless the owner asks.
   (or Enter) sit over it. The steps `UI.onb` = title, auth, avatar, brief are full-screen pages that slide up over the
   same running scene ("Title screen" slides back down). The scene pans down once you leave the title.
 
+- **Campus tour with BYTE** (11, plus  in 07 and  in 04). The first time a learner reaches the
+  campus, BYTE beams in, greets them by name and walks building to building, with the camera zoomed in and following.
+  An RPG dialogue box types each line and shows BYTE's face (happy, excited, wink, think, blink, wave), with "Tell me
+  more" choices, an optional 8-bit blip sound (off by default) and Skip tour (Escape asks to confirm). A spotlight dims
+  everything except the building or control being explained (it eases after its target as the camera moves).
+  The tour ends with "Take me to the Library!" or "I'll explore on my own", +25 XP and the  badge; the
+  "Hello, World" badge waits until the tour ends. Seen or skipped is stored per learner name in   key  (log out clears progress but not this), so returning learners aren't forced through it.
+  Replay from the gear menu or the AI Lab. To change what BYTE says, edit . The static "Mission briefing"
+  onboarding step was removed: the tour replaces it, so onboarding is now title, sign up, avatar, campus.
+
 ## Day mode
 - A sun/moon button (top bar; top-right corner on the sign-in screens) switches between Night (default) and Day.
   The choice is saved in `localStorage` key `cybersity-theme` and applied as `<html data-theme="day">`.
@@ -136,6 +147,7 @@ environments is expected and harmless. `shots/` and `test-page.html` are git-ign
   End incident (resets for another take)
 - **Home Base**: tick every action / clear checklist (resets the dorm to dark without giving XP again)
 - Admin view, reset demo progress, log out
+- Profile: **Replay campus tour with BYTE**
 
 Recording the incident in about 40 seconds:
 1. Start it (the alert shows for about 3s).

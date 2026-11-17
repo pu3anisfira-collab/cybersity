@@ -715,6 +715,50 @@ body.campus-fs{overflow:hidden}
 [data-theme="day"] .press-start{background:#6cc24a; color:#16300c} [data-theme="day"] .press-start{--ps-pulse:#16300c; --ps-bg2:#ffd447}
 @media (max-width:560px){ .title-screen{margin-top:-16vh} .onb-logo{font-size:52px} .press-start{padding:6px 22px 9px} }
 
+/* ---------- Campus tour with BYTE (11-tutorial.js) ----------
+   RPG dialogue box at the bottom, a spotlight that dims everything but the building or control being explained,
+   and a bouncing arrow. Sits above the top bar; pop-ups and toasts stay above it. */
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.tour{position:fixed; inset:0; z-index:150; cursor:pointer}
+.tour-dim{position:absolute; inset:0; background:#05061a99; transition:opacity .3s}
+.tour.has-spot .tour-dim{opacity:0}
+.tour-spot{position:fixed; pointer-events:none; border:3px solid var(--gold); box-shadow:0 0 0 3px #000, 0 0 0 200vmax #05061a9e, 0 0 26px 6px #ffd44788 inset;
+  animation:spotPulse 1.2s steps(2) infinite}
+@keyframes spotPulse{50%{border-color:#fff}}
+.tour-arrow{position:fixed; transform:translateX(-50%); font-family:var(--f-title); font-size:34px; line-height:1; color:var(--gold); text-shadow:3px 3px 0 #000, -2px -2px 0 #000; pointer-events:none; animation:arrowBob .6s steps(2) infinite}
+.tour-arrow.up{transform:translateX(-50%) rotate(180deg)}
+@keyframes arrowBob{50%{margin-top:6px}}
+.tour-box{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom,0px)); width:min(760px, calc(100% - 24px));
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:start; padding:16px 18px 18px; cursor:default;
+  background:#0b0f2c; color:#e9ecff; border:4px solid #fff; box-shadow:0 0 0 4px #000, 8px 8px 0 4px #000; animation:tourIn .35s steps(5)}
+.tour-box.top{bottom:auto; top:calc(78px + env(safe-area-inset-top,0px))}
+@keyframes tourIn{from{transform:translate(-50%,40px); opacity:0}}
+.tour-portrait{width:92px; height:104px; display:grid; place-items:center; background:radial-gradient(circle at 50% 60%, #3a2a8c 0%, #151a4d 70%); border:3px solid #000; box-shadow:inset 0 0 0 3px #5d2fb0}
+.tour-portrait canvas{width:70px; height:80px; image-rendering:pixelated}
+.tour-name{font-family:var(--f-title); font-size:28px; line-height:1; color:var(--gold); letter-spacing:.04em; text-shadow:2px 2px 0 #000}
+.tour-name span{font-family:var(--f-label); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#b9a3ff; margin-left:8px; text-shadow:none}
+.tour-text{margin-top:8px; font-size:17px; line-height:1.5; min-height:3em; max-width:62ch}
+.tour-choices{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+.tour-choices:empty{display:none}
+.tour-next{position:absolute; right:18px; bottom:10px; font-family:var(--f-title); font-size:22px; color:var(--gold); animation:blinkNext .8s steps(2) infinite}
+@keyframes blinkNext{50%{opacity:0}}
+.tour-tools{position:absolute; right:12px; top:-17px; display:flex; gap:6px; align-items:center}
+.tour-count, .tour-tool{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:4px 8px; background:#1f2766; color:#e9ecff; border:2px solid #000; box-shadow:2px 2px 0 #000}
+.tour-tool:hover{background:#5d2fb0}
+.tour-tool[aria-pressed="true"]{background:#0f3e2b; color:var(--green)}
+[data-theme="day"] .tour-dim{background:#1d3a6680}
+[data-theme="day"] .tour-spot{box-shadow:0 0 0 3px #000, 0 0 0 200vmax #1d3a6673, 0 0 26px 6px #ffd44788 inset}
+[data-theme="day"] .tour-box{background:#fffaf0; color:#2b2340; border-color:#5b2f1c}
+[data-theme="day"] .tour-name{color:#ffd23f; text-shadow:2px 0 #5b2f1c, -2px 0 #5b2f1c, 0 2px #5b2f1c, 0 -2px #5b2f1c}
+[data-theme="day"] .tour-name span{color:#6a38c9}
+[data-theme="day"] .tour-portrait{background:radial-gradient(circle at 50% 60%, #e9dcff 0%, #bfe7ff 70%)}
+[data-theme="day"] .tour-next{color:#9a6400}
+@media (max-width:560px){
+  .tour-box{grid-template-columns:62px minmax(0,1fr); gap:10px; padding:14px 12px 16px}
+  .tour-portrait{width:62px; height:72px} .tour-portrait canvas{width:49px; height:56px}
+  .tour-name{font-size:24px} .tour-text{font-size:15px} .tour-tools{right:8px}
+}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}
@@ -1317,7 +1361,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20, incident:150 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20, incident:150, tour:25 };
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -1334,6 +1378,7 @@ const BADGES = [
   {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
   {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'},
   {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'},
+  {id:'orient', t:'Orientation Complete', d:'Finished the campus tour with BYTE', icon:'campus', c:'#a46bff'},
   {id:'defender', t:'Campus Defender', d:'Secured all six buildings during the campus incident', icon:'shield', c:'#ff5d6e'}
 ];
 
@@ -1535,6 +1580,25 @@ function avatarURL(look, frame=0){
 const BOT_ROWS = ['.....AA.....','.....AA.....','..KKKKKKKK..','..KVVVVVVK..','..KVCVVCVK..','..KVVVVVVK..','..KVVMMVVK..','..KKKKKKKK..','...VVVVVV...','.VVVZZZZVVV.','.V.VZVVZV.V.','...VVVVVV...','...VV..VV...','...KK..KK...'];
 function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'}); }
 let BOT_URL = '';
+// BYTE's expressions for the campus tour: face rows 3-6 (eyes and mouth) and body rows 8-10 (arms) swap per expression
+const BOT_FACES = {
+  normal: ['VVVVVV','VCVVCV','VVVVVV','VVMMVV'],
+  happy:  ['VCVVCV','CVCCVC','MVVVVM','VMMMMV'],
+  excited:['VCVVCV','VCVVCV','VVMMVV','VVMMVV'],
+  wink:   ['VVVVVV','VCVCCC','MVVVVM','VMMMMV'],
+  think:  ['VVCVVC','VVVVVV','VVVVVV','VVVMMV'],
+  blink:  ['VVVVVV','VVVVVV','VCCVCC','VVMMVV']
+};
+const BOT_WAVE = [['...VVVVVV.V.','.VVVZZZZVV..','.V.VZVVZV...'], ['...VVVVVVV..','.VVVZZZZV.V.','.V.VZVVZV...']];
+const botFaceCache = new Map();
+function botFace(expr='normal', frame=0, wave=false){
+  const k = expr+frame+wave; if (botFaceCache.has(k)) return botFaceCache.get(k);
+  const rows = BOT_ROWS.slice(), f = BOT_FACES[expr] || BOT_FACES.normal;
+  for (let i=0;i<4;i++) rows[3+i] = '..K'+f[i]+'K..';
+  if (wave){ const w = BOT_WAVE[frame%2]; rows[8]=w[0]; rows[9]=w[1]; rows[10]=w[2]; }
+  const c = rowsToCanvas(rows, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'});
+  botFaceCache.set(k, c); return c;
+}
 
 /* Canvas palette: night (default) or day (bright grass, brick paths, cream walls, sky-blue windows) */
 const isDay = () => document.documentElement.dataset.theme === 'day';
@@ -1742,7 +1806,7 @@ function onbPageHTML(step){
       <div class="ts-foot">© 2026 Cybersity · A prototype for IIMaCC 2026</div>
     </div>`;
   if (step==='auth') return `<div class="onb-card">
-      <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 3</span></div>
+      <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 2</span></div>
       <div class="onb-logo">CYBERSITY</div>
       <p class="onb-sub">Join the campus. Pick up where you left off, or create a new learner.</p>
       <section class="panel">
@@ -1762,24 +1826,7 @@ function onbPageHTML(step){
         <button class="btn pink" style="width:100%" data-act="quickDemo">Try the demo instantly</button>
         <p class="note" style="margin-top:14px">Prototype only: accounts are simulated and nothing leaves your browser. Please don't type a real password.</p>
       </section></div>`;
-  if (step==='avatar') return `<div class="onb-wide">${avatarCreatorHTML()}</div>`;
-  return `<div class="briefing">
-      <div class="label" style="color:var(--pink-ink)">Step 3 of 3 · Mission briefing</div>
-      <h1 class="pixel" style="font-size:clamp(36px,8vw,56px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
-      <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
-      <div class="flow">
-        <div>${icon('book','#2ee6ff',30)}<b>LEARN</b><small>Short lessons with visuals and real scenarios</small></div>
-        <div>${icon('flag','#ff9a3d',30)}<b>PRACTISE</b><small>Hands-on activities with instant feedback</small></div>
-        <div>${icon('check','#47f59a',30)}<b>ASSESS</b><small>Lesson quizzes and module assessments</small></div>
-        <div>${icon('chip','#a46bff',30)}<b>REVIEW</b><small>Explanations for every answer</small></div>
-        <div>${icon('trophy','#ffd447',30)}<b>PROGRESS</b><small>Earn XP, levels, badges and a certificate</small></div>
-      </div>
-      <div class="panel" style="display:flex; gap:16px; align-items:center; text-align:left">
-        <img class="px" src="${BOT_URL}" alt="" style="width:60px;height:70px;flex:none">
-        <p>"Hi ${esc(UI.draftName)}! I'm <b>BYTE</b>. Walk around the campus and step into any building. Start at the <b>Cyber Library</b> for your first lesson. Tap the purple button any time to ask me something."</p>
-      </div>
-      <div style="margin-top:24px"><button class="btn gold" data-act="enterCampus">Enter the campus ▸</button></div>
-    </div>`;
+  return `<div class="onb-wide">${avatarCreatorHTML()}</div>`; // avatar
 }
 function renderOnboarding(dir='up'){
   const app = $('#app');
@@ -1808,7 +1855,7 @@ function avatarCreatorHTML(){
   const sw = (key, list) => `<div class="swatches">${list.map(v=>`<button class="sw ${L[key]===v?'on':''}" style="background:${v}" data-act="look" data-arg="${key}|${v}" aria-label="${key} ${v}"></button>`).join('')}</div>`;
   const chips = (key, list) => `<div class="swatches">${list.map(v=>`<button class="chip ${L[key]===v?'on':''}" data-act="look" data-arg="${key}|${v}">${v}</button>`).join('')}</div>`;
   return `<div class="panel">
-    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:36px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
+    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 2'}</div><h1 class="pixel" style="font-size:36px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
     <div class="creator">
       <div><div class="ava-stage"><div class="floor"></div><img class="px" id="avaPreview" alt="Avatar preview" src="${avatarURL(L)}"></div>
         <div class="field" style="margin-top:16px"><label for="avaName">Display name</label><input class="input" id="avaName" maxlength="18" value="${esc(UI.draftName)}"></div></div>
@@ -1818,7 +1865,7 @@ function avatarCreatorHTML(){
         <div class="opt-row"><span class="label">Hair / hijab colour</span>${sw('hairColor',LOOK_OPTS.hairColor)}</div>
         <div class="opt-row"><span class="label">Outfit colour</span>${sw('shirt',LOOK_OPTS.shirt)}</div>
         <div class="opt-row"><span class="label">Accessory</span>${chips('acc',LOOK_OPTS.acc)}</div>
-        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">${UI.editAvatar?`<button class="btn ghost" data-act="cancelAvatar">Cancel</button>`:''}<button class="btn gold" data-act="saveAvatar">${UI.editAvatar?'Save changes':'Continue ▸'}</button></div>
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">${UI.editAvatar?`<button class="btn ghost" data-act="cancelAvatar">Cancel</button>`:''}<button class="btn gold" data-act="saveAvatar">${UI.editAvatar?'Save changes':'Enter the campus ▸'}</button></div>
       </div></div></div>`;
 }
 function bindAvatarCreator(){
@@ -2076,7 +2123,7 @@ function viewAchievements(el){
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -2152,6 +2199,7 @@ function renderMenu(){
     <span class="label">Profile</span>
     <button class="item" data-act="editAvatar">Edit avatar and name</button>
     <button class="item" data-act="go" data-arg="achievements">My progress</button>
+    <button class="item" data-act="tourReplay">Replay campus tour with BYTE</button>
     <hr><span class="label">Presenter shortcuts</span>
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
     <button class="item" data-act="demoComplete" data-arg="2">Complete Modules 1–2 (incident unlocked)</button>
@@ -2189,10 +2237,11 @@ const ACTIONS = {
   randomLook: () => { UI.draftLook = randomLook(); rerenderCreator(); },
   saveAvatar: () => { const name = (UI.draftName||'').trim().slice(0,18) || 'Learner';
     if (UI.editAvatar){ S.user.name=name; S.user.look=UI.draftLook; save(); UI.editAvatar=false; spriteCache.clear(); renderApp(); toast('Profile updated'); return; }
-    UI.draftName = name; UI.onb='brief'; renderOnboarding(); },
+    UI.draftName = name; ACTIONS.enterCampus(); },
   cancelAvatar: () => { UI.editAvatar=false; renderApp(); },
   editAvatar: () => { UI.menu=false; UI.editAvatar=true; UI.draftLook={...S.user.look}; UI.draftName=S.user.name; clearTimers(); if (window.Campus) Campus.stop(); renderMenu(); $('#view').innerHTML = avatarCreatorHTML(); bindAvatarCreator(); },
-  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp(); setTimeout(()=>award('hello'), 600); },
+  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp();
+    if (Tour.shouldRun()) Tour.start(); else setTimeout(()=>award('hello'), 600); }, // first visit: BYTE's campus tour, which awards the welcome badge at the end
   openModule: a => go('module',{id:a}),
   openLesson: a => { const [id,st]=a.split('|'); const l=lessonById(id); if (!lessonUnlocked(l)){ toast('Finish the previous lesson first.'); return; } UI.lessonId=id; const p=prog(id); let s=+st; if (s===5 && !p.read) s=0; if (s===6 && !(p.read&&p.activity)) s = p.read?5:0; UI.stage=s; go('lesson'); },
   stage: a => { UI.stage=+a; renderView(); window.scrollTo({top:0}); },
@@ -2421,19 +2470,23 @@ const Campus = (() => {
   const PLACE = { library:[2,2,7,5], ailab:[11,2,8,5], community:[21,2,7,5], challenge:[2,12,7,5], achieve:[11,12,8,5], cert:[21,12,7,5], home:[12,19,6,4], compass:[21,7,1,2] };
   const B = [...BUILDINGS, HOME_BASE, CAREER_SIGN].map(b=>{ const [x,y,w,h]=PLACE[b.id]; const cx=(x*T)+(w*T)/2; return {...b, x,y,w,h, px:x*T, py:y*T, pw:w*T, ph:h*T, cx, door:{c:Math.floor(cx/T), r:y+h}}; });
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
+  let guide = null, focusPt = null, tourZoom = false; // campus tour: BYTE walking on the map, and a camera point to look at instead of the player
   // Phone camera: on small screens show a zoomed 12x14-tile window that follows the player (UI.campusFull shows the whole map)
   const CAM_W=12*T, CAM_H=14*T; let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
   const world = () => ctx.setTransform(SC,0,0,SC,-camX*SC,-camY*SC), screen = () => ctx.setTransform(SC,0,0,SC,0,0);
   // Full screen (UI.campusFS): the view takes the screen's shape and covers it, so the camera follows the player along the cut-off side
   function sizeCanvas(){
     if (UI.campusFS){ const a = innerWidth/innerHeight; if (a >= W/H){ vw = W; vh = Math.round(W/a); } else { vh = H; vw = Math.round(H*a); } zoom = vw < W || vh < H; }
-    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H; }
+    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H;
+      if (tourZoom && !zoom){ vw = Math.round(W/1.6); vh = Math.round(H/1.6); zoom = true; } } // the tour zooms in on desktop too
     canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; canvas.style.aspectRatio = `${vw}/${vh}`; camSnap = true;
     const tb = $('#camToggle'); if (tb) tb.textContent = UI.campusFull ? 'Zoom in' : 'Full map';
   }
   function updateCam(){
     if (!zoom){ camX = camY = 0; return; }
-    const tx = Math.max(0, Math.min(W-vw, player.x-vw/2)), ty = Math.max(0, Math.min(H-vh, player.y-10-vh/2));
+    const g = guide && guide.path.length ? guide : null; // while BYTE walks, the camera follows BYTE
+    const fx = g ? g.x : focusPt ? focusPt.x : player.x, fy = g ? g.y : focusPt ? focusPt.y : player.y;
+    const tx = Math.max(0, Math.min(W-vw, fx-vw/2)), ty = Math.max(0, Math.min(H-vh, fy-10-vh/2));
     if (camSnap){ camFX = tx; camFY = ty; camSnap = false; } else { camFX += (tx-camFX)*0.12; camFY += (ty-camFY)*0.12; }
     camX = Math.round(camFX*SC)/SC; camY = Math.round(camFY*SC)/SC;
   }
@@ -2529,6 +2582,10 @@ const Campus = (() => {
 
   function update(){
     frame++;
+    if (guide){ guide.moving = false;
+      if (guide.path.length){ const [c,r] = guide.path[0]; guide.moving = true; if (stepTo(guide, c*T+8, r*T+12, 3)) guide.path.shift(); if (frame%7===0) guide.f++; }
+      else if (guide.onArrive){ const fn = guide.onArrive; guide.onArrive = null; fn(); }
+      if (guide.beam > 0) guide.beam--; }
     // keyboard
     let vx=0, vy=0; if (keys.ArrowLeft||keys.a) vx-=1; if (keys.ArrowRight||keys.d) vx+=1; if (keys.ArrowUp||keys.w) vy-=1; if (keys.ArrowDown||keys.s) vy+=1;
     if (vx||vy){ player.path=[]; pendingEnter=null; marker=null; const sp=1.4, n=Math.hypot(vx,vy); const nx=player.x+vx/n*sp, ny=player.y+vy/n*sp;
@@ -2582,7 +2639,8 @@ const Campus = (() => {
     // target marker
     if (marker){ const s = 3+Math.sin(t*8); ctx.strokeStyle='#ffd447'; ctx.lineWidth=1; ctx.strokeRect(marker[0]*T+8-s, marker[1]*T+10-s/2, s*2, s); }
     // characters (y-sorted)
-    [...npcs, player].sort((a,b)=>a.y-b.y).forEach(ch=>{
+    [...npcs, player, ...(guide ? [guide] : [])].sort((a,b)=>a.y-b.y).forEach(ch=>{
+      if (ch === guide){ drawGuide(t); return; }
       const sp = avatarCanvas(ch.look, ch.moving ? (ch.f%2) : 0, ch.back);
       ctx.fillStyle='#0007'; ctx.fillRect(Math.round(ch.x)-5, Math.round(ch.y)-1, 10, 3);
       ctx.drawImage(sp, Math.round(ch.x-7), Math.round(ch.y-18));
@@ -2597,6 +2655,16 @@ const Campus = (() => {
     drawIncident(t);
   }
 
+  // BYTE on the map during the campus tour: bobbing robot with a name tag, beaming in with a column of light
+  function drawGuide(t){
+    const gx = Math.round(guide.x), gy = Math.round(guide.y), bob = guide.moving ? (guide.f%2) : Math.round(Math.sin(t*3)*1.5);
+    if (guide.beam > 0){ const a = guide.beam/60; ctx.fillStyle = `rgba(46,230,255,${0.5*a})`; ctx.fillRect(gx-8, gy-60, 16, 60); ctx.fillStyle = `rgba(255,255,255,${0.6*a})`; ctx.fillRect(gx-3, gy-60, 6, 60);
+      for (let i=0;i<8;i++){ ctx.fillStyle = i%2 ? '#ffd447' : '#2ee6ff'; ctx.fillRect(gx-10+((i*7+frame)%20), gy-10-((i*13+frame*2)%50), 2, 2); } }
+    ctx.fillStyle='#0007'; ctx.fillRect(gx-5, gy-1, 10, 3);
+    ctx.drawImage(botFace(guide.expr, guide.f, guide.wave), gx-7, gy-17+bob);
+    ctx.font='5px Silkscreen, monospace'; ctx.textAlign='center'; ctx.textBaseline='bottom'; const tw = ctx.measureText('BYTE').width;
+    ctx.fillStyle='#5d2fb0'; ctx.fillRect(gx-tw/2-2, gy-25+bob, tw+4, 7); ctx.fillStyle='#fff'; ctx.fillText('BYTE', gx, gy-18.5+bob);
+  }
   // Campus Incident layer: red sky, glitching hacked buildings, restore animation, alert text and the win celebration
   function bigText(txt, y, size, col){ size = Math.min(size*2.2, (vw-16)/(txt.length*0.5)); ctx.font=`${size}px "Jersey 10", "Press Start 2P", monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
     const w = ctx.measureText(txt).width; ctx.fillStyle='#05061ad9'; ctx.fillRect(vw/2-w/2-6, y-size, w+12, size*2); ctx.fillStyle='#000'; ctx.fillText(txt, vw/2+1, y+1); ctx.fillStyle=col; ctx.fillText(txt, vw/2, y); }
@@ -2721,7 +2789,32 @@ const Campus = (() => {
     try { if (on && !d.fullscreenElement && d.documentElement.requestFullscreen) d.documentElement.requestFullscreen().catch(()=>{}); if (!on && d.fullscreenElement) d.exitFullscreen().catch(()=>{}); } catch(e){}
     applyFS(); }
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && UI.campusFS){ UI.campusFS = false; applyFS(); } });
-  return { start, stop, buildings:B, banner:bannerURL, applyFS, drawFront, tree, bench };
+  // Campus tour API (used by 11-tutorial.js)
+  const tour = {
+    show(){ const [pc,pr] = tileOf(player); let spot = [pc,pr];
+      for (const [dc,dr] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[2,0],[-2,0]]) if (!isBlocked(pc+dc,pr+dr)){ spot = [pc+dc,pr+dr]; break; }
+      guide = { x:spot[0]*T+8, y:spot[1]*T+12, path:[], f:0, back:false, moving:false, expr:'happy', wave:false, beam:60, onArrive:null }; },
+    hide(){ guide = null; focusPt = null; if (tourZoom){ tourZoom = false; if (active) sizeCanvas(); } },
+    zoom(on){ tourZoom = on; if (active) sizeCanvas(); },
+    set(o){ if (guide) Object.assign(guide, o); },
+    // walk BYTE to a building's doorstep (or next to the player); resolves on arrival
+    walk(target){ return new Promise(res=>{ if (!guide){ res(); return; } let tc, tr;
+      if (target==='player'){ [tc,tr] = tileOf(player); tc += isBlocked(tc+1,tr) ? -1 : 1; }
+      else { const b = B.find(v=>v.id===target); if (!b){ res(); return; } tc = b.door.c + (b.id==='compass' ? 1 : -1); tr = b.door.r; if (isBlocked(tc,tr)) tc = b.door.c; }
+      const p = bfs(Math.floor(guide.x/T), Math.floor((guide.y-4)/T), tc, tr); if (!p || !p.length){ res(); return; } guide.path = p; guide.onArrive = res; }); },
+    // jump to the end of the current walk (when the learner clicks to hurry)
+    arrive(){ if (guide && guide.path.length){ const [c,r] = guide.path[guide.path.length-1]; guide.x = c*T+8; guide.y = r*T+12; guide.path = []; } },
+    walking(){ return !!(guide && guide.path.length); },
+    focus(target){ const b = target && target!=='player' && B.find(v=>v.id===target); focusPt = b ? { x:b.cx, y:b.py+b.ph/2+10 } : null; },
+    // a building's (or the player's) box in page coordinates, following the camera
+    rectOf(target){ if (!canvas || !canvas.isConnected) return null; const r = canvas.getBoundingClientRect(), k = r.width/vw; let x, y, w, h;
+      if (target==='player'){ x = Math.min(player.x, guide ? guide.x : player.x)-14; y = player.y-32; w = Math.abs((guide ? guide.x : player.x)-player.x)+28; h = 36; } // you, and BYTE beside you
+      else { const b = B.find(v=>v.id===target); if (!b) return null;
+        if (b.id==='compass'){ x = b.px-18; y = b.py-30; w = b.pw+36; h = b.ph+34; } else { x = b.px-6; y = b.py-4; w = b.pw+12; h = b.ph+10; } }
+      return { left:r.left+(x-camX)*k, top:r.top+(y-camY)*k, width:w*k, height:h*k }; },
+    active(){ return active; }
+  };
+  return { start, stop, buildings:B, banner:bannerURL, applyFS, drawFront, tree, bench, tour };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 
@@ -3080,6 +3173,7 @@ function viewMentor(el){
     <aside class="grid" style="align-content:start">
       <div class="mentor-card"><img class="px" src="${BOT_URL}" alt=""><h2>BYTE</h2><p class="muted" style="font-size:13px; margin-top:6px">AI Cybersecurity Mentor · Online</p>${l?`<div class="pill purple" style="margin-top:12px; display:inline-block">Context: ${esc(l.title)}</div>`:''}</div>
       <div class="panel"><div class="section-title">I can help you</div><ul class="recap-list" style="margin:0; font-size:14px">${['Explain a lesson in simpler words','Give real-world examples','Quiz you for practice','Suggest what to do in a security situation'].map(t=>`<li>${t}</li>`).join('')}</ul></div>
+      <div class="panel"><div class="section-title">Campus tour</div><p style="font-size:13.5px">Want me to walk you around the campus again?</p><button class="btn purple small" style="margin-top:10px" data-act="tourReplay">Replay campus tour</button></div>
       <div class="panel safety-panel"><div class="section-title" style="color:var(--pink-ink)">Safety rules</div><p style="font-size:13.5px">BYTE teaches defence. It won't help with hacking accounts, making malware or anything illegal. Try the last suggestion chip to see how it responds.</p></div>
     </aside>
     <div id="mentorPage">${Mentor.chatHTML('page')}</div>
@@ -3287,6 +3381,194 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
       log(`Career Compass match: ${careerById(S.career.pick).t}`); toast(`Your best match: ${esc(careerById(S.career.pick).t)}`);
     }
     renderView(); }
+});
+/* ============================================================
+   CAMPUS TOUR — BYTE's RPG-style orientation for new learners
+   ============================================================
+   The first time a learner reaches the campus, BYTE beams in next to them and walks the campus building by
+   building. A dialogue box at the bottom types out BYTE's lines; a spotlight dims everything except the building
+   or control being explained. Skip any time; replay from the gear menu or the AI Lab. Who has seen the tour is
+   remembered per learner name on this device (separately from progress, which log out clears). */
+const TOUR_KEY = 'cybersity-tour-seen', TOUR_SOUND_KEY = 'cybersity-tour-sound';
+const TOUR_STEPS = [
+  {face:'happy', wave:true, spot:'player', say:'Hello and welcome to Cybersity, {name}!'},
+  {face:'excited', spot:'player', say:"I'm BYTE, your AI mentor and campus guide. Let me show you around. It only takes a minute!"},
+  {face:'normal', spot:'player', say:"That's you! Walk with the arrow keys or WASD, or tap anywhere to move. Step onto a glowing doorway to go inside."},
+  {walk:'library', face:'excited', spot:'library', say:'This is the Cyber Library, where your adventure begins: six modules of short lessons, each with a hands-on game and a quick quiz.',
+    more:'Lessons unlock one after another. Pass a lesson quiz to open the next lesson, and pass a module assessment to open the next module.'},
+  {walk:'ailab', face:'wink', spot:'ailab', say:'The AI Lab is my home! Stuck on something? Ask me to explain it another way, give you an example or quiz you.'},
+  {face:'happy', spot:'#fab', say:"You can also call me from anywhere with this purple button. I'll pop up right beside your lesson."},
+  {walk:'community', face:'happy', spot:'community', say:'The Community Hub is where learners chat and help each other. Be kind, and never share personal details like your phone number or passwords.'},
+  {walk:'challenge', face:'excited', spot:'challenge', say:'The Challenge Centre keeps every game, quiz and assessment in one place. The final boss lives here too!'},
+  {walk:'achieve', face:'happy', spot:'achieve', say:'Every lesson, game and quiz earns XP. Level up and collect badges in the Achievement Hall.'},
+  {face:'wink', spot:'.hud .player-chip', say:'Your level and XP are always shown up here.'},
+  {walk:'home', face:'think', spot:'home', say:'Home Base is your dorm. Do real safety actions on your own phone, like turning on 2FA, and watch your dorm upgrade!'},
+  {walk:'compass', face:'excited', spot:'compass', say:'Wondering what cyber jobs are out there? The Career Compass matches you with a role and lets you try a taster mission.'},
+  {walk:'cert', face:'wink', spot:'cert', say:'And the Certificate Hall... is locked for now. Finish all six modules and the final assessment to earn your certificate.'},
+  {face:'happy', spot:'#nav', say:'In a hurry? The top bar takes you straight to any building.',
+    more:'Use the sun and moon button to switch between Day and Night, and the gear menu for your profile. You can replay this tour from there too.'},
+  {walk:'player', face:'happy', wave:true, spot:'player', say:"That's the grand tour, {name}! Ready for your first lesson?",
+    end:[{t:'Take me to the Library!', go:'library'}, {t:"I'll explore on my own"}]}
+];
+
+const Tour = (() => {
+  let on = false, i = 0, token = 0, layer = null, typer = null, full = '', mode = 'say', raf = null, portraitT = null, sound = false, audio = null;
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const seenMap = () => { try { return JSON.parse(localStorage.getItem(TOUR_KEY)) || {}; } catch(e){ return {}; } };
+  const nameKey = () => (S.user && S.user.name || '').trim().toLowerCase();
+  function markSeen(status){ const m = seenMap(); m[nameKey()] = status; try { localStorage.setItem(TOUR_KEY, JSON.stringify(m)); } catch(e){} }
+  const shouldRun = () => !!(S.user && !seenMap()[nameKey()]);
+  const fill = s => s.replace(/\{name\}/g, S.user ? S.user.name : 'friend');
+  const $t = sel => layer.querySelector(sel);
+
+  // 8-bit "blip" while BYTE talks (off by default, remembered per device)
+  try { sound = localStorage.getItem(TOUR_SOUND_KEY) === 'on'; } catch(e){}
+  function blip(){ if (!sound) return; try { audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain(); o.type = 'square'; o.frequency.value = 480 + Math.random()*120;
+    g.gain.setValueAtTime(0.035, audio.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.05);
+    o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.05); } catch(e){} }
+
+  function build(){
+    layer = document.createElement('div'); layer.className = 'tour'; layer.id = 'tour';
+    layer.innerHTML = `<div class="tour-dim"></div><div class="tour-spot hidden"></div><div class="tour-arrow hidden" aria-hidden="true">▼</div>
+      <section class="tour-box" role="dialog" aria-modal="true" aria-label="Campus tour with BYTE">
+        <div class="tour-tools"><span class="tour-count"></span>
+          <button class="tour-tool" data-tour="sound" aria-pressed="${sound}" title="Sound effects">${sound ? '♪ On' : '♪ Off'}</button>
+          <button class="tour-tool" data-tour="skip">Skip tour ✕</button></div>
+        <div class="tour-portrait"><canvas width="14" height="16" class="px" aria-hidden="true"></canvas></div>
+        <div class="tour-main"><div class="tour-name">BYTE <span>Campus guide</span></div>
+          <p class="tour-text" aria-hidden="true"></p><p class="sr-only" aria-live="polite"></p>
+          <div class="tour-choices"></div><div class="tour-next hidden" aria-hidden="true">▼</div></div>
+      </section>`;
+    document.body.appendChild(layer);
+    layer.addEventListener('click', onClick);
+    document.addEventListener('keydown', onKey, true);
+    // portrait: BYTE blinks, waves and moves its mouth while talking
+    let f = 0; portraitT = setInterval(()=>{ f++; const st = TOUR_STEPS[i] || {}, c = $t('.tour-portrait canvas'); if (!c) return;
+      const talking = !!typer, expr = (f%23===0) ? 'blink' : (talking && f%2 ? 'normal' : (st.face||'happy'));
+      const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0,0,14,16); x.drawImage(botFace(expr, f, mode==='say' && !!st.wave), 0, 0); }, 140);
+    raf = requestAnimationFrame(trackSpot);
+  }
+
+  // Spotlight follows its target every frame (buildings move with the campus camera)
+  function targetRect(){
+    const st = TOUR_STEPS[i]; if (!st || mode==='walk' || !st.spot) return null;
+    if (st.spot==='player' || Campus.buildings.some(b=>b.id===st.spot)) return Campus.tour.rectOf(st.spot);
+    const el = document.querySelector(st.spot); return el ? el.getBoundingClientRect() : null;
+  }
+  let cur = null; // spotlight box, eased towards its target each frame so it glides between stops and keeps up with the camera
+  function trackSpot(){
+    if (!on) return; const r = targetRect(), spot = $t('.tour-spot'), arrow = $t('.tour-arrow'), box = $t('.tour-box');
+    if (r && r.width){ const pad = 6, k = reduced() ? 1 : 0.3;
+      if (!cur || spot.classList.contains('hidden')) cur = { l:r.left, t:r.top, w:r.width, h:r.height };
+      else { cur.l += (r.left-cur.l)*k; cur.t += (r.top-cur.t)*k; cur.w += (r.width-cur.w)*k; cur.h += (r.height-cur.h)*k; }
+      spot.classList.remove('hidden'); arrow.classList.remove('hidden'); layer.classList.add('has-spot');
+      Object.assign(spot.style, { left:(cur.l-pad)+'px', top:(cur.t-pad)+'px', width:(cur.w+pad*2)+'px', height:(cur.h+pad*2)+'px' });
+      const below = r.top < 90; arrow.classList.toggle('up', below);
+      Object.assign(arrow.style, { left:(r.left+r.width/2)+'px', top:(below ? r.top+r.height+pad+4 : r.top-pad-30)+'px' });
+      box.classList.toggle('top', r.top + r.height/2 > innerHeight*0.55);
+    } else { spot.classList.add('hidden'); arrow.classList.add('hidden'); layer.classList.remove('has-spot'); box.classList.remove('top'); }
+    raf = requestAnimationFrame(trackSpot);
+  }
+  // Scroll the page so a building being explained isn't hidden behind the dialogue box
+  function ensureVisible(){
+    const r = targetRect(); if (!r) return; const st = TOUR_STEPS[i]; if (typeof st.spot==='string' && st.spot[0] !== '#' && st.spot[0] !== '.' ){
+      const box = $t('.tour-box').getBoundingClientRect(), topLimit = 80, bottomLimit = innerHeight - box.height - 30;
+      if (r.top < topLimit || r.top + r.height > bottomLimit) window.scrollBy({ top: r.top - (topLimit + Math.max(0, (bottomLimit - topLimit - r.height)/2)), behavior: reduced() ? 'auto' : 'smooth' }); }
+  }
+
+  function say(text, after){
+    clearInterval(typer); typer = null; full = text; mode = 'say';
+    const out = $t('.tour-text'); $t('.sr-only').textContent = text; $t('.tour-choices').innerHTML = ''; $t('.tour-next').classList.add('hidden');
+    const done = () => { clearInterval(typer); typer = null; out.textContent = full; after(); };
+    if (reduced()){ done(); return; }
+    let n = 0; out.textContent = '';
+    typer = setInterval(()=>{ n++; out.textContent = full.slice(0, n); if (n%2 && full[n-1] !== ' ') blip(); if (n >= full.length) done(); }, 24);
+  }
+  const showNext = () => $t('.tour-next').classList.remove('hidden');
+  function choices(list){ $t('.tour-choices').innerHTML = list.map((c,k)=>`<button class="btn small ${k ? 'ghost' : 'gold'}" data-tour="choice" data-arg="${k}">${esc(c.t)}</button>`).join('');
+    const first = $t('.tour-choices button'); if (first) first.focus({preventScroll:true}); }
+
+  async function runStep(){
+    const st = TOUR_STEPS[i], my = ++token;
+    $t('.tour-count').textContent = `${i+1}/${TOUR_STEPS.length}`;
+    if (st.walk){ mode = 'walk'; Campus.tour.focus(st.walk); Campus.tour.set({ expr:'normal', wave:false });
+      clearInterval(typer); typer = null; $t('.tour-text').textContent = '…'; $t('.tour-choices').innerHTML = ''; $t('.tour-next').classList.add('hidden');
+      await Campus.tour.walk(st.walk); if (!on || my !== token) return; }
+    if (!st.walk || st.walk === 'player') Campus.tour.focus(st.spot === 'player' ? null : st.spot);
+    Campus.tour.set({ expr: st.face, wave: !!st.wave });
+    mode = 'say'; setTimeout(ensureVisible, 60);
+    say(fill(st.say), () => {
+      if (st.end){ mode = 'end'; choices(st.end); }
+      else if (st.more){ mode = 'more'; choices([{t:'Tell me more'}, {t:'Got it!'}]); }
+      else showNext();
+    });
+  }
+  function next(){ i++; if (i >= TOUR_STEPS.length) finish('done'); else runStep(); }
+  function advance(){
+    if (mode === 'walk'){ Campus.tour.arrive(); return; }
+    if (typer){ clearInterval(typer); typer = null; $t('.tour-text').textContent = full; const st = TOUR_STEPS[i];
+      if (mode === 'say' && full === fill(st.say)){ if (st.end){ mode='end'; choices(st.end); } else if (st.more){ mode='more'; choices([{t:'Tell me more'}, {t:'Got it!'}]); } else showNext(); }
+      else showNext(); return; }
+    if (mode === 'say' || mode === 'extra') next();
+  }
+  function pick(k){
+    const st = TOUR_STEPS[i];
+    if (mode === 'confirm'){ if (k === 1) finish('skipped'); else { mode = 'say'; $t('.tour-text').textContent = full; resumeAfterConfirm(); } return; }
+    if (mode === 'more'){ if (k === 0){ mode = 'extra'; say(st.more, showNext); mode = 'extra'; } else next(); return; }
+    if (mode === 'end') finish('done', st.end[k].go);
+  }
+  let resumeAfterConfirm = () => {};
+  function askSkip(){
+    if (mode === 'confirm') return; const prev = { mode, text: $t('.tour-text').textContent, choicesHTML: $t('.tour-choices').innerHTML, next: !$t('.tour-next').classList.contains('hidden') };
+    clearInterval(typer); typer = null; Campus.tour.set({ expr:'think', wave:false }); mode = 'confirm';
+    $t('.tour-text').textContent = 'Skip the tour? You can replay it any time from the ⚙ menu.'; $t('.tour-next').classList.add('hidden');
+    choices([{t:'Keep going'}, {t:'Skip tour'}]);
+    resumeAfterConfirm = () => { const st = TOUR_STEPS[i]; Campus.tour.set({ expr: st.face, wave: !!st.wave });
+      if (prev.mode === 'walk'){ token++; runStep(); return; }
+      mode = prev.mode; $t('.tour-text').textContent = full; $t('.tour-choices').innerHTML = prev.choicesHTML;
+      if (!prev.choicesHTML) showNext(); };
+  }
+
+  function onClick(e){
+    const b = e.target.closest('[data-tour]'); if (b){ e.stopPropagation();
+      const a = b.dataset.tour;
+      if (a === 'skip') askSkip();
+      else if (a === 'sound'){ sound = !sound; try { localStorage.setItem(TOUR_SOUND_KEY, sound ? 'on' : 'off'); } catch(err){} b.setAttribute('aria-pressed', sound); b.textContent = sound ? '♪ On' : '♪ Off'; if (sound) blip(); }
+      else if (a === 'choice') pick(+b.dataset.arg);
+      return; }
+    if (mode !== 'more' && mode !== 'end' && mode !== 'confirm') advance();
+  }
+  function onKey(e){
+    if (!on) return; if (e.key === 'Tab') return;
+    if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); if (mode === 'confirm') pick(0); else askSkip(); return; }
+    if (e.target.closest && e.target.closest('.tour button') && (e.key === 'Enter' || e.key === ' ')){ e.stopPropagation(); return; } // let the focused button click
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); e.stopPropagation(); if (mode !== 'more' && mode !== 'end' && mode !== 'confirm') advance(); return; }
+    e.stopPropagation(); if (e.key.startsWith('Arrow')) e.preventDefault(); // keep the campus still while BYTE talks
+  }
+
+  function start(){
+    if (on || !S.user) return;
+    UI.menu = false; renderMenu(); if (UI.drawer) Mentor.toggleDrawer(); if (UI.campusFS) EXTRA_ACTIONS.campusFS();
+    if (S.view !== 'campus') go('campus');
+    const begin = () => { if (!Campus.tour.active()){ setTimeout(begin, 80); return; }
+      on = true; i = 0; token++; build(); Campus.tour.zoom(true); Campus.tour.show(); Campus.tour.focus(null); runStep(); };
+    setTimeout(begin, 120);
+  }
+  function finish(status, goTo){
+    on = false; token++; clearInterval(typer); typer = null; clearInterval(portraitT); cancelAnimationFrame(raf);
+    document.removeEventListener('keydown', onKey, true); if (layer) layer.remove(); layer = null;
+    Campus.tour.hide(); markSeen(status);
+    if (status === 'done'){ if (!S.badges.includes('orient')){ addXP(XP.tour, 'Campus tour with BYTE'); award('orient'); } }
+    else toast('Tour skipped. Replay it any time from the ⚙ menu.');
+    if (!S.badges.includes('hello')) setTimeout(()=>award('hello'), 300);
+    if (goTo) setTimeout(()=>EXTRA_ACTIONS.campusGo(goTo), 200);
+  }
+  return { start, shouldRun, isOn: () => on };
+})();
+
+window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
+  tourReplay: () => { UI.menu = false; renderMenu(); Tour.start(); }
 });
 /* ---------- Boot ---------- */
 BOT_URL = botCanvas().toDataURL();

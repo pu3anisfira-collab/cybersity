@@ -715,6 +715,50 @@ body.campus-fs{overflow:hidden}
 [data-theme="day"] .press-start{background:#6cc24a; color:#16300c} [data-theme="day"] .press-start{--ps-pulse:#16300c; --ps-bg2:#ffd447}
 @media (max-width:560px){ .title-screen{margin-top:-16vh} .onb-logo{font-size:52px} .press-start{padding:6px 22px 9px} }
 
+/* ---------- Campus tour with BYTE (11-tutorial.js) ----------
+   RPG dialogue box at the bottom, a spotlight that dims everything but the building or control being explained,
+   and a bouncing arrow. Sits above the top bar; pop-ups and toasts stay above it. */
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.tour{position:fixed; inset:0; z-index:150; cursor:pointer}
+.tour-dim{position:absolute; inset:0; background:#05061a99; transition:opacity .3s}
+.tour.has-spot .tour-dim{opacity:0}
+.tour-spot{position:fixed; pointer-events:none; border:3px solid var(--gold); box-shadow:0 0 0 3px #000, 0 0 0 200vmax #05061a9e, 0 0 26px 6px #ffd44788 inset;
+  animation:spotPulse 1.2s steps(2) infinite}
+@keyframes spotPulse{50%{border-color:#fff}}
+.tour-arrow{position:fixed; transform:translateX(-50%); font-family:var(--f-title); font-size:34px; line-height:1; color:var(--gold); text-shadow:3px 3px 0 #000, -2px -2px 0 #000; pointer-events:none; animation:arrowBob .6s steps(2) infinite}
+.tour-arrow.up{transform:translateX(-50%) rotate(180deg)}
+@keyframes arrowBob{50%{margin-top:6px}}
+.tour-box{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom,0px)); width:min(760px, calc(100% - 24px));
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px; align-items:start; padding:16px 18px 18px; cursor:default;
+  background:#0b0f2c; color:#e9ecff; border:4px solid #fff; box-shadow:0 0 0 4px #000, 8px 8px 0 4px #000; animation:tourIn .35s steps(5)}
+.tour-box.top{bottom:auto; top:calc(78px + env(safe-area-inset-top,0px))}
+@keyframes tourIn{from{transform:translate(-50%,40px); opacity:0}}
+.tour-portrait{width:92px; height:104px; display:grid; place-items:center; background:radial-gradient(circle at 50% 60%, #3a2a8c 0%, #151a4d 70%); border:3px solid #000; box-shadow:inset 0 0 0 3px #5d2fb0}
+.tour-portrait canvas{width:70px; height:80px; image-rendering:pixelated}
+.tour-name{font-family:var(--f-title); font-size:28px; line-height:1; color:var(--gold); letter-spacing:.04em; text-shadow:2px 2px 0 #000}
+.tour-name span{font-family:var(--f-label); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#b9a3ff; margin-left:8px; text-shadow:none}
+.tour-text{margin-top:8px; font-size:17px; line-height:1.5; min-height:3em; max-width:62ch}
+.tour-choices{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+.tour-choices:empty{display:none}
+.tour-next{position:absolute; right:18px; bottom:10px; font-family:var(--f-title); font-size:22px; color:var(--gold); animation:blinkNext .8s steps(2) infinite}
+@keyframes blinkNext{50%{opacity:0}}
+.tour-tools{position:absolute; right:12px; top:-17px; display:flex; gap:6px; align-items:center}
+.tour-count, .tour-tool{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:4px 8px; background:#1f2766; color:#e9ecff; border:2px solid #000; box-shadow:2px 2px 0 #000}
+.tour-tool:hover{background:#5d2fb0}
+.tour-tool[aria-pressed="true"]{background:#0f3e2b; color:var(--green)}
+[data-theme="day"] .tour-dim{background:#1d3a6680}
+[data-theme="day"] .tour-spot{box-shadow:0 0 0 3px #000, 0 0 0 200vmax #1d3a6673, 0 0 26px 6px #ffd44788 inset}
+[data-theme="day"] .tour-box{background:#fffaf0; color:#2b2340; border-color:#5b2f1c}
+[data-theme="day"] .tour-name{color:#ffd23f; text-shadow:2px 0 #5b2f1c, -2px 0 #5b2f1c, 0 2px #5b2f1c, 0 -2px #5b2f1c}
+[data-theme="day"] .tour-name span{color:#6a38c9}
+[data-theme="day"] .tour-portrait{background:radial-gradient(circle at 50% 60%, #e9dcff 0%, #bfe7ff 70%)}
+[data-theme="day"] .tour-next{color:#9a6400}
+@media (max-width:560px){
+  .tour-box{grid-template-columns:62px minmax(0,1fr); gap:10px; padding:14px 12px 16px}
+  .tour-portrait{width:62px; height:72px} .tour-portrait canvas{width:49px; height:56px}
+  .tour-name{font-size:24px} .tour-text{font-size:15px} .tour-tools{right:8px}
+}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}

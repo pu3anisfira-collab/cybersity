@@ -72,6 +72,25 @@ function avatarURL(look, frame=0){
 const BOT_ROWS = ['.....AA.....','.....AA.....','..KKKKKKKK..','..KVVVVVVK..','..KVCVVCVK..','..KVVVVVVK..','..KVVMMVVK..','..KKKKKKKK..','...VVVVVV...','.VVVZZZZVVV.','.V.VZVVZV.V.','...VVVVVV...','...VV..VV...','...KK..KK...'];
 function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'}); }
 let BOT_URL = '';
+// BYTE's expressions for the campus tour: face rows 3-6 (eyes and mouth) and body rows 8-10 (arms) swap per expression
+const BOT_FACES = {
+  normal: ['VVVVVV','VCVVCV','VVVVVV','VVMMVV'],
+  happy:  ['VCVVCV','CVCCVC','MVVVVM','VMMMMV'],
+  excited:['VCVVCV','VCVVCV','VVMMVV','VVMMVV'],
+  wink:   ['VVVVVV','VCVCCC','MVVVVM','VMMMMV'],
+  think:  ['VVCVVC','VVVVVV','VVVVVV','VVVMMV'],
+  blink:  ['VVVVVV','VVVVVV','VCCVCC','VVMMVV']
+};
+const BOT_WAVE = [['...VVVVVV.V.','.VVVZZZZVV..','.V.VZVVZV...'], ['...VVVVVVV..','.VVVZZZZV.V.','.V.VZVVZV...']];
+const botFaceCache = new Map();
+function botFace(expr='normal', frame=0, wave=false){
+  const k = expr+frame+wave; if (botFaceCache.has(k)) return botFaceCache.get(k);
+  const rows = BOT_ROWS.slice(), f = BOT_FACES[expr] || BOT_FACES.normal;
+  for (let i=0;i<4;i++) rows[3+i] = '..K'+f[i]+'K..';
+  if (wave){ const w = BOT_WAVE[frame%2]; rows[8]=w[0]; rows[9]=w[1]; rows[10]=w[2]; }
+  const c = rowsToCanvas(rows, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'});
+  botFaceCache.set(k, c); return c;
+}
 
 /* Canvas palette: night (default) or day (bright grass, brick paths, cream walls, sky-blue windows) */
 const isDay = () => document.documentElement.dataset.theme === 'day';

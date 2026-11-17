@@ -18,8 +18,20 @@ const fs = require('fs');
   console.log('title screen -> auth, one page left after slide:', await page.evaluate(()=>[UI.onb, document.querySelectorAll('.onb-page').length]));
   await click('[data-act="quickDemo"]'); await shot('02-avatar');
   await click('[data-act="look"][data-arg="hairStyle|hijab"]');
-  await click('[data-act="saveAvatar"]'); await shot('03-brief');
-  await click('[data-act="enterCampus"]'); await page.waitForTimeout(1500); await shot('04-campus-modal'); await closeModals();
+  await click('[data-act="saveAvatar"]'); await page.waitForTimeout(1500); await shot('03-tour-welcome');
+  // first visit: BYTE's campus tour (personal welcome, walk-through, spotlights), then the welcome badges
+  console.log('tour starts on first visit / welcome line:', await page.evaluate(()=>[Tour.isOn(), document.querySelector('.tour .sr-only').textContent]));
+  for (let k=0; k<80 && await page.evaluate(()=>Tour.isOn()); k++){
+    const n = await page.evaluate(()=>+document.querySelector('.tour-count').textContent.split('/')[0]);
+    if (n===4 || n===10) await shot('03-tour-step'+n);
+    const end = await page.evaluate(()=>document.querySelector('.tour-choices').textContent.includes('explore'));
+    if (end){ await shot('03-tour-end'); await page.click('.tour-choices button:nth-child(2)'); break; }
+    const more = await page.$('.tour-choices button'); if (more){ await more.click(); await page.waitForTimeout(250); continue; }
+    await page.keyboard.press('Enter'); await page.waitForTimeout(300);
+  }
+  await page.waitForTimeout(800); await shot('04-campus-modal');
+  console.log('tour finished / saved / badges:', await page.evaluate(()=>[Tour.isOn(), localStorage.getItem('cybersity-tour-seen'), S.badges.includes('orient') && S.badges.includes('hello')]));
+  await closeModals();
   // walk with keyboard
   await page.keyboard.down('ArrowUp'); await page.waitForTimeout(500); await page.keyboard.up('ArrowUp');
   await page.waitForTimeout(800); await shot('05-campus');
@@ -198,6 +210,14 @@ const fs = require('fs');
   console.log('day mode survives reload:', await page.evaluate(()=>document.documentElement.dataset.theme));
   await click('.hud [data-act="toggleTheme"]'); await page.waitForTimeout(300);
   console.log('back to night:', await page.evaluate(()=>document.documentElement.dataset.theme + '/' + localStorage.getItem('cybersity-theme')));
+  // returning learner is not forced through the tour; skip (Escape) and replay from the gear menu
+  await page.evaluate(()=>ACTIONS.logout()); await page.waitForTimeout(400); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  await click('[data-act="quickDemo"]'); await click('[data-act="saveAvatar"]'); await page.waitForTimeout(1500);
+  console.log('returning learner sees tour (expect false):', await page.evaluate(()=>Tour.isOn())); await closeModals();
+  await click('.hud [data-act="toggleMenu"]'); await click('[data-act="tourReplay"]'); await page.waitForTimeout(1200);
+  console.log('replay from menu starts:', await page.evaluate(()=>Tour.isOn()));
+  await page.keyboard.press('Escape'); await page.waitForTimeout(200); await shot('50-tour-skip-confirm'); await page.click('.tour-choices button:nth-child(2)'); await page.waitForTimeout(400);
+  console.log('skip ends tour:', await page.evaluate(()=>!Tour.isOn() && !document.querySelector('.tour'))); await closeModals();
   console.log('ERRORS:', errs.length ? errs.join('\n') : 'none');
   await browser.close();
 })();

@@ -156,7 +156,7 @@ function onbPageHTML(step){
       <div class="ts-foot">© 2026 Cybersity · A prototype for IIMaCC 2026</div>
     </div>`;
   if (step==='auth') return `<div class="onb-card">
-      <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 3</span></div>
+      <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 2</span></div>
       <div class="onb-logo">CYBERSITY</div>
       <p class="onb-sub">Join the campus. Pick up where you left off, or create a new learner.</p>
       <section class="panel">
@@ -176,24 +176,7 @@ function onbPageHTML(step){
         <button class="btn pink" style="width:100%" data-act="quickDemo">Try the demo instantly</button>
         <p class="note" style="margin-top:14px">Prototype only: accounts are simulated and nothing leaves your browser. Please don't type a real password.</p>
       </section></div>`;
-  if (step==='avatar') return `<div class="onb-wide">${avatarCreatorHTML()}</div>`;
-  return `<div class="briefing">
-      <div class="label" style="color:var(--pink-ink)">Step 3 of 3 · Mission briefing</div>
-      <h1 class="pixel" style="font-size:clamp(36px,8vw,56px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
-      <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
-      <div class="flow">
-        <div>${icon('book','#2ee6ff',30)}<b>LEARN</b><small>Short lessons with visuals and real scenarios</small></div>
-        <div>${icon('flag','#ff9a3d',30)}<b>PRACTISE</b><small>Hands-on activities with instant feedback</small></div>
-        <div>${icon('check','#47f59a',30)}<b>ASSESS</b><small>Lesson quizzes and module assessments</small></div>
-        <div>${icon('chip','#a46bff',30)}<b>REVIEW</b><small>Explanations for every answer</small></div>
-        <div>${icon('trophy','#ffd447',30)}<b>PROGRESS</b><small>Earn XP, levels, badges and a certificate</small></div>
-      </div>
-      <div class="panel" style="display:flex; gap:16px; align-items:center; text-align:left">
-        <img class="px" src="${BOT_URL}" alt="" style="width:60px;height:70px;flex:none">
-        <p>"Hi ${esc(UI.draftName)}! I'm <b>BYTE</b>. Walk around the campus and step into any building. Start at the <b>Cyber Library</b> for your first lesson. Tap the purple button any time to ask me something."</p>
-      </div>
-      <div style="margin-top:24px"><button class="btn gold" data-act="enterCampus">Enter the campus ▸</button></div>
-    </div>`;
+  return `<div class="onb-wide">${avatarCreatorHTML()}</div>`; // avatar
 }
 function renderOnboarding(dir='up'){
   const app = $('#app');
@@ -222,7 +205,7 @@ function avatarCreatorHTML(){
   const sw = (key, list) => `<div class="swatches">${list.map(v=>`<button class="sw ${L[key]===v?'on':''}" style="background:${v}" data-act="look" data-arg="${key}|${v}" aria-label="${key} ${v}"></button>`).join('')}</div>`;
   const chips = (key, list) => `<div class="swatches">${list.map(v=>`<button class="chip ${L[key]===v?'on':''}" data-act="look" data-arg="${key}|${v}">${v}</button>`).join('')}</div>`;
   return `<div class="panel">
-    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 3'}</div><h1 class="pixel" style="font-size:36px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
+    <div class="page-head" style="margin-bottom:16px"><div><div class="label" style="color:var(--pink-ink)">${UI.editAvatar?'Edit profile':'Step 2 of 2'}</div><h1 class="pixel" style="font-size:36px; margin-top:8px">Create your avatar</h1><p class="muted" style="margin-top:6px">This is how other learners will see you on campus and in the community.</p></div><button class="btn ghost small" data-act="randomLook">Randomise</button></div>
     <div class="creator">
       <div><div class="ava-stage"><div class="floor"></div><img class="px" id="avaPreview" alt="Avatar preview" src="${avatarURL(L)}"></div>
         <div class="field" style="margin-top:16px"><label for="avaName">Display name</label><input class="input" id="avaName" maxlength="18" value="${esc(UI.draftName)}"></div></div>
@@ -232,7 +215,7 @@ function avatarCreatorHTML(){
         <div class="opt-row"><span class="label">Hair / hijab colour</span>${sw('hairColor',LOOK_OPTS.hairColor)}</div>
         <div class="opt-row"><span class="label">Outfit colour</span>${sw('shirt',LOOK_OPTS.shirt)}</div>
         <div class="opt-row"><span class="label">Accessory</span>${chips('acc',LOOK_OPTS.acc)}</div>
-        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">${UI.editAvatar?`<button class="btn ghost" data-act="cancelAvatar">Cancel</button>`:''}<button class="btn gold" data-act="saveAvatar">${UI.editAvatar?'Save changes':'Continue ▸'}</button></div>
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap">${UI.editAvatar?`<button class="btn ghost" data-act="cancelAvatar">Cancel</button>`:''}<button class="btn gold" data-act="saveAvatar">${UI.editAvatar?'Save changes':'Enter the campus ▸'}</button></div>
       </div></div></div>`;
 }
 function bindAvatarCreator(){
@@ -490,7 +473,7 @@ function viewAchievements(el){
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
       <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -566,6 +549,7 @@ function renderMenu(){
     <span class="label">Profile</span>
     <button class="item" data-act="editAvatar">Edit avatar and name</button>
     <button class="item" data-act="go" data-arg="achievements">My progress</button>
+    <button class="item" data-act="tourReplay">Replay campus tour with BYTE</button>
     <hr><span class="label">Presenter shortcuts</span>
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
     <button class="item" data-act="demoComplete" data-arg="2">Complete Modules 1–2 (incident unlocked)</button>
@@ -603,10 +587,11 @@ const ACTIONS = {
   randomLook: () => { UI.draftLook = randomLook(); rerenderCreator(); },
   saveAvatar: () => { const name = (UI.draftName||'').trim().slice(0,18) || 'Learner';
     if (UI.editAvatar){ S.user.name=name; S.user.look=UI.draftLook; save(); UI.editAvatar=false; spriteCache.clear(); renderApp(); toast('Profile updated'); return; }
-    UI.draftName = name; UI.onb='brief'; renderOnboarding(); },
+    UI.draftName = name; ACTIONS.enterCampus(); },
   cancelAvatar: () => { UI.editAvatar=false; renderApp(); },
   editAvatar: () => { UI.menu=false; UI.editAvatar=true; UI.draftLook={...S.user.look}; UI.draftName=S.user.name; clearTimers(); if (window.Campus) Campus.stop(); renderMenu(); $('#view').innerHTML = avatarCreatorHTML(); bindAvatarCreator(); },
-  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp(); setTimeout(()=>award('hello'), 600); },
+  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp();
+    if (Tour.shouldRun()) Tour.start(); else setTimeout(()=>award('hello'), 600); }, // first visit: BYTE's campus tour, which awards the welcome badge at the end
   openModule: a => go('module',{id:a}),
   openLesson: a => { const [id,st]=a.split('|'); const l=lessonById(id); if (!lessonUnlocked(l)){ toast('Finish the previous lesson first.'); return; } UI.lessonId=id; const p=prog(id); let s=+st; if (s===5 && !p.read) s=0; if (s===6 && !(p.read&&p.activity)) s = p.read?5:0; UI.stage=s; go('lesson'); },
   stage: a => { UI.stage=+a; renderView(); window.scrollTo({top:0}); },
