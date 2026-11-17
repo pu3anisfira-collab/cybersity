@@ -759,6 +759,83 @@ body.campus-fs{overflow:hidden}
   .tour-name{font-size:24px} .tour-text{font-size:15px} .tour-tools{right:8px}
 }
 
+/* ---------- Cyber Arcade (12-arcade.js) ----------
+   Hall: one pixel cabinet per game plus a sample leaderboard. Game page: a dark arcade cabinet with HUD,
+   question bar, canvas screen, intro/results overlays and on-screen buttons on phones. */
+.arcade-hall{display:grid; gap:18px; margin-bottom:8px}
+.arcade-top{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap}
+.arcade-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+@media (max-width:980px){ .arcade-row{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){ .arcade-row{grid-template-columns:minmax(0,1fr)} }
+.machine{display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:16px 14px; background:var(--panel); border:3px solid #000; border-top:6px solid var(--mc); box-shadow:var(--hard)}
+.machine .cab{width:128px; height:168px; filter:drop-shadow(4px 4px 0 #000)}
+.machine-body{display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; width:100%}
+.machine h3{font-family:var(--f-title); font-size:36px; line-height:1; letter-spacing:.03em; color:var(--mc); text-shadow:2px 2px 0 #000, -1px -1px 0 #000}
+.machine p{color:var(--muted); font-size:14px; line-height:1.45}
+.machine-tags{display:flex; gap:6px; flex-wrap:wrap; justify-content:center}
+.machine .btn{margin-top:auto; width:100%}
+.leaderboard .lb-head{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
+.lb-tabs{display:flex; gap:6px; flex-wrap:wrap}
+.lb-tabs button{font-family:var(--f-label); font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:5px 9px; background:var(--panel-2); color:var(--text); border:2px solid #000}
+.lb-tabs button.on{background:var(--gold); color:#05061a}
+.lb-list{list-style:none; margin:0; padding:0; display:grid; gap:6px}
+.lb-list li{display:grid; grid-template-columns:28px 30px minmax(0,1fr) auto; gap:10px; align-items:center; padding:6px 10px; background:var(--navy); border:2px solid #000}
+.lb-list li.me{background:#4a3b0b; border-color:var(--gold)}
+.lb-rank{font-family:var(--f-title); font-size:22px; color:var(--gold-ink); text-align:center}
+.lb-list img{width:26px; height:30px}
+.lb-name{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.lb-score{font-family:var(--f-title); font-size:24px; font-variant-numeric:tabular-nums}
+[data-theme="day"] .lb-list li.me{background:#fff0b3}
+[data-theme="day"] .machine h3{text-shadow:2px 0 #000,-2px 0 #000,0 2px #000,0 -2px #000}
+
+.arc-cab{max-width:900px; margin:0 auto; padding:12px; background:linear-gradient(#1b2054,#0b0f2c); border:4px solid #000; box-shadow:0 0 0 3px var(--mc), 8px 8px 0 3px #000; color:#e9ecff}
+.arc-hud{display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap; padding:2px 2px 10px}
+.arc-score{font-family:var(--f-label); font-size:12px; letter-spacing:.08em}
+.arc-score b{font-family:var(--f-title); font-size:30px; color:var(--gold); margin-left:6px; font-variant-numeric:tabular-nums}
+.arc-q{flex:1 1 320px; text-align:center; font-family:var(--f-title); font-size:28px; line-height:1.05; letter-spacing:.02em; color:#fff; background:#05061a; border:3px solid var(--mc); padding:6px 12px}
+.arc-q small{display:block; font-family:var(--f-label); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--mc); margin-bottom:2px}
+.arc-lives{display:flex; gap:4px}
+.arc-lives i{display:block; width:18px; height:16px; background:#3a4166; clip-path:polygon(50% 100%,0 45%,0 18%,18% 0,35% 0,50% 18%,65% 0,82% 0,100% 18%,100% 45%)}
+.arc-lives i.on{background:#ff4fae}
+.arc-screen{position:relative; border:3px solid #000; background:#05061a}
+.arc-screen canvas{display:block; width:100%; height:auto; aspect-ratio:16/10}
+.arc-over{position:absolute; inset:0; display:grid; place-items:center; padding:14px; overflow:auto; background:#05061ae0}
+.arc-card{width:min(600px,100%); display:grid; gap:12px; justify-items:center; text-align:center}
+.arc-card p{color:#c3c9ee; max-width:52ch}
+.arc-title{font-family:var(--f-title); font-size:clamp(42px,7vw,68px); line-height:.95; letter-spacing:.04em; color:var(--mc); text-shadow:3px 0 #000,-3px 0 #000,0 3px #000,0 -3px #000,0 7px #000}
+.arc-title.win{color:var(--green)} .arc-title.lose{color:var(--red)}
+.arc-controls{display:flex; flex-wrap:wrap; gap:6px; justify-content:center}
+.arc-controls span{font-size:12.5px; padding:4px 8px; background:#1f2766; border:2px solid #000}
+.arc-controls b{font-family:var(--f-label); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--gold); margin-right:4px}
+.arc-diffs{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; width:100%}
+.arc-diffs button{display:grid; gap:2px; padding:8px; background:#1f2766; color:#e9ecff; border:3px solid #000; box-shadow:2px 2px 0 #000}
+.arc-diffs button b{font-family:var(--f-title); font-size:24px; line-height:1}
+.arc-diffs button small{font-size:11.5px; color:#9aa3da}
+.arc-diffs button.on{background:var(--mc); color:#05061a} .arc-diffs button.on small{color:#05061acc}
+.arc-start{font-size:16px; padding:12px 30px}
+.arc-stats{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:100%}
+.arc-stats div{display:grid; gap:2px; padding:8px; background:#1f2766; border:2px solid #000}
+.arc-stats span{font-family:var(--f-label); font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#9aa3da}
+.arc-stats b{font-family:var(--f-title); font-size:32px; line-height:1}
+.arc-stats em{font-style:normal; font-family:var(--f-label); font-size:10px; color:var(--gold)}
+.arc-mistakes{width:100%; text-align:left; display:grid; gap:6px; max-height:190px; overflow:auto}
+.arc-mistakes .label{color:#ff9aa8}
+.arc-mistakes > div:not(.label){display:grid; gap:2px; padding:8px 10px; background:#2a1030; border-left:4px solid #ff5d6e; font-size:13.5px}
+.arc-mistakes strong{color:#47f59a} .arc-mistakes s{color:#ff9aa8} .arc-mistakes small{color:#c3c9ee}
+.arc-perfect{font-family:var(--f-title); font-size:26px; color:var(--green)!important}
+.arc-actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.arc-pad{display:none; justify-content:center; gap:14px; padding-top:12px}
+.arc-btn{width:76px; height:60px; font-size:26px; color:#fff; background:#1f2766; border:3px solid #000; box-shadow:3px 3px 0 #000; touch-action:manipulation; user-select:none; -webkit-user-select:none}
+.arc-btn:active{transform:translate(3px,3px); box-shadow:none; background:var(--mc); color:#05061a}
+@media (max-width:760px), (pointer:coarse){ .arc-pad{display:flex} }
+@media (max-width:640px){
+  .arc-cab{padding:8px} .arc-q{order:3; flex-basis:100%; font-size:24px}
+  .arc-screen:has(.arc-over:not(.hidden)){min-height:480px}
+  .arc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .arc-diffs button small{display:none}
+}
+[data-theme="day"] .arc-cab{--cyan-ink:var(--cyan); --gold-ink:var(--gold); --green-ink:var(--green); --pink-ink:var(--pink); --red-ink:var(--red); --text:#e9ecff; --muted:#9aa3da}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}

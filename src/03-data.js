@@ -466,7 +466,7 @@ const LEVELS = [
   {xp:0, t:'Newbie'}, {xp:200, t:'Script Scout'}, {xp:450, t:'Firewall Cadet'}, {xp:800, t:'Packet Ranger'},
   {xp:1200, t:'Cyber Defender'}, {xp:1700, t:'Security Guardian'}, {xp:2300, t:'Cyber Sentinel'}
 ];
-const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20, incident:150, tour:25 };
+const XP = { lesson:50, activity:30, perfectActivity:15, quiz:40, perfectQuiz:20, module:100, final:250, mentor:5, chat:5, health:10, healthFull:50, taster:20, incident:150, tour:25, arcade:30, arcadeWin:20 }; // arcade: up to 30 XP for accuracy + 20 for finishing a run
 
 const BADGES = [
   {id:'hello', t:'Hello, World', d:'Joined the Cybersity campus', icon:'home', c:'#4c78ff'},
@@ -483,6 +483,9 @@ const BADGES = [
   {id:'grad', t:'Cyber Graduate', d:'Earned the Certificate of Completion', icon:'scroll', c:'#ffd447'},
   {id:'homesafe', t:'Home Secured', d:'Reached a 100% Safety Score at Home Base', icon:'shield', c:'#47f59a'},
   {id:'explorer', t:'Career Explorer', d:'Completed a taster mission from the Career Compass', icon:'compass', c:'#ffd447'},
+  {id:'arc_virus', t:'Virus Buster', d:'Saved the campus in Virus Escape with 70%+ accuracy', icon:'shield', c:'#47f59a'},
+  {id:'arc_rocket', t:'Firewall Pilot', d:'Finished Rocket Firewall with 70%+ accuracy', icon:'star', c:'#2ee6ff'},
+  {id:'arc_packet', t:'Packet Sorter', d:'Finished Packet Drop with 70%+ accuracy', icon:'network', c:'#ff4fae'},
   {id:'orient', t:'Orientation Complete', d:'Finished the campus tour with BYTE', icon:'campus', c:'#a46bff'},
   {id:'defender', t:'Campus Defender', d:'Secured all six buildings during the campus incident', icon:'shield', c:'#ff5d6e'}
 ];
@@ -610,4 +613,103 @@ const TIPS = [
   'Use mobile data instead of open public Wi-Fi for banking.',
   'Back up important files using the 3-2-1 rule.',
   'If you clicked something suspicious, report it quickly. Speed limits damage.'
+];
+
+/* ---------- CYBER ARCADE content ----------
+   Arcade games answer by moving, so options must fit in lanes, gates and bins: short questions,
+   3 options of 1-4 words (correct answer first; the game shuffles them) and a one-line explanation. */
+const ARCADE_GAMES = [
+  {id:'virus', t:'Virus Escape', color:'#47f59a', diff:'Medium', badge:'arc_virus',
+    desc:'A virus monster is loose on campus. Run, switch into the lane with the right answer and secure all 6 buildings.',
+    how:'Switch lanes to run through the sign with the right answer. Wrong lanes make you stumble and the monster gets closer.'},
+  {id:'rocket', t:'Rocket Firewall', color:'#2ee6ff', diff:'Easy', badge:'arc_rocket',
+    desc:'Pilot your rocket through deep space and fly through the gate with the right answer.',
+    how:'Steer up and down into the gate with the right answer. A wrong gate costs a shield.'},
+  {id:'packet', t:'Packet Drop', color:'#ff4fae', diff:'Hard', badge:'arc_packet',
+    desc:'Data packets are falling. Slide each one into the right bin before the stack overflows.',
+    how:'Move each falling block left or right and drop it into the correct bin. Wrong bins stack junk blocks.'}
+];
+const ARCADE_QS = [
+  // Module 1: cybersecurity basics and the CIA triad
+  {m:1, q:'Your phone photos are an…', o:['Asset','Threat','Vulnerability'], e:'Anything valuable you need to protect is an asset.'},
+  {m:1, q:'A scammer sending fake prizes is a…', o:['Threat','Asset','Firewall'], e:'A person who could cause harm is a threat.'},
+  {m:1, q:'An app never updated is a…', o:['Vulnerability','Threat','Asset'], e:'A weakness attackers can use is a vulnerability.'},
+  {m:1, q:'In the CIA triad, "C" means…', o:['Confidentiality','Control','Cyber'], e:'Confidentiality keeps information private.'},
+  {m:1, q:'A website flooded offline breaks…', o:['Availability','Integrity','Confidentiality'], e:'Availability means systems work when people need them.'},
+  {m:1, q:'Someone secretly changed your grade. Which is broken?', o:['Integrity','Availability','Confidentiality'], e:'Integrity means data stays accurate and unaltered.'},
+  {m:1, q:'Risk = likelihood × …', o:['Impact','Speed','Cost'], e:'Risk combines how likely something is and how bad it would be.'},
+  // Module 2: phishing and malware
+  {m:2, q:'SMS: "Parcel on hold, pay RM2 here". This is…', o:['Phishing','A real update','A backup'], e:'Fake parcel SMS is a common phishing trick in Malaysia.'},
+  {m:2, q:'A caller from "your bank" asks for your TAC. You…', o:['Hang up','Read it out','Text it back'], e:'Banks never ask for your TAC or OTP.'},
+  {m:2, q:'Phishing by SMS is called…', o:['Smishing','Vishing','Spoofing'], e:'SMS phishing is called smishing.'},
+  {m:2, q:'Phishing by phone call is…', o:['Vishing','Smishing','Pharming'], e:'Voice phishing is called vishing.'},
+  {m:2, q:'Malware that locks files for money:', o:['Ransomware','Adware','Firewall'], e:'Ransomware encrypts files and demands payment.'},
+  {m:2, q:'Lost money to a scam? Call…', o:['NSRC 997','A game shop','Nobody'], e:'Call the National Scam Response Centre at 997 as fast as possible.'},
+  {m:2, q:'A wedding invite .apk on WhatsApp?', o:["Don't open it",'Install it','Forward it'], e:'.apk files from strangers often hide malware.'},
+  {m:2, q:'Malware that records your typing:', o:['Keylogger','Backup','Patch'], e:'A keylogger secretly records what you type.'},
+  // Module 3: networks, firewalls and Wi-Fi
+  {m:3, q:'A firewall…', o:['Filters traffic','Speeds up Wi-Fi','Stores files'], e:'A firewall allows or blocks network traffic using rules.'},
+  {m:3, q:'Safest home Wi-Fi security:', o:['WPA3','WEP','Open network'], e:'WPA3 is the newest and strongest Wi-Fi security.'},
+  {m:3, q:'Banking at a café? Use…', o:['Mobile data','Free Wi-Fi','Guest Wi-Fi'], e:'Mobile data is safer than shared public Wi-Fi.'},
+  {m:3, q:'The HTTPS padlock means…', o:['Encrypted link','Honest website','No viruses'], e:'The padlock means the connection is encrypted, not that the site is genuine.'},
+  {m:3, q:'Router password "admin" is…', o:['Risky','Fine','Strong'], e:'Default passwords are public knowledge, so change them.'},
+  {m:3, q:'DNS turns website names into…', o:['IP addresses','Passwords','Emails'], e:'DNS looks up the IP address for a website name.'},
+  {m:3, q:'A VPN on café Wi-Fi…', o:['Encrypts traffic','Blocks all malware','Hides you completely'], e:'A VPN encrypts your traffic to the VPN server.'},
+  // Module 4: passwords, MFA and access
+  {m:4, q:'Strongest password?', o:['purple-kite-rain-42','P@ssw0rd','aina2005'], e:'Long random passphrases beat short tricky ones.'},
+  {m:4, q:'Use one password everywhere?', o:['Never','Always','Only for banks'], e:'One leak would unlock every account.'},
+  {m:4, q:'An SMS code is something you…', o:['Have','Know','Are'], e:'The code arrives on your phone: something you have.'},
+  {m:4, q:'Your fingerprint is something you…', o:['Are','Know','Have'], e:'Biometrics are something you are.'},
+  {m:4, q:'Give users only the access they need:', o:['Least privilege','Full admin','Shared login'], e:'Least privilege limits the damage if an account is hacked.'},
+  {m:4, q:'Best way to keep many passwords:', o:['Password manager','Sticky notes','Same password'], e:'A password manager stores a strong unique password for every account.'},
+  {m:4, q:'Someone asks for your OTP. Share it?', o:['Never','If polite','If urgent'], e:'Never share one-time codes with anyone.'},
+  // Module 5: encryption, hashing, logs and backups
+  {m:5, q:'Hashing is…', o:['One-way','Reversible','Compression'], e:'A hash cannot be turned back into the original data.'},
+  {m:5, q:'Encryption is…', o:['Reversible with a key','One-way only','Deleting data'], e:'Encrypted data can be decrypted with the right key.'},
+  {m:5, q:'3-2-1 backups: keep 1 copy…', o:['Offsite','Deleted','Printed'], e:'Keep one copy offsite or offline, safe from ransomware.'},
+  {m:5, q:'38 failed logins at 2 AM means…', o:['Brute force attack','Normal use','A backup'], e:'Many failed logins means someone is guessing passwords.'},
+  {m:5, q:'Who watches security alerts all day?', o:['SOC analyst','Web designer','Cashier'], e:'Security Operations Centre analysts monitor alerts.'},
+  {m:5, q:'Why install updates?', o:['Fix security holes','Use more battery','Slow the phone'], e:'Updates patch known weaknesses.'},
+  // Module 6: risk and incident response
+  {m:6, q:'Buying cyber insurance is…', o:['Transferring risk','Avoiding risk','Accepting risk'], e:'Insurance shifts the cost of a breach to another party.'},
+  {m:6, q:'Ransomware found! First move:', o:['Disconnect the PC','Pay the ransom','Ignore it'], e:'Containing the infection stops it spreading.'},
+  {m:6, q:'Clicked a phishing link at work?', o:['Report it now','Hide it','Delete the email'], e:'Reporting fast lets IT contain the damage.'},
+  {m:6, q:'Last incident response step:', o:['Lessons learned','Prepare','Identify'], e:'Review what happened and improve for next time.'},
+  {m:6, q:'An Acceptable Use Policy sets…', o:['Rules for systems','Staff salaries','Wi-Fi speed'], e:'An AUP sets rules for using company systems.'},
+  {m:6, q:'Stopping an unpatchable app is…', o:['Avoiding risk','Transferring risk','Accepting risk'], e:'Stopping the risky activity avoids the risk.'}
+];
+// Packet Drop: short items sorted into bins (two sets)
+const ARCADE_SORT = [
+  {id:'saferisky', t:'Safe or risky?', bins:['Safe','Risky'], items:[
+    {t:'Unique passphrase', b:'Safe', e:'A long unique passphrase is hard to guess.'},
+    {t:'Same password everywhere', b:'Risky', e:'One leak unlocks every account.'},
+    {t:'Turn on 2FA', b:'Safe', e:'A second factor stops most account takeovers.'},
+    {t:'Share OTP with caller', b:'Risky', e:'Nobody genuine ever needs your OTP.'},
+    {t:'Automatic updates on', b:'Safe', e:'Updates fix known security holes.'},
+    {t:'Banking on café Wi-Fi', b:'Risky', e:'Public Wi-Fi is shared with strangers.'},
+    {t:'Screen lock PIN', b:'Safe', e:'A lock keeps a lost phone private.'},
+    {t:'Router password "admin"', b:'Risky', e:'Default passwords are public knowledge.'},
+    {t:'Weekly photo backup', b:'Safe', e:'Backups protect against loss and ransomware.'},
+    {t:'Click "You won!" link', b:'Risky', e:'Surprise prizes are a classic phishing lure.'},
+    {t:'Check sender address', b:'Safe', e:'Look-alike senders reveal phishing.'},
+    {t:'Install .apk from chat', b:'Risky', e:'Apps from chats can hide malware.'},
+    {t:'Save 997 in contacts', b:'Safe', e:'You can call the scam hotline fast if needed.'},
+    {t:'Post your IC number', b:'Risky', e:'IC numbers help scammers steal identities.'},
+    {t:'WPA3 home Wi-Fi', b:'Safe', e:'WPA3 is the strongest Wi-Fi security.'},
+    {t:'Password on sticky note', b:'Risky', e:'Anyone walking past can read it.'}]},
+  {id:'threats', t:'Spot the threat', bins:['Phishing','Malware','Safe'], items:[
+    {t:'Fake parcel SMS', b:'Phishing', e:'It tricks you into paying or logging in.'},
+    {t:'Caller wants your TAC', b:'Phishing', e:'Voice phishing aims to steal codes.'},
+    {t:'"Verify account" email', b:'Phishing', e:'Urgent verify links steal passwords.'},
+    {t:'Fake prize login page', b:'Phishing', e:'Look-alike pages steal logins.'},
+    {t:'Ransomware locks files', b:'Malware', e:'Ransomware is malicious software.'},
+    {t:'Keylogger records typing', b:'Malware', e:'Keyloggers secretly capture what you type.'},
+    {t:'Trojan game download', b:'Malware', e:'Trojans hide inside "free" apps.'},
+    {t:'Worm spreads on network', b:'Malware', e:'Worms copy themselves across networks.'},
+    {t:'Spyware in free app', b:'Malware', e:'Spyware watches what you do.'},
+    {t:'Official app store update', b:'Safe', e:'Updates from official stores are safe.'},
+    {t:'2FA prompt you started', b:'Safe', e:'Approving your own login is expected.'},
+    {t:'Antivirus scan', b:'Safe', e:'Scanning helps find malware.'},
+    {t:'Password manager', b:'Safe', e:'It stores strong unique passwords.'},
+    {t:'Portal via bookmark', b:'Safe', e:'Bookmarks avoid look-alike links.'}]}
 ];

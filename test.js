@@ -145,6 +145,20 @@ const fs = require('fs');
   await page.evaluate(()=>go('admin')); await page.waitForTimeout(300); await shot('33-admin');
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(500); await shot('34-dashboard');
   await page.evaluate(()=>go('challenge')); await page.waitForTimeout(300); await shot('35-challenge');
+  // Cyber Arcade hall: one cabinet per game, availability, sample leaderboard, practice/assessments still below
+  console.log('arcade hall: machines / leaderboard / practice kept:', await page.evaluate(()=>[document.querySelectorAll('.machine').length, !!document.querySelector('.lb-list li'), !!document.querySelector('.boss') && document.querySelectorAll('.ch-row').length > 20]));
+  await page.evaluate(()=>document.querySelector('.arcade-hall').scrollIntoView()); await page.waitForTimeout(700); await shot('35a-arcade-hall');
+  // framework check with a tiny test-only game (the real games register themselves in later steps)
+  await page.evaluate(()=>{ if (!Arcade.games.rocket) Arcade.register('rocket', { controls:['up','down'], size:[320,200], create(api){ const qs = api.questions(4); let i = 0; api.prompt(qs[0].q, 'Question 1 of 4');
+    return { update(){}, draw(g){ g.fillStyle='#10153b'; g.fillRect(0,0,api.W,api.H); g.fillStyle='#2ee6ff'; g.fillRect(20+i*60, 90, 40, 20); },
+      input(d){ const q = qs[i], ok = d === 'up'; api.answer(ok, { q:q.q, chosen: ok ? q.correct : q.options.find(o=>o!==q.correct), correct:q.correct, e:q.e }); if (ok) api.addScore(100); else api.loseLife(); i++; if (i >= qs.length) api.end(true, 'Test run complete.'); else api.prompt(qs[i].q, 'Question '+(i+1)+' of 4'); } }; } }); go('challenge'); });
+  await page.waitForTimeout(400); await click('[data-act="arcPlay"][data-arg="rocket"]'); await page.waitForTimeout(300); await shot('35b-arcade-intro');
+  await click('[data-act="arcDiff"][data-arg="hard"]'); await click('[data-act="arcStart"]'); await page.waitForTimeout(300); await shot('35c-arcade-play');
+  const xpBefore = await page.evaluate(()=>S.xp);
+  for (const k of ['ArrowUp','ArrowDown','w','ArrowUp']){ await page.keyboard.press(k); await page.waitForTimeout(150); }
+  await page.waitForTimeout(1800); await closeModals(); await shot('35d-arcade-results');
+  console.log('arcade results: accuracy / mistakes listed / high score saved / XP gained / on leaderboard:', await page.evaluate(x=>[document.querySelector('.arc-stats').textContent.includes('75%'), document.querySelectorAll('.arc-mistakes > div:not(.label)').length, Arcade.scores().rocket.best, S.xp - x, Arcade.leaderboard('rocket').some(r=>r.me)], xpBefore));
+  await page.evaluate(()=>{ delete Arcade.games.rocket; Arcade.resetScores(); });
   // building-themed headers: every building page gets its colour and a pixel banner
   for (const v of ['library','mentor','community','home','career']){ await page.evaluate(v=>go(v), v); await page.waitForTimeout(300); await shot('35-theme-'+v); }
   console.log('themed headers:', await page.evaluate(()=>Object.keys(VIEW_BUILDING).map(v=>{ go(v); const h=document.querySelector('.page-head'); return v+':'+(h.classList.contains('bhead')&&!!h.querySelector('.bbanner')); }).join(' ')));
@@ -175,6 +189,8 @@ const fs = require('fs');
   console.log('F exits full screen:', await page.evaluate(()=>!UI.campusFS && !document.querySelector('#campusShell').classList.contains('fs')));
   await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(300);
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=2; go('lesson'); }); await page.waitForTimeout(300); await shot('40-m-lesson');
+  await page.evaluate(()=>go('challenge')); await page.waitForTimeout(500); await page.screenshot({ path: __dirname + '/shots/40f-m-arcade-hall.png', fullPage: true });
+  console.log('mobile arcade hall scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
   await page.evaluate(()=>go('library')); await page.waitForTimeout(300); await shot('40b-m-library-theme');
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300); await shot('40c-m-ailab-theme');
   await page.evaluate(()=>{ UI.lessonId='m2l1'; UI.stage=4; go('lesson'); }); await page.waitForTimeout(300);

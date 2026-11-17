@@ -84,7 +84,7 @@ function award(id){
 
 /* ---------- Shell ---------- */
 const NAV = [
-  ['dashboard','Dashboard','home'],['campus','Campus','campus'],['library','Library','book'],['challenge','Challenges','flag'],['career','Careers','compass'],
+  ['dashboard','Dashboard','home'],['campus','Campus','campus'],['library','Library','book'],['challenge','Arcade','flag'],['career','Careers','compass'],
   ['mentor','AI Lab','chip'],['community','Community','chat'],['achievements','Achievements','trophy'],['certificate','Certificate','scroll']
 ];
 function renderApp(){
@@ -122,11 +122,11 @@ function go(view, params={}){
 function renderView(){
   clearTimers(); if (window.Campus) Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
-  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || (v==='quiz'&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
+  document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, incident:viewIncident };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, incident:viewIncident, arcade:viewArcade };
   (views[v] || viewDashboard)(el);
   themeHead(el, v);
 }
@@ -134,7 +134,7 @@ function renderView(){
 function gameTitles(){ document.querySelectorAll('#app :is(.page-head h1, .welcome h1, .hero-logo, .onb-logo)').forEach(h=>{ const t = h.innerText.trim(); if (h.dataset.t !== t){ h.dataset.t = t; h.classList.add('gt'); } }); }
 new MutationObserver(gameTitles).observe(document.getElementById('app'), { childList:true, subtree:true });
 // Inside a building, the page header takes the building's colour and a pixel banner of it
-const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
+const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', arcade:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
 function themeHead(el, v){
   const head = el.querySelector('.page-head'); if (!head || head.classList.contains('role-head')) return;
   const hacked = v==='incident', id = hacked ? (S.params||{}).b : VIEW_BUILDING[v], b = id && Campus.buildings.find(x=>x.id===id); if (!b) return;
@@ -454,7 +454,8 @@ function quizResult(el, Q){
 function viewChallenge(el){
   const row = (ic, color, title, sub, btn) => `<div class="ch-row">${icon(ic,color,28)}<div><b>${title}</b><small>${sub}</small></div>${btn}</div>`;
   const fUn = allModsPassed();
-  el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Challenge Centre</div><h1>Challenge Centre</h1><p>Every practice activity, quiz and assessment in one place. Locked items open as you progress through the lessons.</p></div></div>
+  el.innerHTML = `<div class="page-head"><div><div class="crumbs">Campus · Challenge Centre</div><h1>Cyber Arcade</h1><p>Play arcade games that test what you learned, then find every practice activity, quiz and assessment below. Locked items open as you progress through the lessons.</p></div></div>
+  ${arcadeHallHTML()}
   <section class="boss"><img class="px" src="${iconURL('trophy','#ffd447')}" alt="" style="width:64px;height:64px"><div style="flex:1; min-width:220px"><div class="label" style="color:var(--pink-ink)">Final boss</div><h2>Final Assessment</h2><p class="muted" style="margin-top:6px">${MODULES.length*2} questions drawn from every module. Pass at ${S.passMark}% to earn the Cybersity Certificate of Completion.</p></div>
     ${finalPassed()?`<span class="pill green">Passed · best ${S.final.best}%</span>`:''}<button class="btn gold" data-act="startFinal" ${fUn?'':'disabled'}>${fUn?(finalPassed()?'Retake':'Start'):'Pass all 6 modules first'}</button></section>
   <div class="grid g2" style="margin-top:22px">
@@ -462,6 +463,7 @@ function viewChallenge(el){
     <section><div class="section-title">Lesson quizzes</div>${ALL_LESSONS.map(l=>{ const p=S.lessons[l.id]||{}, ok=p.read&&p.activity; return row(p.quiz?'check':ok?'star':'lock', p.quiz?'#47f59a':ok?'#ffd447':'#5a6199', `Quiz ${l.mod.n}.${l.li+1}`, `${esc(l.title)}${p.quizBest!=null?` · best ${p.quizBest}%`:''}`, `<button class="btn small ${p.quiz?'ghost':''}" data-act="startLessonQuiz" data-arg="${l.id}" ${ok?'':'disabled'}>${p.quiz?'Retake':ok?'Start':'Locked'}</button>`); }).join('')}
       <div class="section-title" style="margin-top:22px">Module assessments</div>${MODULES.map(m=>{ const ok=modLessonsDone(m), mp=S.modules[m.id]; return row(mp&&mp.passed?'check':ok?'trophy':'lock', mp&&mp.passed?'#47f59a':ok?'#ffd447':'#5a6199', `Module ${m.n} assessment`, `${esc(m.title)}${mp&&mp.best!=null?` · best ${mp.best}%`:''}`, `<button class="btn small gold" data-act="startModule" data-arg="${m.id}" ${ok?'':'disabled'}>${mp&&mp.passed?'Retake':ok?'Start':'Locked'}</button>`); }).join('')}</section>
   </div>`;
+  bindArcadeHall();
 }
 
 /* ---------- Achievements ---------- */
