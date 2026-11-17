@@ -19,7 +19,7 @@ let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
 
-const UI = { onb:'auth', authTab:'register', draftLook:null, draftName:'', editAvatar:false, lessonId:null, stage:0, scen:{}, quiz:null, room:'lounge', drawer:false, menu:false, actState:null };
+const UI = { onb:'title', authTab:'register', draftLook:null, draftName:'', editAvatar:false, lessonId:null, stage:0, scen:{}, quiz:null, room:'lounge', drawer:false, menu:false, actState:null };
 let timers = [];
 function clearTimers(){ timers.forEach(t=>{ clearInterval(t); clearTimeout(t); }); timers = []; }
 
@@ -131,7 +131,7 @@ function renderView(){
   themeHead(el, v);
 }
 // Big titles get the game-title look (see .gt in the CSS): their text is copied into data-t for the outline and fill layers
-function gameTitles(){ document.querySelectorAll('#app :is(.page-head h1, .welcome h1, .hero-logo)').forEach(h=>{ const t = h.innerText.trim(); if (h.dataset.t !== t){ h.dataset.t = t; h.classList.add('gt'); } }); }
+function gameTitles(){ document.querySelectorAll('#app :is(.page-head h1, .welcome h1, .hero-logo, .onb-logo)').forEach(h=>{ const t = h.innerText.trim(); if (h.dataset.t !== t){ h.dataset.t = t; h.classList.add('gt'); } }); }
 new MutationObserver(gameTitles).observe(document.getElementById('app'), { childList:true, subtree:true });
 // Inside a building, the page header takes the building's colour and a pixel banner of it
 const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
@@ -144,17 +144,21 @@ function themeHead(el, v){
 
 /* ---------- Onboarding ---------- */
 function randomLook(){ return { skin:pick(LOOK_OPTS.skin), hairStyle:pick(LOOK_OPTS.hairStyle), hairColor:pick(LOOK_OPTS.hairColor), shirt:pick(LOOK_OPTS.shirt), acc:pick(LOOK_OPTS.acc) }; }
-function renderOnboarding(){
-  const app = $('#app');
-  if (UI.onb==='auth'){
-    app.innerHTML = `<div class="auth"><div class="auth-wrap">
-      <section>
-        <div class="hero-logo">CYBER<br>SITY</div>
-        <div class="hero-tag">Learn cybersecurity. Level up together.</div>
-        <p class="hero-copy">A pixel campus where beginners learn to stay safe online through bite-sized lessons, hands-on challenges, an AI mentor and a community of fellow learners.</p>
-        <div class="hero-pills"><span class="pill cyan">6 modules</span><span class="pill pink">Hands-on activities</span><span class="pill purple">AI mentor</span><span class="pill gold">XP & badges</span><span class="pill green">Certificate</span></div>
-        <canvas id="heroCanvas" class="px" width="160" height="40" style="width:100%; max-width:480px; height:auto; margin-top:26px; display:block"></canvas>
-      </section>
+// Onboarding is a stack of full-screen pages over one animated campus scene (startTitleScene).
+// Steps: title -> auth -> avatar -> brief. Moving forward slides the new page up; going back slides it down.
+function onbPageHTML(step){
+  if (step==='title') return `<div class="title-screen">
+      <div class="ts-kicker">★ A cybersecurity campus adventure ★</div>
+      <h1 class="hero-logo">CYBERSITY</h1>
+      <div class="hero-tag">Learn cybersecurity. Level up together.</div>
+      <button class="press-start" data-act="pressStart">▶ Press start</button>
+      <div class="ts-hint">Press Enter or tap to begin</div>
+      <div class="ts-foot">© 2026 Cybersity · A prototype for IIMaCC 2026</div>
+    </div>`;
+  if (step==='auth') return `<div class="onb-card">
+      <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 3</span></div>
+      <div class="onb-logo">CYBERSITY</div>
+      <p class="onb-sub">Join the campus. Pick up where you left off, or create a new learner.</p>
       <section class="panel">
         <div class="tabs" role="tablist"><button class="${UI.authTab==='register'?'on':''}" data-act="authTab" data-arg="register">Register</button><button class="${UI.authTab==='login'?'on':''}" data-act="authTab" data-arg="login">Log in</button></div>
         <form id="authForm" autocomplete="off">
@@ -162,28 +166,19 @@ function renderOnboarding(){
           <div class="field"><label for="fName">Display name</label><input class="input" id="fName" maxlength="18" placeholder="e.g. NurulCyber" required></div>
           <div class="field"><label for="fEmail">Email</label><input class="input" id="fEmail" type="email" placeholder="you@example.com"></div>
           <div class="field"><label for="fPass">Password</label><input class="input" id="fPass" type="password" placeholder="At least 12 characters"></div>
-          <button class="btn" style="width:100%" type="submit">Create account</button>` : `
+          <button class="btn" style="width:100%" type="submit">Create account ▸</button>` : `
           <div class="field"><label for="fEmail">Email</label><input class="input" id="fEmail" type="email" placeholder="you@example.com"></div>
           <div class="field"><label for="fPass">Password</label><input class="input" id="fPass" type="password"></div>
-          <button class="btn" style="width:100%" type="submit">Log in</button>
+          <button class="btn" style="width:100%" type="submit">Log in ▸</button>
           <p class="note" style="margin-top:10px">Forgot password? Recovery is handled by the full system.</p>`}
         </form>
         <div style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted)" class="label"><span style="flex:1;height:2px;background:var(--line)"></span>or<span style="flex:1;height:2px;background:var(--line)"></span></div>
         <button class="btn pink" style="width:100%" data-act="quickDemo">Try the demo instantly</button>
         <p class="note" style="margin-top:14px">Prototype only: accounts are simulated and nothing leaves your browser. Please don't type a real password.</p>
-      </section></div></div>`;
-    $('#authForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const name = ($('#fName')?.value || ($('#fEmail').value.split('@')[0]) || 'Learner').trim().slice(0,18) || 'Learner';
-      UI.draftName = name; UI.draftLook = randomLook(); UI.onb='avatar'; UI.editAvatar=false; renderOnboarding();
-    });
-    drawHeroStrip();
-    return;
-  }
-  if (UI.onb==='avatar'){ app.innerHTML = `<div class="auth"><div style="width:100%;max-width:900px">${avatarCreatorHTML()}</div></div>`; bindAvatarCreator(); return; }
-  if (UI.onb==='brief'){
-    app.innerHTML = `<div class="auth"><div class="briefing">
-      <div class="label" style="color:var(--pink-ink)">Mission briefing</div>
+      </section></div>`;
+  if (step==='avatar') return `<div class="onb-wide">${avatarCreatorHTML()}</div>`;
+  return `<div class="briefing">
+      <div class="label" style="color:var(--pink-ink)">Step 3 of 3 · Mission briefing</div>
       <h1 class="pixel" style="font-size:clamp(36px,8vw,56px); margin-top:14px; text-shadow:3px 3px 0 #000">WELCOME, ${esc(UI.draftName.toUpperCase())}</h1>
       <p class="hero-copy" style="margin:16px auto 0">Cybersity follows one simple loop. Every lesson takes you through it, and BYTE, your AI mentor, is there whenever you get stuck.</p>
       <div class="flow">
@@ -198,16 +193,29 @@ function renderOnboarding(){
         <p>"Hi ${esc(UI.draftName)}! I'm <b>BYTE</b>. Walk around the campus and step into any building. Start at the <b>Cyber Library</b> for your first lesson. Tap the purple button any time to ask me something."</p>
       </div>
       <div style="margin-top:24px"><button class="btn gold" data-act="enterCampus">Enter the campus ▸</button></div>
-    </div></div>`;
-  }
+    </div>`;
 }
-function drawHeroStrip(){
-  const c = $('#heroCanvas'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
-  const looks = [0,1,2,3,4].map(()=>randomLook()); let f=0;
-  const draw = ()=>{ x.clearRect(0,0,160,40); x.fillStyle=isDay() ? '#58b83a' : '#1a2056'; x.fillRect(0,32,160,8); x.fillStyle=isDay() ? '#3c8f27' : '#303b8f'; for(let i=0;i<160;i+=6) x.fillRect(i,32,3,1);
-    looks.forEach((L,i)=>{ const sp = avatarCanvas(L, (f+i)%2); x.drawImage(sp, 6+i*26, 14 + ((f+i)%2)); });
-    x.drawImage(botCanvas(), 138, 17); f++; };
-  draw(); timers.push(setInterval(draw, 450));
+function renderOnboarding(dir='up'){
+  const app = $('#app');
+  if (!$('#onbPages')){ app.innerHTML = `<div class="onb"><canvas id="onbSky" class="px" aria-hidden="true"></canvas><div class="onb-pages" id="onbPages"></div></div>`; startTitleScene($('#onbSky')); }
+  const host = $('#onbPages'), old = host.querySelector('.onb-page.cur'), step = UI.onb;
+  const pg = document.createElement('div'); pg.className = 'onb-page step-'+step; pg.innerHTML = onbPageHTML(step);
+  if (old && old.dataset.step === step){ old.innerHTML = pg.innerHTML; bindOnbPage(old); return; } // same step (e.g. Register/Log in tabs): update in place
+  pg.dataset.step = step;
+  if (old){ pg.classList.add(dir==='up' ? 'from-below' : 'from-above'); host.appendChild(pg); pg.offsetHeight; // start below/above, then slide in
+    requestAnimationFrame(()=>{ pg.classList.remove('from-below','from-above'); old.classList.remove('cur'); old.classList.add(dir==='up' ? 'to-above' : 'to-below'); });
+    setTimeout(()=>old.remove(), 750);
+  } else host.appendChild(pg);
+  pg.classList.add('cur'); bindOnbPage(pg);
+}
+function bindOnbPage(pg){
+  const form = pg.querySelector('#authForm');
+  if (form) form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = ($('#fName')?.value || ($('#fEmail').value.split('@')[0]) || 'Learner').trim().slice(0,18) || 'Learner';
+    UI.draftName = name; UI.draftLook = randomLook(); UI.onb='avatar'; UI.editAvatar=false; renderOnboarding();
+  });
+  if (pg.querySelector('#avaPreview')) bindAvatarCreator();
 }
 function avatarCreatorHTML(){
   const L = UI.draftLook;
@@ -589,6 +597,8 @@ const ACTIONS = {
   go: a => { UI.menu=false; renderMenu(); go(a); },
   authTab: a => { UI.authTab=a; renderOnboarding(); },
   quickDemo: () => { UI.draftName='Demo Learner'; UI.draftLook=randomLook(); UI.onb='avatar'; UI.editAvatar=false; renderOnboarding(); },
+  pressStart: () => { UI.onb='auth'; renderOnboarding(); },
+  backToTitle: () => { UI.onb='title'; renderOnboarding('down'); },
   look: a => { const [k,v]=a.split('|'); UI.draftLook = {...UI.draftLook, [k]:v}; rerenderCreator(); },
   randomLook: () => { UI.draftLook = randomLook(); rerenderCreator(); },
   saveAvatar: () => { const name = (UI.draftName||'').trim().slice(0,18) || 'Learner';
@@ -616,8 +626,8 @@ const ACTIONS = {
     if (S.user) renderApp(); toast(day ? '☀ Day mode on' : '🌙 Night mode on'); },
   demoComplete: a => demoComplete(+a),
   resetDemo: () => { UI.menu=false; renderMenu(); showModal(`<h2>Reset demo?</h2><p class="muted">This clears all progress, XP, badges and your avatar so you can start the journey again.</p><div class="actions"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn pink" data-act="confirmReset">Reset everything</button></div>`); },
-  confirmReset: () => { S = freshState(); save(); UI.onb='auth'; UI.scen={}; UI.quiz=null; modalQueue.length=0; $('#layer').innerHTML=''; Mentor.reset(); renderApp(); },
-  logout: () => { UI.menu=false; const keep = S; S = freshState(); S.passMark = keep.passMark; save(); UI.onb='auth'; renderApp(); toast('Logged out securely'); },
+  confirmReset: () => { S = freshState(); save(); UI.onb='title'; UI.scen={}; UI.quiz=null; modalQueue.length=0; $('#layer').innerHTML=''; Mentor.reset(); renderApp(); },
+  logout: () => { UI.menu=false; const keep = S; S = freshState(); S.passMark = keep.passMark; save(); UI.onb='title'; modalQueue.length=0; $('#layer').innerHTML=''; renderApp(); toast('Logged out securely'); },
   closeModal: () => closeModal(),
   modalBg: (a, e) => { if (e.target.classList.contains('overlay')) closeModal(); },
   shareBadge: a => { const b=BADGES.find(x=>x.id===a); Community.postShare(`unlocked the <b>${esc(b.t)}</b> badge`, b.icon, b.c); if (modalQueue.length) closeModal(); toast('Shared to the Achievement Wall'); },
@@ -632,7 +642,7 @@ const ACTIONS = {
 };
 function rerenderCreator(){
   clearTimers();
-  if (UI.editAvatar && S.user){ $('#view').innerHTML = avatarCreatorHTML(); } else { $('#app').innerHTML = `<div class="auth"><div style="width:100%;max-width:900px">${avatarCreatorHTML()}</div></div>`; }
+  if (UI.editAvatar && S.user){ $('#view').innerHTML = avatarCreatorHTML(); } else { const cur = $('#onbPages .onb-page.cur'); if (cur) cur.innerHTML = onbPageHTML('avatar'); }
   bindAvatarCreator();
 }
 document.addEventListener('click', e=>{
@@ -642,4 +652,4 @@ document.addEventListener('click', e=>{
   const fn = ACTIONS[t.dataset.act] || (window.EXTRA_ACTIONS && EXTRA_ACTIONS[t.dataset.act]);
   if (fn){ if (t.tagName==='A') e.preventDefault(); fn(t.dataset.arg, e, t); }
 });
-document.addEventListener('keydown', e=>{ if (e.key==='Escape'){ if (modalQueue.length) closeModal(); else if (UI.menu){ UI.menu=false; renderMenu(); } else if (UI.drawer) Mentor.toggleDrawer(); } });
+document.addEventListener('keydown', e=>{ if (e.key==='Enter' && !S.user && UI.onb==='title' && !e.target.closest('input,textarea,button')){ e.preventDefault(); ACTIONS.pressStart(); return; } if (e.key==='Escape'){ if (modalQueue.length) closeModal(); else if (UI.menu){ UI.menu=false; renderMenu(); } else if (UI.drawer) Mentor.toggleDrawer(); } });

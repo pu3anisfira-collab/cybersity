@@ -262,6 +262,18 @@ const Campus = (() => {
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); },
     campusZoom: () => { UI.campusFull = !UI.campusFull; if (active) sizeCanvas(); },
     campusFS: () => setCampusFS(!UI.campusFS), campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
+  // One building's front (roof, sign, windows, door) at x,y, as seen on the campus; used by banners and the title screen
+  function drawFront(g, id, x, y, hacked){
+    const b = B.find(v=>v.id===id); if (!b) return; const P = pal(), locked = bLocked(id), col = hacked ? '#ff5d6e' : b.color;
+    if (id==='home'){ drawDorm(g, x, y, b.pw, b.ph, homeStage(), 1); return; }
+    building(g, {...b, px:x, py:y});
+    [x+6, x+18, x+b.pw-28, x+b.pw-16].forEach((wx,i)=>{ const on = !locked && (hacked ? i%2===0 : i!==2);
+      g.fillStyle='#05061a'; g.fillRect(wx-1,y+35,12,12); g.fillStyle = on ? (P.winOn && !hacked ? P.winOn : col) : P.winOff; g.fillRect(wx,y+36,10,10);
+      g.fillStyle = on ? '#ffffffaa' : P.winGlintOff; g.fillRect(wx+1,y+37,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,y+36,1,10); });
+    const dx = x+b.pw/2-10, dy = y+b.ph-22;
+    g.fillStyle='#05061a'; g.fillRect(dx-2,dy-2,24,24); g.fillStyle=col; g.fillRect(dx-1,dy-1,22,23); g.fillStyle=P.doorIn; g.fillRect(dx+1,dy+1,18,21);
+    if (locked) g.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); else { g.fillStyle=col+'55'; g.fillRect(dx+1,dy+8,18,2); g.fillStyle='#ffffff22'; g.fillRect(dx+1,dy+1,18,4); }
+  }
   // Small pixel banner of one building (as seen on the campus) for its page header; cached once fonts are ready
   const bannerCache = new Map();
   function bannerURL(id, hacked){
@@ -278,13 +290,7 @@ const Campus = (() => {
     if (id==='home') drawDorm(g, (BW-96)/2, BH-12-64, 96, 64, stage, 1);
     else if (id==='compass'){ g.translate(BW/2, BH-12); g.scale(1.7,1.7); drawSignpost(g, 0, 0, 1); g.setTransform(s,0,0,s,0,0); }
     else {
-      const x=Math.round((BW-b.pw)/2), y=BH-12-b.ph, col = hacked ? '#ff5d6e' : b.color; building(g, {...b, px:x, py:y});
-      [x+6, x+18, x+b.pw-28, x+b.pw-16].forEach((wx,i)=>{ const on = !locked && (hacked ? i%2===0 : i!==2);
-        g.fillStyle='#05061a'; g.fillRect(wx-1,y+35,12,12); g.fillStyle = on ? col : '#262c66'; g.fillRect(wx,y+36,10,10);
-        g.fillStyle = on ? '#ffffffaa' : '#3a4596'; g.fillRect(wx+1,y+37,3,3); g.fillStyle='#05061a'; g.fillRect(wx+4.5,y+36,1,10); });
-      const dx = x+b.pw/2-10, dy = y+b.ph-22;
-      g.fillStyle='#05061a'; g.fillRect(dx-2,dy-2,24,24); g.fillStyle=col; g.fillRect(dx-1,dy-1,22,23); g.fillStyle='#0b0f2c'; g.fillRect(dx+1,dy+1,18,21);
-      if (locked) g.drawImage(iconCanvas('lock','#ffd447'), dx+4, dy+5); else { g.fillStyle=col+'55'; g.fillRect(dx+1,dy+8,18,2); g.fillStyle='#ffffff22'; g.fillRect(dx+1,dy+1,18,4); }
+      const x=Math.round((BW-b.pw)/2), y=BH-12-b.ph; drawFront(g, id, x, y, hacked);
       if (hacked){ g.fillStyle='rgba(255,60,80,0.22)'; g.fillRect(x-3,y,b.pw+6,b.ph);
         [[y+14,3,4],[y+40,4,-5],[y+58,2,3]].forEach(([sy,sh,off])=>g.drawImage(c, (x-3)*s, sy*s, (b.pw+6)*s, sh*s, x-3+off, sy, b.pw+6, sh));
         g.font='6px Silkscreen, monospace'; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#05061a'; g.fillRect(BW/2-18, BH-11, 36, 9); g.fillStyle='#ff5d6e'; g.fillText('HACKED', BW/2, BH-6.5); }
@@ -300,7 +306,7 @@ const Campus = (() => {
     try { if (on && !d.fullscreenElement && d.documentElement.requestFullscreen) d.documentElement.requestFullscreen().catch(()=>{}); if (!on && d.fullscreenElement) d.exitFullscreen().catch(()=>{}); } catch(e){}
     applyFS(); }
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && UI.campusFS){ UI.campusFS = false; applyFS(); } });
-  return { start, stop, buildings:B, banner:bannerURL, applyFS };
+  return { start, stop, buildings:B, banner:bannerURL, applyFS, drawFront, tree, bench };
 })();
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 
@@ -487,3 +493,63 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
     if (gained){ S.xp += gained; log('Presenter shortcut: Home Base checklist complete', gained); updateHUD(); }
     healthAfter(before); renderView(); }
 });
+
+/* ---------- Title screen scene (sign-in pages) ----------
+   A wide pixel campus at dusk or by day: sky, moon or sun, drifting clouds in two layers, the campus buildings
+   along the horizon, lamps and students walking the path. It keeps running behind every onboarding page and
+   pans down a little once the learner leaves the title screen. */
+function startTitleScene(cv){
+  const g = cv.getContext('2d'); let s = 2, LW = 0, LH = 0, front = null, frontKey = '', last = performance.now(), pan = 0;
+  const ROW = ['library','ailab','community','home','challenge','achieve','cert'];
+  const clouds = Array.from({length:9}, (_,i)=>({ x:(i*0.137+0.05)%1, y:0.05+((i*37)%10)/10*0.36, w:46+((i*23)%5)*14, far:i%3===0 }));
+  const walkers = COMMUNITY_USERS.slice(0,6).map((u,i)=>({ look:u.look, x:(i*0.19+0.07)%1, dir:i%2 ? 1 : -1, sp:9+(i%3)*4, f:0 }));
+  function size(){ s = Math.max(2, Math.floor(Math.min(innerHeight/300, innerWidth/170))); LW = Math.ceil(innerWidth/s); LH = Math.ceil(innerHeight/s);
+    cv.width = LW*s; cv.height = LH*s; g.imageSmoothingEnabled = false; frontKey = ''; }
+  function cloud(x, y, w, far){ const h = Math.round(w*0.32), day = isDay();
+    const top = day ? (far ? '#e8f4ff' : '#ffffff') : (far ? '#232a66' : '#2f3a86'), under = day ? '#c9dcff' : (far ? '#1b2158' : '#252e73');
+    x = Math.round(x); y = Math.round(y);
+    g.fillStyle = top; g.fillRect(x, y+h*0.45|0, w, h*0.45|0); g.fillRect(x+w*0.12|0, y+h*0.2|0, w*0.5|0, h*0.4|0); g.fillRect(x+w*0.4|0, y, w*0.3|0, h*0.4|0); g.fillRect(x+w*0.62|0, y+h*0.25|0, w*0.25|0, h*0.3|0);
+    g.fillStyle = under; g.fillRect(x, y+h*0.9|0, w, Math.max(2, h*0.12|0)); }
+  // Static front layer (hills, buildings, path, grass, lamps), rebuilt only when size or theme changes
+  function buildFront(){
+    const P = pal(), day = isDay(), H2 = 150; front = document.createElement('canvas'); front.width = LW*s; front.height = H2*s;
+    const f = front.getContext('2d'); f.imageSmoothingEnabled = false; f.setTransform(s,0,0,s,0,0);
+    const base = 96; // path line inside the layer
+    f.fillStyle = day ? '#7cc77a' : '#14243f'; for (let x=0;x<LW;x+=12){ const h = 10+((x*7)%13); f.fillRect(x, base-34-h, 14, h+40); } // far hills
+    for (let x=-8;x<LW;x+=16) Campus.tree(f, x, base-40+((x/16|0)%2)*3, (x/16|0)%3);
+    const gap = 10, widths = ROW.map(id=>Campus.buildings.find(b=>b.id===id).pw), total = widths.reduce((a,b)=>a+b+gap,0) - gap;
+    let x = Math.round((LW-total)/2); while (x > 0) x -= total+gap; // repeat the row to fill wide screens
+    for (; x < LW; x += total+gap){ let bx = x; ROW.forEach((id,i)=>{ const b = Campus.buildings.find(v=>v.id===id); Campus.drawFront(f, id, bx, base-b.ph); bx += widths[i]+gap; }); }
+    f.fillStyle = P.path[0]; f.fillRect(0, base, LW, 18); f.fillStyle = P.pathLine; f.fillRect(0, base, LW, 1); f.fillRect(0, base+17, LW, 1);
+    for (let i=0;i<LW;i+=16){ f.fillStyle = P.path[1]; f.fillRect(i, base+1, 8, 16); }
+    f.fillStyle = P.grass; f.fillRect(0, base+18, LW, H2-base-18);
+    for (let i=0;i<LW*3;i++){ f.fillStyle = P.grassDots[i%2]; f.fillRect((i*37)%LW, base+20+((i*13)%(H2-base-22)), 1, 2); }
+    for (let i=0;i<LW/9;i++){ if ((i*7)%5===0){ f.fillStyle = pick(P.sparkle); f.fillRect((i*53)%LW, base+24+((i*29)%(H2-base-28)), 2, 2); } }
+    for (let lx=24; lx<LW; lx+=72){ if (!day){ const grd = f.createRadialGradient(lx, base-14, 1, lx, base-14, 22); grd.addColorStop(0,'rgba(255,212,71,0.3)'); grd.addColorStop(1,'rgba(255,212,71,0)'); f.fillStyle = grd; f.fillRect(lx-22, base-36, 44, 44); }
+      f.fillStyle='#05061a'; f.fillRect(lx-1, base-12, 3, 14); f.fillRect(lx-3, base-16, 7, 5); f.fillStyle = day ? '#fff6d0' : '#ffd447'; f.fillRect(lx-2, base-15, 5, 3); }
+    Campus.bench(f, 40, base+24); Campus.bench(f, LW-80, base+24);
+    frontKey = [LW, LH, s, day].join('|');
+  }
+  function frame(now){
+    if (!cv.isConnected){ removeEventListener('resize', size); return; }
+    const dt = Math.max(0, Math.min(0.05, (now-last)/1000)), t = now/1000, day = isDay(); last = now;
+    if (frontKey !== [LW, LH, s, day].join('|')) buildFront();
+    pan += ((UI.onb==='title' ? 0 : 1) - pan) * Math.min(1, dt*4);
+    g.setTransform(s,0,0,s,0,0);
+    const sky = g.createLinearGradient(0,0,0,LH); if (day){ sky.addColorStop(0,'#4fb2ff'); sky.addColorStop(1,'#c9ecff'); } else { sky.addColorStop(0,'#05071c'); sky.addColorStop(1,'#232a7a'); }
+    g.fillStyle = sky; g.fillRect(0,0,LW,LH);
+    if (day){ const sx = LW*0.84|0, sy = LH*0.13|0; g.fillStyle='#fff3a0'; g.fillRect(sx-9,sy-6,18,12); g.fillRect(sx-6,sy-9,12,18); g.fillStyle='#ffd447'; g.fillRect(sx-7,sy-4,14,8); g.fillRect(sx-4,sy-7,8,14); }
+    else { for (let i=0;i<70;i++){ const x = (i*97)%LW, y = (i*53)%(LH*0.6|0); g.fillStyle = (Math.floor(t*1.5+i)%7===0) ? '#ffffff' : (i%4 ? '#ffffff66' : '#2ee6ff88'); g.fillRect(x, y, 1, 1); }
+      const mx = LW*0.82|0, my = LH*0.14|0; for (let yy=-9; yy<=9; yy++) for (let xx=-9; xx<=9; xx++){ if (xx*xx+yy*yy <= 81 && (xx-5)*(xx-5)+(yy+3)*(yy+3) > 49){ g.fillStyle = (xx*xx+yy*yy > 60) ? '#d8d2a0' : '#f6f2cf'; g.fillRect(mx+xx, my+yy, 1, 1); } } }
+    clouds.forEach(c=>{ c.x += (c.far ? 0.004 : 0.009) * dt; if (c.x > 1.15) c.x = -0.3; if (c.far) cloud(c.x*LW, c.y*LH, c.w*0.75, true); });
+    clouds.forEach(c=>{ if (!c.far) cloud(c.x*LW, c.y*LH, c.w, false); });
+    const baseY = Math.round(LH*0.74 + pan*LH*0.18) - 96; // front layer's top edge on screen
+    g.setTransform(1,0,0,1,0,0); g.drawImage(front, 0, baseY*s); g.setTransform(s,0,0,s,0,0);
+    if (baseY+150 < LH){ g.fillStyle = pal().grass; g.fillRect(0, baseY+150, LW, LH-baseY-150); }
+    walkers.forEach(w=>{ w.x += w.dir*w.sp*dt/LW; if (w.x > 1.05) w.x = -0.05; if (w.x < -0.05) w.x = 1.05; w.f += dt*4;
+      const sp = avatarCanvas(w.look, Math.floor(w.f)%2, false), px = Math.round(w.x*LW), py = baseY+96+1;
+      g.fillStyle='#0006'; g.fillRect(px+2, py+15, 10, 2); g.save(); if (w.dir<0){ g.translate(px+14, 0); g.scale(-1,1); g.drawImage(sp, 0, py-2); } else g.drawImage(sp, px, py-2); g.restore(); });
+    requestAnimationFrame(frame);
+  }
+  size(); addEventListener('resize', size); requestAnimationFrame(frame);
+}

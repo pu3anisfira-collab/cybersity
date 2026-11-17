@@ -12,7 +12,10 @@ const fs = require('fs');
   const shot = async n => page.screenshot({ path: __dirname + '/shots/' + n + '.png' });
   const click = async sel => { await page.click(sel); await page.waitForTimeout(250); };
   const closeModals = async () => { for (let i=0;i<6;i++){ const b = await page.$('#layer .modal [data-act="closeModal"]'); if (!b) break; await b.click(); await page.waitForTimeout(150); } };
-  await page.waitForTimeout(800); await shot('01-auth');
+  await page.waitForTimeout(1200); await shot('01-title');
+  // title screen: Press Start (Enter) slides up to sign up / log in
+  await page.keyboard.press('Enter'); await page.waitForTimeout(350); await shot('01a-slide'); await page.waitForTimeout(700); await shot('01b-auth');
+  console.log('title screen -> auth, one page left after slide:', await page.evaluate(()=>[UI.onb, document.querySelectorAll('.onb-page').length]));
   await click('[data-act="quickDemo"]'); await shot('02-avatar');
   await click('[data-act="look"][data-arg="hairStyle|hijab"]');
   await click('[data-act="saveAvatar"]'); await shot('03-brief');

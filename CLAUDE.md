@@ -79,6 +79,12 @@ build tooling unless the owner asks.
   shape, so the camera follows the player along the cut-off side. A gear button, Exit and the incident banner float
   on top. The mode stays on while visiting buildings and comes back on return. Esc or F exits.
 
+- **Title screen and onboarding** (05 `renderOnboarding` / `onbPageHTML`, 07 `startTitleScene`). Signed-out visitors
+  see a full-screen animated pixel campus: sky with a moon or sun, drifting clouds, the campus buildings (drawn
+  with `Campus.drawFront`), lamps and walking students. A centred CYBERSITY title and a pulsing PRESS START button
+  (or Enter) sit over it. The steps `UI.onb` = title, auth, avatar, brief are full-screen pages that slide up over the
+  same running scene ("Title screen" slides back down). The scene pans down once you leave the title.
+
 ## Day mode
 - A sun/moon button (top bar; top-right corner on the sign-in screens) switches between Night (default) and Day.
   The choice is saved in `localStorage` key `cybersity-theme` and applied as `<html data-theme="day">`.
