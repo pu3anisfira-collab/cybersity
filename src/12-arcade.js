@@ -58,7 +58,7 @@ const Arcade = (() => {
   const meta = id => ARCADE_GAMES.find(g => g.id === id);
   function status(id){
     if (!games[id]) return { ok:false, label:'Coming soon' };
-    if (id === 'virus' && !(modPassed(MODULES[1]) || S.arcadeUnlocked)) return { ok:false, label:'Unlocks after Module 2' };
+    if (id === 'virus' && !(modPassed(MODULES[1]) || S.arcadeUnlocked || incActive())) return { ok:false, label:'Unlocks after Module 2' };
     return { ok:true, label:'Ready to play' };
   }
 
@@ -148,6 +148,7 @@ function arcIntro(id, diff){
   const keys = (mod.controls || []).includes('up') ? '▲ ▼ arrow keys or W / S' : '◀ ▶ arrow keys or A / D';
   $('#arcOver').innerHTML = `<div class="arc-card">
       <div class="arc-title" data-t="${esc(gm.t)}">${esc(gm.t)}</div>
+      ${mod.story ? `<p class="arc-story">${esc(mod.story(S.params || {}))}</p>` : ''}
       <p>${esc(gm.how)}</p>
       <div class="arc-controls"><span><b>Desktop</b> ${keys}</span><span><b>Phone</b> tap the buttons or swipe</span><span><b>Pause</b> P or Esc</span></div>
       <div class="arc-diffs" role="radiogroup" aria-label="Difficulty">${Object.values(ARCADE_DIFF).map(d => `<button role="radio" aria-checked="${d.id===diff}" class="${d.id===diff?'on':''}" data-act="arcDiff" data-arg="${d.id}"><b>${d.t}</b><small>${d.note}</small></button>`).join('')}</div>
@@ -162,11 +163,11 @@ function arcStart(id){
   Arcade.unlockAudio(); Arcade.sfx('start');
   const [LW, LH] = mod.size || [320, 200], SCL = 3; cv.width = LW*SCL; cv.height = LH*SCL; cv.style.aspectRatio = `${LW}/${LH}`;
   const g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
-  const run = ARC = { id, diff, score:0, lives:diff.lives, answers:[], over:false, paused:false, flashT:0, flashC:'', game:null, raf:0, last:0 };
+  const run = ARC = { id, mod, params:{ ...(S.params || {}) }, diff, score:0, lives:diff.lives, answers:[], over:false, paused:false, flashT:0, flashC:'', game:null, raf:0, last:0 };
   const hud = () => { const sEl = $('#arcScore'), lEl = $('#arcLives'); if (sEl) sEl.textContent = run.score;
     if (lEl) lEl.innerHTML = Array.from({length:diff.lives}, (_,i) => `<i class="${i < run.lives ? 'on' : ''}"></i>`).join(''); };
   const api = {
-    W:LW, H:LH, diff, questions:Arcade.questions, sortSet:Arcade.sortSet, sfx:Arcade.sfx,
+    W:LW, H:LH, diff, params:{ ...(S.params || {}) }, questions:Arcade.questions, sortSet:Arcade.sortSet, sfx:Arcade.sfx,
     prompt(text, small){ const q = $('#arcQ'); if (!q) return; q.classList.toggle('hidden', !text); q.innerHTML = text ? `${small ? `<small>${esc(small)}</small>` : ''}${esc(text)}` : ''; },
     answer(ok, item){ run.answers.push({ ok, ...item }); Arcade.sfx(ok ? 'ok' : 'bad'); run.flashT = 0.35; run.flashC = ok ? '#47f59a' : '#ff5d6e'; hud(); },
     loseLife(){ if (run.over) return; run.lives = Math.max(0, run.lives-1); Arcade.sfx('life'); hud(); if (run.lives <= 0) api.end(false); },
@@ -176,6 +177,8 @@ function arcStart(id){
     end(won, note){ if (run.over) return; run.over = true; run.won = won; run.note = note; Arcade.sfx(won ? 'win' : 'lose'); setTimeout(() => arcResults(run), won ? 1400 : 900); }
   };
   $('#arcOver').classList.add('hidden'); $('#arcOver').innerHTML = ''; api.prompt('');
+  // bring the whole cabinet (question bar, screen, buttons) into view under the top bar, ready to record
+  const cab = $('.arc-cab'); if (cab) window.scrollTo({ top: Math.max(0, cab.getBoundingClientRect().top + scrollY - ($('.hud') ? $('.hud').offsetHeight + 8 : 8)), behavior:'smooth' });
   run.game = mod.create(api); hud();
   const loop = now => {
     if (ARC !== run || !cv.isConnected){ arcStop(run); return; }
@@ -222,7 +225,7 @@ function arcResults(run){
       <div class="arc-stats"><div><span>Score</span><b>${run.score}</b>${best && run.score ? '<em>New high score!</em>' : ''}</div><div><span>Accuracy</span><b>${acc}%</b></div><div><span>Correct</span><b>${correct}/${total}</b></div><div><span>XP</span><b>+${xp}</b></div></div>
       ${mistakes.length ? `<div class="arc-mistakes"><div class="label">Review your mistakes</div>${mistakes.map(m => `<div><b>${esc(m.q)}</b><span>You chose <s>${esc(m.chosen)}</s> · Correct: <strong>${esc(m.correct)}</strong></span><small>${esc(m.e)}</small></div>`).join('')}</div>`
         : (total ? '<p class="arc-perfect">No mistakes. Flawless run!</p>' : '')}
-      <div class="arc-actions"><button class="btn gold" data-act="arcStart" data-arg="${run.id}">↻ Play again</button><button class="btn ghost" data-act="arcIntroBack" data-arg="${run.id}">Change difficulty</button><button class="btn ghost" data-act="go" data-arg="challenge">Back to arcade</button></div>
+      <div class="arc-actions">${run.mod.resultActions ? run.mod.resultActions(run) : ''}<button class="btn gold" data-act="arcStart" data-arg="${run.id}">↻ Play again</button><button class="btn ghost" data-act="arcIntroBack" data-arg="${run.id}">Change difficulty</button><button class="btn ghost" data-act="go" data-arg="challenge">Back to arcade</button></div>
     </div>`;
   arcStop(run); ARC = run; // keep the session for "Play again" but stop the loop
   if (xp) addXP(xp, `${gm.t}: ${correct}/${total} correct`);

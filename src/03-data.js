@@ -490,25 +490,9 @@ const BADGES = [
   {id:'defender', t:'Campus Defender', d:'Secured all six buildings during the campus incident', icon:'shield', c:'#ff5d6e'}
 ];
 
-/* Campus Incident: a presenter-started attack event, unlocked after Module 2. One challenge per building, reusing the game engines. */
-const INCIDENT = [
-  {b:'library', lesson:'m2l1', t:'Planted phishing email', brief:'Attackers planted a phishing email in the Library inbox. Find the warning signs before anyone clicks the link.'},
-  {b:'ailab', lesson:'m4l1', t:'BYTE is locked out', brief:'Hackers guessed BYTE\'s weak password and took over the AI Lab. Build a strong passphrase to lock them out.'},
-  {b:'community', lesson:'inc-community', t:'Fake admin in the chat', brief:'A fake "admin" is asking learners for their passwords. Sort the messages: genuine, or a scam to report?'},
-  {b:'challenge', lesson:'m3l2', t:'Router settings changed', brief:'Someone changed the Challenge Centre router to unsafe settings. Put every setting back to secure.'},
-  {b:'achieve', lesson:'m5l2', t:'Intruder in the logs', brief:'An intruder is hiding in the Achievement Hall server. Find every suspicious log line.'},
-  {b:'cert', lesson:'m6l2', t:'Ransomware on the certificate server', brief:'Ransomware hit the Certificate Hall. Put the incident response steps in the right order to recover.'}
-];
-const FAKE_ADMIN = {id:'inc-community', title:'Spot the Fake Admin', activity:{type:'sort', title:'Spot the Fake Admin', intro:'Read each Community Hub message and decide: genuine, or a scam to report?',
-  buckets:[{id:'ok', t:'Genuine', d:'A normal, safe message', c:'vt-green'},{id:'scam', t:'Fake admin / scam', d:'Report it and never reply', c:'vt-red'}],
-  items:[
-    {t:'[ADMIN] Security check: reply with your password in 10 minutes or your account will be deleted.', a:'scam', fb:'Real admins never ask for your password, and the countdown is a pressure trick.'},
-    {t:'Anyone want to revise Module 3 together tonight in Study Squad?', a:'ok', fb:'A normal study invite. It asks for nothing personal.'},
-    {t:'Cybersity Support here. Send us the 6-digit code we just texted you to verify your badge.', a:'scam', fb:'One-time codes are never shared with anyone. This is how accounts get taken over.'},
-    {t:'Moderator reminder: never share passwords or OTP codes in chat, even with staff.', a:'ok', fb:'A genuine safety reminder. It warns you instead of asking for anything.'},
-    {t:'Admin_Official: free 500 XP! Log in at cybersity-bonus.xyz with your student account.', a:'scam', fb:'A look-alike website and a too-good-to-be-true prize: classic credential phishing.'},
-    {t:'Just got the Log Detective badge! The 2 AM logins were the giveaway.', a:'ok', fb:'A classmate sharing progress. Nothing suspicious.'}]}};
-
+/* Campus Incident: a virus monster attacks the campus (presenter gear menu, or the campus alert after Module 2).
+   Virus Escape secures these buildings in this order; the campus shows each one restored. */
+const INCIDENT = [ {b:'library'}, {b:'ailab'}, {b:'community'}, {b:'challenge'}, {b:'achieve'}, {b:'cert'} ];
 /* Career Compass: signpost on the plaza, role quiz, role pages with taster missions and roadmaps */
 const CAREER_SIGN = {id:'compass', name:'Career Compass', view:'career', color:'#ffd447', icon:'compass', desc:'Find the cyber role that fits you and your roadmap to a first job'};
 const CAREERS = [

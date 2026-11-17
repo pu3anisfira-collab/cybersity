@@ -253,12 +253,12 @@ const Campus = (() => {
   }
   function onMove(e){ const [x,y]=toLogical(e); const b=bAt(x,y); hover=b||null; canvas.style.cursor = b?'pointer':'crosshair';
     const tip=$('#campusTip'); if (!tip) return; if (b){ const r=canvas.getBoundingClientRect(); const locked = bLocked(b.id), hk = incHacked(b.id);
-      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red-ink)">⚠ Hacked! Enter to secure it</span>':locked?'<br><span style="color:var(--gold-ink)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
+      tip.classList.remove('hidden'); tip.innerHTML=`<b>${esc(b.name)}</b>${esc(b.desc)}${hk?'<br><span style="color:var(--red-ink)">⚠ Hacked! Chase the virus to secure it</span>':locked?'<br><span style="color:var(--gold-ink)">🔒 Locked until you pass the final assessment</span>':''}<br><span class="muted" style="font-size:12px">Click to walk there</span>`;
       const lx = e.clientX - r.left + 14, ly = e.clientY - r.top + 14; tip.style.left = Math.min(lx, r.width-250)+'px'; tip.style.top = Math.min(ly, r.height-90)+'px'; } else tip.classList.add('hidden'); }
   function renderPrompt(){ const el=$('#campusPrompt'); if (!el) return; if (!nearDoor){ el.classList.add('hidden'); return; }
     const locked = bLocked(nearDoor.id), hk = incHacked(nearDoor.id);
     el.classList.remove('hidden'); el.innerHTML = `<span>${hk?'⚠ ':locked?'🔒 ':''}${esc(nearDoor.name)}</span><kbd>E</kbd><button class="btn small ${hk?'pink':''}" data-act="campusEnter">${hk?'Secure it':locked?'View requirements':'Enter'}</button>`; }
-  function enter(b){ if (incHacked(b.id)){ S.lastDoor=b.view; stop(); go('incident',{b:b.id}); return; } S.lastDoor=b.view; toast(`Entering ${esc(b.name)}…`); stop(); go(b.view); }
+  function enter(b){ if (incHacked(b.id)){ S.lastDoor=b.view; stop(); EXTRA_ACTIONS.incPlay(); return; } S.lastDoor=b.view; toast(`Entering ${esc(b.name)}…`); stop(); go(b.view); }
   const kd = e => { if (!active || e.target.matches('input,textarea')) return; const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(k)){ keys[k]=true; if (k.startsWith('Arrow')) e.preventDefault(); }
     if ((k==='e'||k==='Enter') && nearDoor){ e.preventDefault(); enter(nearDoor); }
@@ -373,22 +373,29 @@ const incAllSecured = () => INCIDENT.every(x=>S.incident.secured.includes(x.b));
 const incUnlocked = () => modPassed(MODULES[1]);
 const bLocked = id => id==='cert' && !finalPassed() && !incHacked('cert');
 const bName = id => Campus.buildings.find(b=>b.id===id).name;
+// Campus banner: an alert after Module 2 invites the learner to investigate; during the attack it tracks the
+// buildings Virus Escape has secured and relaunches the chase; afterwards it celebrates.
 function incBannerHTML(){
   if (incActive()){ const n = S.incident.secured.length;
-    return `<div class="inc-banner"><div class="inc-title"><span class="siren"></span>Campus under attack!</div><div class="inc-count"><b>${n}/${INCIDENT.length}</b> buildings secured</div>
-      <div class="inc-chips">${INCIDENT.map(x=>{ const ok = S.incident.secured.includes(x.b); return `<button class="inc-chip ${ok?'ok':''}" data-act="incOpen" data-arg="${x.b}" ${ok?'disabled':''}>${ok?'✓':'⚠'} ${esc(bName(x.b))}</button>`; }).join('')}</div></div>`; }
+    return `<div class="inc-banner"><div class="inc-title"><span class="siren"></span>Virus loose on campus!</div><div class="inc-count"><b>${n}/${INCIDENT.length}</b> buildings secured</div>
+      <button class="btn pink small inc-go" data-act="incPlay">▶ Chase the virus</button>
+      <div class="inc-chips">${INCIDENT.map(x=>{ const ok = S.incident.secured.includes(x.b); return `<span class="inc-chip ${ok?'ok':''}">${ok?'✓':'⚠'} ${esc(bName(x.b))}</span>`; }).join('')}</div></div>`; }
   if (UI.incSaved) return `<div class="inc-banner saved"><div class="inc-title">${icon('shield','#47f59a',18)} Campus saved!</div><div class="inc-count"><b>${INCIDENT.length}/${INCIDENT.length}</b> buildings secured</div></div>`;
+  if (incUnlocked() && !(S.incident && S.incident.done)) return `<div class="inc-banner warn"><div class="inc-title"><span class="siren warn"></span>Strange activity near the Cyber Core…</div><div class="inc-count">Something is stirring on campus</div><button class="btn gold small inc-go" data-act="incStart">Investigate</button></div>`;
   return '';
 }
 function renderIncBanner(){ const el = $('#incBanner'); if (el) el.innerHTML = incBannerHTML(); const w = $('.campus-wrap'); if (w) w.classList.toggle('alarm', incActive()); }
+// Start the attack: the campus turns red with flashing alarms, then Virus Escape launches
 function incStart(){
-  if (!incUnlocked()){ toast('The campus incident unlocks after you pass the Module 2 assessment.'); return; }
+  if (!incUnlocked() && !S.arcadeUnlocked){ toast('The campus incident unlocks after you pass the Module 2 assessment.'); return; }
   S.incident = { active:true, secured:[], started:Date.now() }; UI.incAlert = Date.now(); UI.incWin = 0; UI.incSaved = false; UI.incFx = null;
   log('Campus incident started'); save(); go('campus');
+  setTimeout(()=>{ if (incActive() && S.view === 'campus' && !S.incident.secured.length) EXTRA_ACTIONS.incPlay(); }, 3400);
 }
+// Called by Virus Escape (and the presenter shortcut) each time a building is secured
 function incSecure(id){
   if (!incActive() || S.incident.secured.includes(id)) return;
-  S.incident.secured.push(id); save(); UI.incFx = { id, at:0 };
+  S.incident.secured.push(id); save(); UI.incFx = { id, at:0 }; // the restore animation plays when the campus is next shown
   log(`Secured ${bName(id)} during the campus incident`);
 }
 function incWin(){
@@ -397,25 +404,14 @@ function incWin(){
   UI.incWin = Date.now(); UI.incSaved = true; renderIncBanner();
   setTimeout(()=>{
     showModal(`<div class="label" style="color:var(--green-ink)">Incident closed</div><div class="big-medal" style="background:var(--green)">${icon('shield','#05061a',58)}</div><h2>Campus saved!</h2>
-      <p class="muted">You secured all ${INCIDENT.length} buildings in ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}, using phishing spotting, strong passphrases, network hardening, log analysis, scam reporting and incident response.</p>
+      <p class="muted">You chased the virus off campus and secured all ${INCIDENT.length} buildings in ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}.</p>
       <div class="actions"><button class="btn green" data-act="closeModal">Back to campus</button></div>`);
     addXP(XP.incident, 'Campus saved from the incident'); award('defender');
   }, 2600);
 }
-function viewIncident(el){
-  const x = INCIDENT.find(i=>i.b===(S.params||{}).b);
-  if (!x || !incActive()){ go('campus'); return; }
-  const b = Campus.buildings.find(v=>v.id===x.b), L = x.lesson===FAKE_ADMIN.id ? FAKE_ADMIN : lessonById(x.lesson), n = S.incident.secured.length;
-  el.innerHTML = `<div class="page-head inc-head"><div><div class="crumbs"><button data-act="go" data-arg="campus">Virtual Campus</button><span>›</span><span>${esc(b.name)}</span><span>›</span><span style="color:var(--red-ink)">Incident</span></div>
-    <h1>⚠ ${esc(b.name)} is hacked</h1><p><b style="color:#fff">${esc(x.t)}.</b> ${esc(x.brief)}</p></div><span class="pill red">${n}/${INCIDENT.length} secured</span></div>
-  <section class="monitor"><div id="actHost"></div></section>`;
-  Activities.mount(L, $('#actHost'), { tag:'Incident response', nextAct:'incBack', nextLabel:'Return to campus', onDone: sc => {
-    if (sc < 60){ toast('Not secure yet. Try again to lock the attacker out.'); return; }
-    incSecure(x.b); toast(`${esc(b.name)} secured!`); timers.push(setTimeout(()=>go('campus'), 1800)); } });
-}
 window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
-  incOpen: id => { const b = Campus.buildings.find(v=>v.id===id); if (b) S.lastDoor = b.view; go('incident', {b:id}); },
-  incBack: () => go('campus'),
+  incPlay: () => { UI.menu=false; renderMenu(); if (!incActive()) return; go('arcade', { game:'virus', incident:true }); },
+  incCampus: () => go('campus'),
   incStart: () => { UI.menu=false; renderMenu(); incStart(); },
   incNext: () => { UI.menu=false; renderMenu(); if (!incActive()){ toast('Start the campus incident first.'); return; }
     const x = INCIDENT.find(i=>!S.incident.secured.includes(i.b)); if (!x) return;

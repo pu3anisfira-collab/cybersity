@@ -88,7 +88,7 @@ const NAV = [
   ['mentor','AI Lab','chip'],['community','Community','chat'],['achievements','Achievements','trophy'],['certificate','Certificate','scroll']
 ];
 function renderApp(){
-  clearTimers(); if (window.Campus) Campus.stop();
+  clearTimers(); Campus.stop();
   if (!S.user){ renderOnboarding(); return; }
   $('#app').innerHTML = `
     <header class="hud">
@@ -120,13 +120,13 @@ function go(view, params={}){
   S.view = view; S.params = params; save(); renderView(); window.scrollTo({top:0});
 }
 function renderView(){
-  clearTimers(); if (window.Campus) Campus.stop();
+  clearTimers(); Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
   document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, incident:viewIncident, arcade:viewArcade };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade };
   (views[v] || viewDashboard)(el);
   themeHead(el, v);
 }
@@ -137,9 +137,9 @@ new MutationObserver(gameTitles).observe(document.getElementById('app'), { child
 const VIEW_BUILDING = { library:'library', module:'library', mentor:'ailab', community:'community', challenge:'challenge', arcade:'challenge', achievements:'achieve', certificate:'cert', home:'home', career:'compass' };
 function themeHead(el, v){
   const head = el.querySelector('.page-head'); if (!head || head.classList.contains('role-head')) return;
-  const hacked = v==='incident', id = hacked ? (S.params||{}).b : VIEW_BUILDING[v], b = id && Campus.buildings.find(x=>x.id===id); if (!b) return;
-  head.classList.add('bhead'); head.style.setProperty('--bc', hacked ? '#ff5d6e' : b.color);
-  head.insertAdjacentHTML('afterbegin', `<img class="bbanner px" src="${Campus.banner(id, hacked)}" alt="">`);
+  const id = VIEW_BUILDING[v], b = id && Campus.buildings.find(x=>x.id===id); if (!b) return;
+  head.classList.add('bhead'); head.style.setProperty('--bc', b.color);
+  head.insertAdjacentHTML('afterbegin', `<img class="bbanner px" src="${Campus.banner(id)}" alt="">`);
 }
 
 /* ---------- Onboarding ---------- */
@@ -591,7 +591,7 @@ const ACTIONS = {
     if (UI.editAvatar){ S.user.name=name; S.user.look=UI.draftLook; save(); UI.editAvatar=false; spriteCache.clear(); renderApp(); toast('Profile updated'); return; }
     UI.draftName = name; ACTIONS.enterCampus(); },
   cancelAvatar: () => { UI.editAvatar=false; renderApp(); },
-  editAvatar: () => { UI.menu=false; UI.editAvatar=true; UI.draftLook={...S.user.look}; UI.draftName=S.user.name; clearTimers(); if (window.Campus) Campus.stop(); renderMenu(); $('#view').innerHTML = avatarCreatorHTML(); bindAvatarCreator(); },
+  editAvatar: () => { UI.menu=false; UI.editAvatar=true; UI.draftLook={...S.user.look}; UI.draftName=S.user.name; clearTimers(); Campus.stop(); renderMenu(); $('#view').innerHTML = avatarCreatorHTML(); bindAvatarCreator(); },
   enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp();
     if (Tour.shouldRun()) Tour.start(); else setTimeout(()=>award('hello'), 600); }, // first visit: BYTE's campus tour, which awards the welcome badge at the end
   openModule: a => go('module',{id:a}),

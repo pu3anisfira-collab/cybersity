@@ -109,24 +109,25 @@ const fs = require('fs');
   await page.evaluate(()=>document.querySelector('.reallife').scrollIntoView({block:'center'})); await shot('27r-scam-reallife');
   console.log('real-life box on scam lesson / not on others / call link:', await page.evaluate(()=>{ const on=!!document.querySelector('.reallife'), tel=(document.querySelector('.rl-call')||{}).getAttribute?.('href');
     UI.lessonId='m1l1'; UI.stage=4; go('lesson'); return [on, !document.querySelector('.reallife'), tel]; }));
-  // Campus Incident: start from the gear menu, play three challenges for real, fast-forward the rest
-  const toCampus = async () => { await page.waitForFunction(()=>S.view==="campus", null, {timeout:6000}).catch(()=>{}); await page.waitForTimeout(700); };
+  // Campus Incident = Virus Escape: alert after Module 2, start from the gear menu, the campus turns red, the runner launches
+  console.log('pre-incident alert on campus after Module 2:', await page.evaluate(()=>{ go('campus'); return !!document.querySelector('.inc-banner.warn [data-act="incStart"]'); }));
+  await page.waitForTimeout(600); await shot('27-incident-alert-banner');
   await click('[data-act="toggleMenu"]'); await shot('27a-menu-incident');
-  await click('[data-act="incStart"]'); await page.waitForTimeout(600); await shot('27b-incident-alert');
-  await page.waitForTimeout(2700); await shot('27c-incident-campus');
-  await click('.inc-chip[data-arg="library"]'); await shot('27d-incident-library');
-  for (const id of await page.evaluate(()=>lessonById('m2l1').activity.targets)) await page.click(`.sel-email [data-arg="${id}"]`).catch(()=>{});
-  await click('[data-act="actCheck"]'); await closeModals(); await toCampus(); await shot('27e-library-restoring');
-  await click('.inc-chip[data-arg="ailab"]'); await page.fill('#pwIn', 'violet-durian-kites-at-dawn-7'); await page.waitForTimeout(200); await shot('27f-incident-ailab'); await click('#pwLock'); await closeModals(); await toCampus();
-  await click('.inc-chip[data-arg="community"]'); await shot('27g-incident-community');
-  for (let i=0;i<6;i++){ const a = await page.evaluate(i=>FAKE_ADMIN.activity.items[i].a, i); await click(`[data-act="actSort"][data-arg="${a}"]`); await click('[data-act="actNext"]'); }
-  await closeModals(); await toCampus();
-  console.log('secured after 3 real challenges:', await page.evaluate(()=>S.incident.secured.join(',')));
-  await click('[data-act="toggleMenu"]'); await click('[data-act="incNext"]'); await page.waitForTimeout(450); await shot('27h-incident-fastforward');
-  await page.waitForTimeout(2300); await page.evaluate(()=>EXTRA_ACTIONS.incNext()); await page.waitForTimeout(2700); await page.evaluate(()=>EXTRA_ACTIONS.incNext());
-  await page.waitForTimeout(3300); await shot('27i-campus-saved');
-  await page.waitForTimeout(2600); await shot('27j-campus-saved-modal'); await closeModals();
-  console.log('incident done / defender badge / cert relocked:', await page.evaluate(()=>[!!S.incident.done, S.badges.includes('defender'), bLocked('cert')]));
+  await click('.menu [data-act="incStart"]'); await page.waitForTimeout(900); await shot('27b-incident-alert');
+  await page.waitForFunction(()=>S.view==="arcade", null, {timeout:8000}).catch(()=>{}); await page.waitForTimeout(400); await shot('27c-virus-intro');
+  console.log('incident launches Virus Escape:', await page.evaluate(()=>[S.view, S.params.game, !!S.params.incident]));
+  await click('[data-act="arcStart"]');
+  // autopilot steers into the right lane and misses question 3 on purpose
+  await page.evaluate(()=>{ window.__auto = setInterval(()=>{ if (!ARC || !ARC.game || !ARC.game.state) return; const st = ARC.game.state(); if (st.phase !== 'run' || st.correctLane === null) return;
+    const target = ARC.answers.length === 2 ? (st.correctLane === 1 ? 0 : 1) : st.correctLane; if (st.lane < target) ARC.game.input('right'); else if (st.lane > target) ARC.game.input('left'); }, 120); });
+  await page.waitForTimeout(5200); await shot('27d-virus-run');
+  await page.waitForFunction(()=>ARC.game.state().secured >= 1, null, {timeout:30000}).catch(()=>{}); await page.waitForTimeout(200); await shot('27e-virus-secured');
+  await page.waitForFunction(()=>ARC.game.state().phase !== 'run', null, {timeout:120000}).catch(()=>{}); await page.waitForTimeout(600); await shot('27f-virus-saved');
+  await page.evaluate(()=>clearInterval(window.__auto)); await page.waitForTimeout(1500); await closeModals(); await shot('27g-virus-results');
+  console.log('virus run: answers / 1 mistake shown / incident buildings secured:', await page.evaluate(()=>[ARC.answers.length, document.querySelectorAll('.arc-mistakes > div:not(.label)').length, S.incident.secured.length]));
+  await click('[data-act="incCampus"]'); await page.waitForTimeout(1200); await shot('27h-campus-restoring');
+  await page.waitForTimeout(4000); await shot('27i-campus-saved'); await page.waitForTimeout(800); await shot('27j-campus-saved-modal'); await closeModals();
+  console.log('incident done / defender badge / virus badge / cert relocked:', await page.evaluate(()=>[!!S.incident.done, S.badges.includes('defender'), S.badges.includes('arc_virus'), bLocked('cert')]));
   // mentor
   await page.evaluate(()=>go('mentor')); await page.waitForTimeout(300);
   await page.fill('.mentor-form input', 'what is phishing'); await page.press('.mentor-form input', 'Enter'); await page.waitForTimeout(1700);
@@ -210,8 +211,8 @@ const fs = require('fs');
   console.log('mobile role scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
   await page.evaluate(()=>{ incStart(); S.incident.secured=['library','ailab']; save(); renderView(); }); await page.waitForTimeout(3200);
   await page.screenshot({ path: __dirname + '/shots/45-m-incident-campus.png', fullPage: true });
-  await click('.inc-chip[data-arg="cert"]'); await page.waitForTimeout(300);
-  await page.screenshot({ path: __dirname + '/shots/46-m-incident-cert.png', fullPage: true });
+  await page.evaluate(()=>EXTRA_ACTIONS.incPlay()); await page.waitForTimeout(400); await click('[data-act="arcStart"]'); await page.waitForTimeout(5000); await click('.arc-btn[data-arc-dir="left"]');
+  await page.screenshot({ path: __dirname + '/shots/46-m-virus-escape.png', fullPage: true });
   console.log('mobile incident scrollWidth', await page.evaluate(()=>document.documentElement.scrollWidth));
   await page.evaluate(()=>EXTRA_ACTIONS.incEnd());
   // Day mode: sun/moon toggle in the top bar, remembered on this device, campus and pages repainted
