@@ -86,14 +86,15 @@ build tooling unless the owner asks.
   (or Enter) sit over it. The steps `UI.onb` = title, auth, avatar, brief are full-screen pages that slide up over the
   same running scene ("Title screen" slides back down). The scene pans down once you leave the title.
 
-- **Campus tour with BYTE** (11, plus  in 07 and  in 04). The first time a learner reaches the
+- **Campus tour with BYTE** (11, plus `Campus.tour` in 07 and `botFace()` in 04). The first time a learner reaches the
   campus, BYTE beams in, greets them by name and walks building to building, with the camera zoomed in and following.
   An RPG dialogue box types each line and shows BYTE's face (happy, excited, wink, think, blink, wave), with "Tell me
   more" choices, an optional 8-bit blip sound (off by default) and Skip tour (Escape asks to confirm). A spotlight dims
   everything except the building or control being explained (it eases after its target as the camera moves).
-  The tour ends with "Take me to the Library!" or "I'll explore on my own", +25 XP and the  badge; the
-  "Hello, World" badge waits until the tour ends. Seen or skipped is stored per learner name in   key  (log out clears progress but not this), so returning learners aren't forced through it.
-  Replay from the gear menu or the AI Lab. To change what BYTE says, edit . The static "Mission briefing"
+  The tour ends with "Take me to the Library!" or "I'll explore on my own", +25 XP and the `orient` badge; the
+  "Hello, World" badge waits until the tour ends. Seen or skipped is stored per learner name in `localStorage`
+  key `cybersity-tour-seen` (log out clears progress but not this), so returning learners aren't forced through it.
+  Replay from the gear menu or the AI Lab. To change what BYTE says, edit `TOUR_STEPS`. The static "Mission briefing"
   onboarding step was removed: the tour replaces it, so onboarding is now title, sign up, avatar, campus.
 
 ## Day mode
