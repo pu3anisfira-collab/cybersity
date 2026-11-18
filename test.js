@@ -38,7 +38,7 @@ const fs = require('fs');
   // click library building to walk & enter
   // campus page: the map fills the screen under the top bar, no building cards below it
   console.log('campus fills page under top bar / no cards / dock buttons:', await page.evaluate(()=>{ const r = document.querySelector('#campus').getBoundingClientRect(), hud = document.querySelector('.hud').getBoundingClientRect();
-    return [Math.round(r.right) === innerWidth && Math.round(r.top) === Math.round(hud.bottom) && Math.round(r.bottom) === innerHeight && r.left > 100, !document.querySelector('.quick-nav'), document.querySelectorAll('.cam-dock .dock-btn').length]; }));
+    return [Math.round(r.right) === innerWidth && Math.round(r.top) === Math.round(hud.bottom) && Math.round(r.bottom) === innerHeight && Math.round(r.left) === 0, !document.querySelector('.quick-nav'), document.querySelectorAll('.cam-dock .dock-btn').length]; }));
   const lib = await page.evaluate(()=>Campus.tour.rectOf('library'));
   await page.mouse.click(lib.left + lib.width/2, lib.top + lib.height/2);
   await page.waitForFunction(()=>S.view!=="campus", null, {timeout:20000}).catch(()=>{});

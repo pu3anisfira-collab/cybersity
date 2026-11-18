@@ -1002,6 +1002,45 @@ span.inc-chip{cursor:default}
 .ach-stats{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px} .ach-stats img{width:12px; height:12px; vertical-align:-1px}
 .fab.quiet .bubble-hint{display:none}
 
+/* ---------- Top navigation (tablet and desktop); the sidebar is only the phone "More" menu ---------- */
+.shell, .shell.mini{--side-w:0px}
+.side-collapse{display:none}
+@media (min-width:761px){ .side{display:none} .hud .hud-logo{display:block} }
+@media (max-width:760px){ .hud .nav{display:none} }
+@media (max-width:1400px){ .hud-chip.streak{display:none} }
+.hud .nav button{position:relative}
+.hud .nav .nb{position:absolute; top:1px; right:1px; margin:0; min-width:0; font-size:9px; padding:0 4px}
+/* the gear menu scrolls inside itself when it is taller than the screen */
+.menu{max-height:calc(100vh - 84px - env(safe-area-inset-top,0px)); overflow-y:auto; overscroll-behavior:contain}
+
+/* ---------- Dashboard, option A: hero, today's quests, learning path + arcade, floating BYTE ---------- */
+.dash-hero{min-height:250px}
+.hero-chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+.hero-chips > span{display:flex; align-items:center; gap:6px; padding:5px 10px; background:#0b0f2ccc; border:2px solid #000; font-family:var(--f-label); font-size:12px; letter-spacing:.04em}
+.hero-chips img{width:14px; height:14px}
+.hc-lvl b{color:var(--gold)} .hc-lvl .bar{width:90px; height:8px}
+.hero-go{font-size:15px; padding:13px 24px}
+.today{margin-top:18px; display:grid; gap:12px}
+.today-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+.tq{display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto; gap:6px 12px; align-items:center; padding:12px; background:var(--navy); border:3px solid #000; box-shadow:3px 3px 0 #000; color:var(--text); text-align:left; transition:transform .12s}
+.tq:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 #000}
+.tq .q-box{grid-row:span 2; width:40px; height:40px} .tq-t{font-size:15px; font-weight:500}
+.tq .q-rew{justify-self:start}
+.tq.done{background:#0f3e2b33} .tq.done .q-box{background:var(--green)} .tq.done .tq-t{color:var(--muted); text-decoration:line-through}
+.week-line{display:flex; gap:8px 14px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--muted)}
+.week-line span{padding:2px 8px; border:2px solid var(--line); } .week-line span.ok{color:var(--green-ink); border-color:var(--green-ink)}
+.dash-pair{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:18px; margin-top:18px}
+.dash-pair .arc-strip{grid-template-columns:repeat(3,minmax(0,1fr))} .dash-pair .d-arcade, .dash-pair .d-path{grid-column:auto}
+.dash-hero .dash-byte{position:absolute; right:18px; bottom:16px; z-index:2; align-items:flex-end}
+.byte-bubble{max-width:270px; padding-right:30px}
+.bb-x{position:absolute; top:4px; right:6px; background:none; border:0; color:var(--ink-2); font-size:14px; padding:2px}
+@media (max-width:900px){ .dash-pair{grid-template-columns:minmax(0,1fr)} .today-row{grid-template-columns:minmax(0,1fr)} }
+.today .dc-head{flex-wrap:wrap}
+@media (max-width:1000px){ .dash-hero{flex-direction:column; align-items:stretch} .dash-hero .dash-byte{position:static; margin-top:14px; justify-content:flex-start} }
+@media (max-width:640px){ .byte-bubble{max-width:none; flex:1} .byte-big{width:56px; height:65px} .hero-go{width:100%} }
+[data-theme="day"] .hero-chips > span{background:#fffaf0cc; color:var(--text)}
+[data-theme="day"] .tq.done{background:#d6f5c466}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}

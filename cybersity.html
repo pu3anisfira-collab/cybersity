@@ -1002,6 +1002,45 @@ span.inc-chip{cursor:default}
 .ach-stats{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px} .ach-stats img{width:12px; height:12px; vertical-align:-1px}
 .fab.quiet .bubble-hint{display:none}
 
+/* ---------- Top navigation (tablet and desktop); the sidebar is only the phone "More" menu ---------- */
+.shell, .shell.mini{--side-w:0px}
+.side-collapse{display:none}
+@media (min-width:761px){ .side{display:none} .hud .hud-logo{display:block} }
+@media (max-width:760px){ .hud .nav{display:none} }
+@media (max-width:1400px){ .hud-chip.streak{display:none} }
+.hud .nav button{position:relative}
+.hud .nav .nb{position:absolute; top:1px; right:1px; margin:0; min-width:0; font-size:9px; padding:0 4px}
+/* the gear menu scrolls inside itself when it is taller than the screen */
+.menu{max-height:calc(100vh - 84px - env(safe-area-inset-top,0px)); overflow-y:auto; overscroll-behavior:contain}
+
+/* ---------- Dashboard, option A: hero, today's quests, learning path + arcade, floating BYTE ---------- */
+.dash-hero{min-height:250px}
+.hero-chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+.hero-chips > span{display:flex; align-items:center; gap:6px; padding:5px 10px; background:#0b0f2ccc; border:2px solid #000; font-family:var(--f-label); font-size:12px; letter-spacing:.04em}
+.hero-chips img{width:14px; height:14px}
+.hc-lvl b{color:var(--gold)} .hc-lvl .bar{width:90px; height:8px}
+.hero-go{font-size:15px; padding:13px 24px}
+.today{margin-top:18px; display:grid; gap:12px}
+.today-row{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+.tq{display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto; gap:6px 12px; align-items:center; padding:12px; background:var(--navy); border:3px solid #000; box-shadow:3px 3px 0 #000; color:var(--text); text-align:left; transition:transform .12s}
+.tq:hover{transform:translate(-2px,-2px); box-shadow:5px 5px 0 #000}
+.tq .q-box{grid-row:span 2; width:40px; height:40px} .tq-t{font-size:15px; font-weight:500}
+.tq .q-rew{justify-self:start}
+.tq.done{background:#0f3e2b33} .tq.done .q-box{background:var(--green)} .tq.done .tq-t{color:var(--muted); text-decoration:line-through}
+.week-line{display:flex; gap:8px 14px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--muted)}
+.week-line span{padding:2px 8px; border:2px solid var(--line); } .week-line span.ok{color:var(--green-ink); border-color:var(--green-ink)}
+.dash-pair{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:18px; margin-top:18px}
+.dash-pair .arc-strip{grid-template-columns:repeat(3,minmax(0,1fr))} .dash-pair .d-arcade, .dash-pair .d-path{grid-column:auto}
+.dash-hero .dash-byte{position:absolute; right:18px; bottom:16px; z-index:2; align-items:flex-end}
+.byte-bubble{max-width:270px; padding-right:30px}
+.bb-x{position:absolute; top:4px; right:6px; background:none; border:0; color:var(--ink-2); font-size:14px; padding:2px}
+@media (max-width:900px){ .dash-pair{grid-template-columns:minmax(0,1fr)} .today-row{grid-template-columns:minmax(0,1fr)} }
+.today .dc-head{flex-wrap:wrap}
+@media (max-width:1000px){ .dash-hero{flex-direction:column; align-items:stretch} .dash-hero .dash-byte{position:static; margin-top:14px; justify-content:flex-start} }
+@media (max-width:640px){ .byte-bubble{max-width:none; flex:1} .byte-big{width:56px; height:65px} .hero-go{width:100%} }
+[data-theme="day"] .hero-chips > span{background:#fffaf0cc; color:var(--text)}
+[data-theme="day"] .tq.done{background:#d6f5c466}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}
@@ -2082,12 +2121,12 @@ function renderApp(){
   const app = $('#app'); app.className = 'shell' + (UI.sideMini ? ' mini' : ''); const nic = isDay() ? '#0a7ea3' : '#2ee6ff';
   app.innerHTML = `
     <aside class="side" aria-label="Main menu"><button class="logo side-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home"><span class="logo-full">CYBER<span>SITY</span></span><span class="logo-mini">C<span>S</span></span></button>
-      <nav class="side-nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}" title="${t}">${icon(ic, nic)}<span>${t}</span></button>`).join('')}</nav>
+      <nav class="side-nav" aria-label="Main menu">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}" title="${t}">${icon(ic, nic)}<span>${t}</span></button>`).join('')}</nav>
       <button class="side-collapse" data-act="sideMini" aria-label="${UI.sideMini ? 'Expand' : 'Collapse'} menu">${UI.sideMini ? '»' : '« Collapse'}</button></aside>
     <header class="hud">
       <button class="hud-menu" data-act="sideOpen" aria-label="Open menu">${icon('menu', nic)}</button>
       <button class="logo hud-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
-      <span class="hud-spacer"></span>
+      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, nic)}${t}</button>`).join('')}</nav>
       <span class="hud-chip streak" title="Day streak">🔥 <b id="hudStreak">0</b></span>
       <span class="hud-chip coins" id="hudCoinsChip" title="Coins">${coinIcon(16)} <b id="hudCoins">0</b></span>
       <button class="icon-btn bell" data-act="toggleBell" aria-label="Notifications">${icon('bell', isDay() ? '#b07800' : '#ffd447')}<i class="bell-dot hidden" id="bellDot"></i></button>
@@ -2225,57 +2264,45 @@ function bindAvatarCreator(){
 }
 
 /* ---------- Dashboard ---------- */
-// Dashboard = home screen: hero with one big "Continue learning", player card, learning path, arcade, daily and
-// weekly quests, recent activity, latest achievement, Safety Score and BYTE with a context tip
+// Dashboard = home screen, kept to 4 blocks: hero (with level, coins, streak and the one big Continue button),
+// today's quests, learning path and arcade. Activity lives in the bell,
+// achievements in the Achievement Hall and the Safety Score in Home Base. BYTE's tip sits inside the hero.
 function viewDashboard(el){
   const L = levelInfo(), nx = nextStep(), pct = overallProgress(), m = Quests.state(), st = S.streak || { n:0 }, tip = byteTip();
-  const lastBadge = S.badges.length ? BADGES.find(b => b.id === S.badges[S.badges.length-1]) : null;
-  const curMod = MODULES.find(md => !modPassed(md)) || MODULES[MODULES.length-1];
-  const ago = t => { const s = (Date.now()-t)/1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s/60)} min ago` : s < 86400 ? `${Math.floor(s/3600)} h ago` : `${Math.floor(s/86400)} d ago`; };
-  const quest = (it, weekly) => { const q = Quests.def(it.id), p = Math.round(it.n / q.need * 100);
-    return `<button class="quest ${it.done ? 'done' : ''}" data-act="go" data-arg="${q.go}"><span class="q-box">${it.done ? icon('check','#05061a',14) : icon(q.icon, isDay() ? '#0a7ea3' : '#2ee6ff', 16)}</span>
-      <span class="q-body"><span>${esc(q.t)}</span>${weekly || q.need > 1 ? `<span class="bar green"><i style="width:${p}%"></i></span>` : ''}</span>
-      <span class="q-rew">${it.done ? 'Done' : `+${q.xp} XP · ${coinIcon(12)}${q.coins}`}</span></button>`; };
+  const curMod = MODULES.find(md => !modPassed(md)) || MODULES[MODULES.length-1], done = m.daily.filter(x => x.done).length;
+  const nic = isDay() ? '#0a7ea3' : '#2ee6ff';
   el.innerHTML = `
-  <div class="dash-top">
-    <section class="dash-hero">
-      <canvas id="miniCampus" class="px hero-art" width="240" height="96" aria-hidden="true"></canvas>
-      <div class="hero-body">
-        <div class="hero-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
-        <div class="hero-text"><div class="hero-hi">Good to see you again,</div><h1 class="dash-name">${esc(S.user.name)}!</h1>
-          <p>Continue your learning journey, complete challenges and keep the campus secure!</p>
-          <div class="hero-btns"><button class="btn gold" data-act="${nx.act}" data-arg="${nx.arg||''}">▶ Continue learning</button><button class="btn ghost" data-act="go" data-arg="campus">${icon('campus', isDay() ? '#0a7ea3' : '#2ee6ff', 16)} Explore campus</button></div>
-          <small class="muted">Next: ${esc(nx.label)}</small></div>
-      </div>
-    </section>
-    <section class="panel dash-player">
-      <div class="dp-head"><img class="px" src="${avatarURL(S.user.look)}" alt=""><div><b>${esc(S.user.name)}</b><span>${esc(L.t)}</span></div></div>
-      <div class="dp-level"><span>Level ${L.n}</span><span>${S.xp}${L.next ? ' / ' + L.next : ''} XP</span></div><div class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></div>
-      <div class="dp-stats"><div>${icon('star','#ffd447',22)}<b>${S.xp}</b><span>XP</span></div><div>${coinIcon(22)}<b>${S.coins || 0}</b><span>Coins</span></div>
-        <div>${icon('trophy','#ffd447',22)}<b>${S.badges.length}</b><span>Badges</span></div><div><span class="flame">🔥</span><b>${st.n || 0}</b><span>Day streak</span></div></div>
-    </section>
-  </div>
-  <div class="dash-grid">
+  <section class="dash-hero">
+    <canvas id="miniCampus" class="px hero-art" width="240" height="96" aria-hidden="true"></canvas>
+    <div class="hero-body">
+      <div class="hero-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
+      <div class="hero-text"><div class="hero-hi">Good to see you again,</div><h1 class="dash-name">${esc(S.user.name)}!</h1>
+        <div class="hero-chips"><span class="hc-lvl"><b>LV ${L.n}</b> ${esc(L.t)}<span class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></span></span>
+          <span>${coinIcon(14)} ${S.coins || 0}</span><span>🔥 ${st.n || 0} day${st.n === 1 ? '' : 's'}</span><span>${icon('trophy','#ffd447',14)} ${S.badges.length}</span></div>
+        <div class="hero-btns"><button class="btn gold hero-go" data-act="${nx.act}" data-arg="${nx.arg||''}">▶ Continue learning</button><button class="btn ghost" data-act="go" data-arg="campus">${icon('campus', nic, 16)} Explore campus</button></div>
+        <small class="muted">Next: ${esc(nx.label)}</small></div>
+    </div>
+    <aside class="dash-byte"><div class="byte-bubble"><p>${esc(tip.text)}</p><button class="btn small purple" data-act="${tip.act}" data-arg="${tip.arg||''}">${esc(tip.btn)} ▸</button><button class="bb-x" data-act="byteHide" aria-label="Hide tip">✕</button></div><img class="px byte-big" src="${BOT_URL}" alt="BYTE"></aside>
+  </section>
+  <section class="panel today">
+    <div class="dc-head"><span>${icon('check','#47f59a',18)} Today's quests</span><em>${done}/3 done · ${m.bonus ? '🎉 bonus collected' : `all 3 = +${DAILY_BONUS.xp} XP · ${coinIcon(12)}${DAILY_BONUS.coins}`}</em></div>
+    <div class="today-row">${m.daily.map(it => { const q = Quests.def(it.id);
+      return `<button class="tq ${it.done ? 'done' : ''}" data-act="go" data-arg="${q.go}"><span class="q-box">${it.done ? icon('check','#05061a',16) : icon(q.icon, nic, 18)}</span>
+        <span class="tq-t">${esc(q.t)}</span><span class="q-rew">${it.done ? 'Done' : `+${q.xp} XP · ${coinIcon(12)}${q.coins}`}</span></button>`; }).join('')}</div>
+    <div class="week-line">This week: ${m.weekly.map(it => { const q = Quests.def(it.id); return `<span class="${it.done ? 'ok' : ''}">${esc(q.t)} ${it.done ? '✓' : `${Math.min(it.n, q.need)}/${q.need}`}</span>`; }).join('')}</div>
+  </section>
+  <div class="dash-pair">
     <section class="panel dash-card d-path"><div class="dc-head"><span>${icon('book','#ffd447',18)} My learning path</span><button data-act="go" data-arg="library">View all ›</button></div>
       <div class="path-cur"><div class="path-ic" style="background:${curMod.color}">${icon(curMod.icon,'#05061a',26)}</div>
         <div style="min-width:0; flex:1"><b>${esc(curMod.title)}</b><small>${esc(nx.label)}</small><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div>
         <span class="path-pct">${pct}%</span><button class="path-play" data-act="${nx.act}" data-arg="${nx.arg||''}" aria-label="Continue">▶</button></div>
-      <div class="path-mods">${MODULES.map(md => `<span title="${esc(md.title)}" class="${modPassed(md) ? 'ok' : modUnlocked(md) ? 'cur' : ''}" style="--mc:${md.color}"><i style="width:${Math.round(modProgress(md)*100)}%"></i></span>`).join('')}</div></section>
+      <div class="path-mods">${MODULES.map(md => `<span title="Module ${md.n}: ${esc(md.title)}" style="--mc:${md.color}"><i style="width:${Math.round(modProgress(md)*100)}%"></i></span>`).join('')}</div></section>
     <section class="panel dash-card d-arcade"><div class="dc-head"><span>${icon('flag','#ff4fae',18)} Cyber Arcade</span><button data-act="go" data-arg="challenge">Play now ›</button></div>
-      <div class="arc-strip">${ARCADE_GAMES.map(g => { const ok = Arcade.status(g.id).ok; return `<button class="arc-mini ${ok ? '' : 'locked'}" data-act="${ok ? 'arcPlay' : 'go'}" data-arg="${ok ? g.id : 'challenge'}" style="--mc:${g.color}"><canvas class="px" data-cab="${g.id}" width="192" height="252" aria-hidden="true"></canvas><b>${esc(g.t)}</b></button>`; }).join('')}
-        <div class="arc-mini soon"><b>More games coming</b><small>Byte Jump · Whack-a-Phish · Data Snake</small></div></div></section>
-    <section class="panel dash-card d-quests"><div class="dc-head"><span>${icon('check','#47f59a',18)} Daily quests</span><em>${m.daily.filter(x => x.done).length}/3 completed</em></div>
-      ${m.daily.map(it => quest(it)).join('')}
-      <div class="q-bonus ${m.bonus ? 'got' : ''}">${m.bonus ? '🎉 Daily bonus collected' : `Finish all 3: +${DAILY_BONUS.xp} XP · ${coinIcon(12)}${DAILY_BONUS.coins} bonus`}</div>
-      <div class="dc-sub">This week</div>${m.weekly.map(it => quest(it, true)).join('')}</section>
-    <section class="panel dash-card d-activity"><div class="dc-head"><span>${icon('star','#2ee6ff',18)} Recent activity</span><button data-act="go" data-arg="achievements">History ›</button></div>
-      ${S.history.length ? S.history.slice(0, 5).map(h => `<div class="act-row"><span>${esc(h.txt)}</span><small>${ago(h.t)}</small></div>`).join('') : '<p class="muted">Your milestones will appear here.</p>'}</section>
-    <section class="panel dash-card d-achieve"><div class="dc-head"><span>${icon('trophy','#ffd447',18)} Latest achievement</span></div>
-      ${lastBadge ? `<div class="ach"><div class="medal" style="background:${lastBadge.c}">${icon(lastBadge.icon,'#05061a',30)}</div><div><b>${esc(lastBadge.t)}</b><small>${esc(lastBadge.d)}</small></div></div>` : '<p class="muted">Complete your first lesson to earn a badge.</p>'}
-      <button class="home-mini" data-act="go" data-arg="home"><canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas><span><b>Safety Score ${healthScore()}%</b><small>${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></span></button></section>
-    <section class="dash-byte"><div class="byte-bubble"><p>${esc(tip.text)}</p><button class="btn small purple" data-act="${tip.act}" data-arg="${tip.arg||''}">${esc(tip.btn)} ▸</button></div><img class="px byte-big" src="${BOT_URL}" alt="BYTE"></section>
-  </div>`;
-  drawMiniCampus(); animateDorm($('#miniDorm'), 2); bindArcadeHall();
+      <div class="arc-strip">${ARCADE_GAMES.map(g => { const ok = Arcade.status(g.id).ok; return `<button class="arc-mini ${ok ? '' : 'locked'}" data-act="${ok ? 'arcPlay' : 'go'}" data-arg="${ok ? g.id : 'challenge'}" style="--mc:${g.color}"><canvas class="px" data-cab="${g.id}" width="192" height="252" aria-hidden="true"></canvas><b>${esc(g.t)}</b></button>`; }).join('')}</div></section>
+  </div>
+`;
+  if (UI.byteHidden) $('.dash-byte').classList.add('hidden');
+  drawMiniCampus(); bindArcadeHall();
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
@@ -4745,6 +4772,7 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS || {}, {
   sideOpen: () => { $('#app').classList.toggle('side-open'); },
   sfxToggle: () => { UI.menu = false; Arcade.setMuted(!Arcade.isMuted()); toast(Arcade.isMuted() ? 'Sound effects off' : 'Sound effects on'); renderMenu(); },
   musicToggle: () => { UI.menu = false; const on = Music.toggle(); toast(on ? '♪ Music on' : 'Music off'); renderMenu(); },
+  byteHide: () => { UI.byteHidden = true; const d = $('.dash-byte'); if (d) d.classList.add('hidden'); },
   demoCoins: () => { UI.menu = false; renderMenu(); addCoins(500); toast('Presenter shortcut: +500 coins'); }
 });
 document.addEventListener('click', e => { if (UI.bell && !e.target.closest('.bell-pop, [data-act="toggleBell"]')){ UI.bell = false; renderBell(); }

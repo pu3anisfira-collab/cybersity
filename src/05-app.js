@@ -98,12 +98,12 @@ function renderApp(){
   const app = $('#app'); app.className = 'shell' + (UI.sideMini ? ' mini' : ''); const nic = isDay() ? '#0a7ea3' : '#2ee6ff';
   app.innerHTML = `
     <aside class="side" aria-label="Main menu"><button class="logo side-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home"><span class="logo-full">CYBER<span>SITY</span></span><span class="logo-mini">C<span>S</span></span></button>
-      <nav class="side-nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}" title="${t}">${icon(ic, nic)}<span>${t}</span></button>`).join('')}</nav>
+      <nav class="side-nav" aria-label="Main menu">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}" title="${t}">${icon(ic, nic)}<span>${t}</span></button>`).join('')}</nav>
       <button class="side-collapse" data-act="sideMini" aria-label="${UI.sideMini ? 'Expand' : 'Collapse'} menu">${UI.sideMini ? '»' : '« Collapse'}</button></aside>
     <header class="hud">
       <button class="hud-menu" data-act="sideOpen" aria-label="Open menu">${icon('menu', nic)}</button>
       <button class="logo hud-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
-      <span class="hud-spacer"></span>
+      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, nic)}${t}</button>`).join('')}</nav>
       <span class="hud-chip streak" title="Day streak">🔥 <b id="hudStreak">0</b></span>
       <span class="hud-chip coins" id="hudCoinsChip" title="Coins">${coinIcon(16)} <b id="hudCoins">0</b></span>
       <button class="icon-btn bell" data-act="toggleBell" aria-label="Notifications">${icon('bell', isDay() ? '#b07800' : '#ffd447')}<i class="bell-dot hidden" id="bellDot"></i></button>
@@ -241,57 +241,45 @@ function bindAvatarCreator(){
 }
 
 /* ---------- Dashboard ---------- */
-// Dashboard = home screen: hero with one big "Continue learning", player card, learning path, arcade, daily and
-// weekly quests, recent activity, latest achievement, Safety Score and BYTE with a context tip
+// Dashboard = home screen, kept to 4 blocks: hero (with level, coins, streak and the one big Continue button),
+// today's quests, learning path and arcade. Activity lives in the bell,
+// achievements in the Achievement Hall and the Safety Score in Home Base. BYTE's tip sits inside the hero.
 function viewDashboard(el){
   const L = levelInfo(), nx = nextStep(), pct = overallProgress(), m = Quests.state(), st = S.streak || { n:0 }, tip = byteTip();
-  const lastBadge = S.badges.length ? BADGES.find(b => b.id === S.badges[S.badges.length-1]) : null;
-  const curMod = MODULES.find(md => !modPassed(md)) || MODULES[MODULES.length-1];
-  const ago = t => { const s = (Date.now()-t)/1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s/60)} min ago` : s < 86400 ? `${Math.floor(s/3600)} h ago` : `${Math.floor(s/86400)} d ago`; };
-  const quest = (it, weekly) => { const q = Quests.def(it.id), p = Math.round(it.n / q.need * 100);
-    return `<button class="quest ${it.done ? 'done' : ''}" data-act="go" data-arg="${q.go}"><span class="q-box">${it.done ? icon('check','#05061a',14) : icon(q.icon, isDay() ? '#0a7ea3' : '#2ee6ff', 16)}</span>
-      <span class="q-body"><span>${esc(q.t)}</span>${weekly || q.need > 1 ? `<span class="bar green"><i style="width:${p}%"></i></span>` : ''}</span>
-      <span class="q-rew">${it.done ? 'Done' : `+${q.xp} XP · ${coinIcon(12)}${q.coins}`}</span></button>`; };
+  const curMod = MODULES.find(md => !modPassed(md)) || MODULES[MODULES.length-1], done = m.daily.filter(x => x.done).length;
+  const nic = isDay() ? '#0a7ea3' : '#2ee6ff';
   el.innerHTML = `
-  <div class="dash-top">
-    <section class="dash-hero">
-      <canvas id="miniCampus" class="px hero-art" width="240" height="96" aria-hidden="true"></canvas>
-      <div class="hero-body">
-        <div class="hero-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
-        <div class="hero-text"><div class="hero-hi">Good to see you again,</div><h1 class="dash-name">${esc(S.user.name)}!</h1>
-          <p>Continue your learning journey, complete challenges and keep the campus secure!</p>
-          <div class="hero-btns"><button class="btn gold" data-act="${nx.act}" data-arg="${nx.arg||''}">▶ Continue learning</button><button class="btn ghost" data-act="go" data-arg="campus">${icon('campus', isDay() ? '#0a7ea3' : '#2ee6ff', 16)} Explore campus</button></div>
-          <small class="muted">Next: ${esc(nx.label)}</small></div>
-      </div>
-    </section>
-    <section class="panel dash-player">
-      <div class="dp-head"><img class="px" src="${avatarURL(S.user.look)}" alt=""><div><b>${esc(S.user.name)}</b><span>${esc(L.t)}</span></div></div>
-      <div class="dp-level"><span>Level ${L.n}</span><span>${S.xp}${L.next ? ' / ' + L.next : ''} XP</span></div><div class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></div>
-      <div class="dp-stats"><div>${icon('star','#ffd447',22)}<b>${S.xp}</b><span>XP</span></div><div>${coinIcon(22)}<b>${S.coins || 0}</b><span>Coins</span></div>
-        <div>${icon('trophy','#ffd447',22)}<b>${S.badges.length}</b><span>Badges</span></div><div><span class="flame">🔥</span><b>${st.n || 0}</b><span>Day streak</span></div></div>
-    </section>
-  </div>
-  <div class="dash-grid">
+  <section class="dash-hero">
+    <canvas id="miniCampus" class="px hero-art" width="240" height="96" aria-hidden="true"></canvas>
+    <div class="hero-body">
+      <div class="hero-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
+      <div class="hero-text"><div class="hero-hi">Good to see you again,</div><h1 class="dash-name">${esc(S.user.name)}!</h1>
+        <div class="hero-chips"><span class="hc-lvl"><b>LV ${L.n}</b> ${esc(L.t)}<span class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></span></span>
+          <span>${coinIcon(14)} ${S.coins || 0}</span><span>🔥 ${st.n || 0} day${st.n === 1 ? '' : 's'}</span><span>${icon('trophy','#ffd447',14)} ${S.badges.length}</span></div>
+        <div class="hero-btns"><button class="btn gold hero-go" data-act="${nx.act}" data-arg="${nx.arg||''}">▶ Continue learning</button><button class="btn ghost" data-act="go" data-arg="campus">${icon('campus', nic, 16)} Explore campus</button></div>
+        <small class="muted">Next: ${esc(nx.label)}</small></div>
+    </div>
+    <aside class="dash-byte"><div class="byte-bubble"><p>${esc(tip.text)}</p><button class="btn small purple" data-act="${tip.act}" data-arg="${tip.arg||''}">${esc(tip.btn)} ▸</button><button class="bb-x" data-act="byteHide" aria-label="Hide tip">✕</button></div><img class="px byte-big" src="${BOT_URL}" alt="BYTE"></aside>
+  </section>
+  <section class="panel today">
+    <div class="dc-head"><span>${icon('check','#47f59a',18)} Today's quests</span><em>${done}/3 done · ${m.bonus ? '🎉 bonus collected' : `all 3 = +${DAILY_BONUS.xp} XP · ${coinIcon(12)}${DAILY_BONUS.coins}`}</em></div>
+    <div class="today-row">${m.daily.map(it => { const q = Quests.def(it.id);
+      return `<button class="tq ${it.done ? 'done' : ''}" data-act="go" data-arg="${q.go}"><span class="q-box">${it.done ? icon('check','#05061a',16) : icon(q.icon, nic, 18)}</span>
+        <span class="tq-t">${esc(q.t)}</span><span class="q-rew">${it.done ? 'Done' : `+${q.xp} XP · ${coinIcon(12)}${q.coins}`}</span></button>`; }).join('')}</div>
+    <div class="week-line">This week: ${m.weekly.map(it => { const q = Quests.def(it.id); return `<span class="${it.done ? 'ok' : ''}">${esc(q.t)} ${it.done ? '✓' : `${Math.min(it.n, q.need)}/${q.need}`}</span>`; }).join('')}</div>
+  </section>
+  <div class="dash-pair">
     <section class="panel dash-card d-path"><div class="dc-head"><span>${icon('book','#ffd447',18)} My learning path</span><button data-act="go" data-arg="library">View all ›</button></div>
       <div class="path-cur"><div class="path-ic" style="background:${curMod.color}">${icon(curMod.icon,'#05061a',26)}</div>
         <div style="min-width:0; flex:1"><b>${esc(curMod.title)}</b><small>${esc(nx.label)}</small><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div>
         <span class="path-pct">${pct}%</span><button class="path-play" data-act="${nx.act}" data-arg="${nx.arg||''}" aria-label="Continue">▶</button></div>
-      <div class="path-mods">${MODULES.map(md => `<span title="${esc(md.title)}" class="${modPassed(md) ? 'ok' : modUnlocked(md) ? 'cur' : ''}" style="--mc:${md.color}"><i style="width:${Math.round(modProgress(md)*100)}%"></i></span>`).join('')}</div></section>
+      <div class="path-mods">${MODULES.map(md => `<span title="Module ${md.n}: ${esc(md.title)}" style="--mc:${md.color}"><i style="width:${Math.round(modProgress(md)*100)}%"></i></span>`).join('')}</div></section>
     <section class="panel dash-card d-arcade"><div class="dc-head"><span>${icon('flag','#ff4fae',18)} Cyber Arcade</span><button data-act="go" data-arg="challenge">Play now ›</button></div>
-      <div class="arc-strip">${ARCADE_GAMES.map(g => { const ok = Arcade.status(g.id).ok; return `<button class="arc-mini ${ok ? '' : 'locked'}" data-act="${ok ? 'arcPlay' : 'go'}" data-arg="${ok ? g.id : 'challenge'}" style="--mc:${g.color}"><canvas class="px" data-cab="${g.id}" width="192" height="252" aria-hidden="true"></canvas><b>${esc(g.t)}</b></button>`; }).join('')}
-        <div class="arc-mini soon"><b>More games coming</b><small>Byte Jump · Whack-a-Phish · Data Snake</small></div></div></section>
-    <section class="panel dash-card d-quests"><div class="dc-head"><span>${icon('check','#47f59a',18)} Daily quests</span><em>${m.daily.filter(x => x.done).length}/3 completed</em></div>
-      ${m.daily.map(it => quest(it)).join('')}
-      <div class="q-bonus ${m.bonus ? 'got' : ''}">${m.bonus ? '🎉 Daily bonus collected' : `Finish all 3: +${DAILY_BONUS.xp} XP · ${coinIcon(12)}${DAILY_BONUS.coins} bonus`}</div>
-      <div class="dc-sub">This week</div>${m.weekly.map(it => quest(it, true)).join('')}</section>
-    <section class="panel dash-card d-activity"><div class="dc-head"><span>${icon('star','#2ee6ff',18)} Recent activity</span><button data-act="go" data-arg="achievements">History ›</button></div>
-      ${S.history.length ? S.history.slice(0, 5).map(h => `<div class="act-row"><span>${esc(h.txt)}</span><small>${ago(h.t)}</small></div>`).join('') : '<p class="muted">Your milestones will appear here.</p>'}</section>
-    <section class="panel dash-card d-achieve"><div class="dc-head"><span>${icon('trophy','#ffd447',18)} Latest achievement</span></div>
-      ${lastBadge ? `<div class="ach"><div class="medal" style="background:${lastBadge.c}">${icon(lastBadge.icon,'#05061a',30)}</div><div><b>${esc(lastBadge.t)}</b><small>${esc(lastBadge.d)}</small></div></div>` : '<p class="muted">Complete your first lesson to earn a badge.</p>'}
-      <button class="home-mini" data-act="go" data-arg="home"><canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas><span><b>Safety Score ${healthScore()}%</b><small>${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></span></button></section>
-    <section class="dash-byte"><div class="byte-bubble"><p>${esc(tip.text)}</p><button class="btn small purple" data-act="${tip.act}" data-arg="${tip.arg||''}">${esc(tip.btn)} ▸</button></div><img class="px byte-big" src="${BOT_URL}" alt="BYTE"></section>
-  </div>`;
-  drawMiniCampus(); animateDorm($('#miniDorm'), 2); bindArcadeHall();
+      <div class="arc-strip">${ARCADE_GAMES.map(g => { const ok = Arcade.status(g.id).ok; return `<button class="arc-mini ${ok ? '' : 'locked'}" data-act="${ok ? 'arcPlay' : 'go'}" data-arg="${ok ? g.id : 'challenge'}" style="--mc:${g.color}"><canvas class="px" data-cab="${g.id}" width="192" height="252" aria-hidden="true"></canvas><b>${esc(g.t)}</b></button>`; }).join('')}</div></section>
+  </div>
+`;
+  if (UI.byteHidden) $('.dash-byte').classList.add('hidden');
+  drawMiniCampus(); bindArcadeHall();
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;

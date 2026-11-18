@@ -160,6 +160,7 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS || {}, {
   sideOpen: () => { $('#app').classList.toggle('side-open'); },
   sfxToggle: () => { UI.menu = false; Arcade.setMuted(!Arcade.isMuted()); toast(Arcade.isMuted() ? 'Sound effects off' : 'Sound effects on'); renderMenu(); },
   musicToggle: () => { UI.menu = false; const on = Music.toggle(); toast(on ? '♪ Music on' : 'Music off'); renderMenu(); },
+  byteHide: () => { UI.byteHidden = true; const d = $('.dash-byte'); if (d) d.classList.add('hidden'); },
   demoCoins: () => { UI.menu = false; renderMenu(); addCoins(500); toast('Presenter shortcut: +500 coins'); }
 });
 document.addEventListener('click', e => { if (UI.bell && !e.target.closest('.bell-pop, [data-act="toggleBell"]')){ UI.bell = false; renderBell(); }

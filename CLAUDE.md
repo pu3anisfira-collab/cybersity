@@ -127,12 +127,14 @@ build tooling unless the owner asks.
   onboarding step was removed: the tour replaces it, so onboarding is now title, sign up, avatar, campus.
 
 ## Gamification and layout (Phase 1 and 2)
-- **Shell** (05 `renderApp`). `#app` gets class `shell`: a fixed left sidebar (`.side`, `#nav` with `data-nav`
+- **Shell** (05 `renderApp`). Navigation is in the top bar (`.hud .nav#nav`) on tablets and desktops; the sidebar
+  (`.side`) is now only the phone "More" menu. `#app` gets class `shell`: a fixed left sidebar (`.side`, `#nav` with `data-nav`
   buttons; collapsible to icons with `UI.sideMini`, remembered in `cybersity-side-mini`), a top bar (`.hud`: streak,
   coins `#hudCoinsChip`, notifications bell, player chip, theme, gear) and, at 760px and below, a bottom tab bar
   (`.tabbar`) with a slide-in sidebar ("More"). Layout sizes are CSS variables `--side-w` and `--tab-h`; the
   campus page uses them so it sits beside the sidebar and above the tab bar.
-- **Home** is the dashboard (`viewDashboard`): hero with Continue learning (`nextStep()`) and Explore campus, player
+- **Home** is the dashboard (`viewDashboard`), 3 blocks: hero (level, coins, streak and badges chips, Continue learning
+  from `nextStep()`, Explore campus, BYTE tip), today's quests with a weekly line, and learning path + arcade. Older notes: player
   card, learning path, arcade cabinets, daily and weekly quests, recent activity, latest achievement, Safety Score
   and BYTE with `byteTip()`. New learners still start with BYTE's campus tour.
 - **Coins**: `addXP()` also gives 1 coin per 5 XP (not for quest rewards, which pay their own coins); `addCoins()`
