@@ -38,7 +38,7 @@ const fs = require('fs');
   // click library building to walk & enter
   // campus page: the map fills the screen under the top bar, no building cards below it
   console.log('campus fills page under top bar / no cards / dock buttons:', await page.evaluate(()=>{ const r = document.querySelector('#campus').getBoundingClientRect(), hud = document.querySelector('.hud').getBoundingClientRect();
-    return [Math.round(r.width) === innerWidth && Math.round(r.top) === Math.round(hud.bottom) && Math.round(r.bottom) === innerHeight, !document.querySelector('.quick-nav'), document.querySelectorAll('.cam-dock .dock-btn').length]; }));
+    return [Math.round(r.right) === innerWidth && Math.round(r.top) === Math.round(hud.bottom) && Math.round(r.bottom) === innerHeight && r.left > 100, !document.querySelector('.quick-nav'), document.querySelectorAll('.cam-dock .dock-btn').length]; }));
   const lib = await page.evaluate(()=>Campus.tour.rectOf('library'));
   await page.mouse.click(lib.left + lib.width/2, lib.top + lib.height/2);
   await page.waitForFunction(()=>S.view!=="campus", null, {timeout:20000}).catch(()=>{});
@@ -189,7 +189,7 @@ const fs = require('fs');
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(400); await shot('38-m-dashboard');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(700); await shot('39-m-campus');
   // phone camera: zoomed view that follows the avatar, taps still walk to the right place, full-map toggle
-  console.log('phone campus fills screen / camera zoomed in:', await page.evaluate(()=>{ const c=document.querySelector('#campus'), r=c.getBoundingClientRect(); return [Math.round(r.width)===innerWidth && Math.round(r.bottom)===innerHeight, c.width/3 < 480]; }));
+  console.log('phone campus fills screen / camera zoomed in:', await page.evaluate(()=>{ const c=document.querySelector('#campus'), r=c.getBoundingClientRect(); return [Math.round(r.width)===innerWidth && Math.round(r.bottom)===innerHeight - 66, c.width/3 < 480]; }));
   const cb = await (await page.$('#campus')).boundingBox();
   await page.mouse.click(cb.x + cb.width*0.5, cb.y + cb.height*0.85); await page.waitForTimeout(1600); await shot('39b-m-campus-walk');
   await click('.cam-dock [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:25000}).catch(()=>{});

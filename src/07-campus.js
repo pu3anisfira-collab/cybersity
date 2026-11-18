@@ -487,6 +487,7 @@ function drawDorm(g, x, y, w, h, stage, t){
   if (stage===3){ const sy = y-17+Math.round(Math.sin(t*2)*1.5);
     g.fillStyle=`rgba(71,245,154,${0.25+0.2*pulse})`; g.beginPath(); g.arc(cx, sy+6, 10, 0, Math.PI*2); g.fill();
     g.drawImage(dormIcon('shield',green), Math.round(cx-6), sy); }
+  drawDormDecor(g, x, y, w, h, t);
 }
 // Animates a dorm canvas (logical 128x104) with an upgrade flash after a new stage
 function animateDorm(cv, sc){

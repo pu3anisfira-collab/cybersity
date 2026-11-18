@@ -70,7 +70,10 @@ function avatarURL(look, frame=0){
   return urlCache.get(key);
 }
 const BOT_ROWS = ['.....AA.....','.....AA.....','..KKKKKKKK..','..KVVVVVVK..','..KVCVVCVK..','..KVVVVVVK..','..KVVMMVVK..','..KKKKKKKK..','...VVVVVV...','.VVVZZZZVVV.','.V.VZVVZV.V.','...VVVVVV...','...VV..VV...','...KK..KK...'];
-function botCanvas(){ return rowsToCanvas(BOT_ROWS, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'}); }
+// BYTE's colours; a skin bought in the Coin Shop recolours the body
+const BYTE_SKINS = { mint:{K:'#1f7a4a',V:'#47f59a',Z:'#2fc77a'}, pink:{K:'#a8216b',V:'#ff7ac0',Z:'#ff4fae'}, gold:{K:'#8a5a00',V:'#ffd447',Z:'#e0a800',A:'#ff4fae'} };
+function botPal(skin){ const k = skin !== undefined ? skin : (typeof S !== 'undefined' && S.shop ? S.shop.byte : null); return {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0', ...(BYTE_SKINS[k] || {})}; }
+function botCanvas(skin){ return rowsToCanvas(BOT_ROWS, botPal(skin)); }
 let BOT_URL = '';
 // BYTE's expressions for the campus tour: face rows 3-6 (eyes and mouth) and body rows 8-10 (arms) swap per expression
 const BOT_FACES = {
@@ -84,11 +87,11 @@ const BOT_FACES = {
 const BOT_WAVE = [['...VVVVVV.V.','.VVVZZZZVV..','.V.VZVVZV...'], ['...VVVVVVV..','.VVVZZZZV.V.','.V.VZVVZV...']];
 const botFaceCache = new Map();
 function botFace(expr='normal', frame=0, wave=false){
-  const k = expr+frame+wave; if (botFaceCache.has(k)) return botFaceCache.get(k);
+  const k = expr+frame+wave+(S.shop ? S.shop.byte : ''); if (botFaceCache.has(k)) return botFaceCache.get(k);
   const rows = BOT_ROWS.slice(), f = BOT_FACES[expr] || BOT_FACES.normal;
   for (let i=0;i<4;i++) rows[3+i] = '..K'+f[i]+'K..';
   if (wave){ const w = BOT_WAVE[frame%2]; rows[8]=w[0]; rows[9]=w[1]; rows[10]=w[2]; }
-  const c = rowsToCanvas(rows, {A:'#ffd447',K:'#5d2fb0',V:'#a46bff',C:'#2ee6ff',M:'#2ee6ff',Z:'#7f48e0'});
+  const c = rowsToCanvas(rows, botPal());
   botFaceCache.set(k, c); return c;
 }
 
@@ -105,6 +108,8 @@ const PAL_DAY = { path:['#e8cf9c','#e1c58e'], pathLine:'#c9a970', grass:'#5cb83c
 const pal = () => isDay() ? PAL_DAY : PAL_NIGHT;
 
 const ICONS = {
+  coin:['..XXXXXX..','.XYYYYYYX.','XYYWWYYYYX','XYWYYXYYYX','XYWYYXYYYX','XYYYYXYYYX','XYYYYXYYYX','XYYYYYYYYX','.XYYYYYYX.','..XXXXXX..'],
+  bell:['....XX....','...XWWX...','..XWWWWX..','..XWWWWX..','.XWWWWWWX.','.XWWWWWWX.','XWWWWWWWWX','XXXXXXXXXX','...XYYX...','....XX....'],
   sun:['....XX....','.X..XX..X.','..XXXXXX..','..XWWWWX..','XXXWWWWXXX','XXXWWWWXXX','..XWWWWX..','..XXXXXX..','.X..XX..X.','....XX....'],
   moon:['..XXXX....','.XWWX.....','XWWX......','XWX.......','XWX.......','XWX.......','XWWX......','XWWWX..XX.','.XWWWXXWX.','..XXXXXX..'],
   compass:['...XXXX...','.XXWWWWXX.','.XWWWFWWX.','XWWWFFFWWX','XWWWWDWWWX','XWWWZZZWWX','.XWWWZWWX.','.XXWWWWXX.','...XXXX...','..........'],

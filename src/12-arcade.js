@@ -43,7 +43,9 @@ const Arcade = (() => {
     start: () => { [392, 523, 659, 784].forEach((f,i)=>tone(f, 0.08, 'square', 0.04, i*0.08)); },
     win:   () => { [523, 659, 784, 1047, 784, 1047].forEach((f,i)=>tone(f, 0.12, 'square', 0.05, i*0.11)); },
     lose:  () => { [392, 330, 262, 196].forEach((f,i)=>tone(f, 0.18, 'triangle', 0.06, i*0.15)); },
-    tick:  () => tone(1200, 0.03, 'square', 0.02)
+    tick:  () => tone(1200, 0.03, 'square', 0.02),
+    click: () => tone(900, 0.025, 'square', 0.015),
+    coin:  () => { tone(988, 0.06, 'square', 0.035); tone(1319, 0.12, 'square', 0.035, 0.06); }
   };
   function sfx(n){ if (muted || !audio || !SFX[n]) return; try { SFX[n](); } catch(e){} }
   function setMuted(m){ muted = m; try { localStorage.setItem(ARCADE_MUTE_KEY, m ? '1' : '0'); } catch(e){} }
@@ -70,7 +72,7 @@ const Arcade = (() => {
     return rows.sort((a, b) => b.score - a.score).slice(0, 8);
   }
   return { games, register:(id, mod)=>{ games[id] = mod; }, scores, saveScore, resetScores, unlockAudio, sfx, setMuted, isMuted:()=>muted,
-    questions, sortSet, meta, status, leaderboard };
+    questions, sortSet, meta, status, leaderboard, ctx:()=>audio };
 })();
 
 /* ---------- Arcade cabinet art (pixel art drawn in code) ---------- */
@@ -222,6 +224,7 @@ function arcResults(run){
   over.innerHTML = `<div class="arc-card results">
       <div class="arc-title ${run.won ? 'win' : 'lose'}" data-t="${run.won ? 'You win!' : 'Game over'}">${run.won ? 'You win!' : 'Game over'}</div>
       ${run.note ? `<p>${esc(run.note)}</p>` : ''}
+      <p class="byte-line"><img class="px" src="${BOT_URL}" alt="">${esc(run.won ? (acc === 100 ? 'Perfect run! I\'m impressed.' : 'Great job! Check the mistakes below to make it perfect next time.') : (acc >= 50 ? 'So close! Review the mistakes and try again. Easy mode is slower.' : 'Tough one! Revisit the lesson, then come back and beat it.'))}</p>
       <div class="arc-stats"><div><span>Score</span><b>${run.score}</b>${best && run.score ? '<em>New high score!</em>' : ''}</div><div><span>Accuracy</span><b>${acc}%</b></div><div><span>Correct</span><b>${correct}/${total}</b></div><div><span>XP</span><b>+${xp}</b></div></div>
       ${mistakes.length ? `<div class="arc-mistakes"><div class="label">Review your mistakes</div>${mistakes.map(m => `<div><b>${esc(m.q)}</b><span>You chose <s>${esc(m.chosen)}</s> · Correct: <strong>${esc(m.correct)}</strong></span><small>${esc(m.e)}</small></div>`).join('')}</div>`
         : (total ? '<p class="arc-perfect">No mistakes. Flawless run!</p>' : '')}

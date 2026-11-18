@@ -14,7 +14,7 @@ const now = () => new Date();
 const hhmm = d => d.toTimeString().slice(0,5);
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], career:{pick:null, second:null, tasters:[]}, incident:{active:false, secured:[]}, view:'dashboard', params:{} }; }
+function freshState(){ return { user:null, xp:0, badges:[], lessons:{}, modules:{}, final:null, cert:null, history:[], attempts:[], mentorCount:0, msgsSent:0, reports:[], passMark:70, mentorLog:[], health:{}, healthXP:[], career:{pick:null, second:null, tasters:[]}, coins:0, streak:null, missions:null, shop:{owned:[], dorm:[], byte:null}, bellSeen:0, incident:{active:false, secured:[]}, view:'dashboard', params:{} }; }
 let S = freshState();
 try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(freshState(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){} }
@@ -72,28 +72,41 @@ function closeModal(){ const m = modalQueue.shift(); $('#layer').innerHTML=''; i
 function log(txt, xp=0){ S.history.unshift({t:Date.now(), txt, xp}); S.history = S.history.slice(0,60); }
 function addXP(n, why){
   const before = levelInfo().n; S.xp += n; log(why, n); save();
-  toast(`+${n} XP`, 'xp'); updateHUD();
+  toast(`+${n} XP`, 'xp'); sfx('coin'); updateHUD();
+  if (!/^(Quest complete|All daily)/.test(why)) addCoins(Math.max(1, Math.round(n/5))); // 1 coin per 5 XP (quests pay coins separately)
+  Quests.track(why, n);
   const after = levelInfo();
-  if (after.n > before) showModal(`<div class="label" style="color:var(--gold-ink)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
+  if (after.n > before){ sfx('win'); flyTo('LEVEL UP!', '.hud .player-chip'); } if (after.n > before) showModal(`<div class="label" style="color:var(--gold-ink)">Level up!</div><div class="level-num" style="margin:14px auto">${after.n}</div><h2>${esc(after.t)}</h2><p class="muted">You reached level ${after.n}. Keep learning to unlock the next rank.</p><div class="actions"><button class="btn gold" data-act="closeModal">Awesome</button></div>`);
 }
 function award(id){
   if (S.badges.includes(id)) return; const b = BADGES.find(x=>x.id===id); if (!b) return;
-  S.badges.push(id); log(`Badge unlocked: ${b.t}`); save();
+  S.badges.push(id); log(`Badge unlocked: ${b.t}`); save(); sfx('start');
   showModal(`<div class="label" style="color:var(--gold-ink)">Badge unlocked</div><div class="big-medal" style="background:${b.c}">${icon(b.icon,'#05061a',58)}</div><h2>${esc(b.t)}</h2><p class="muted">${esc(b.d)}</p><div class="actions"><button class="btn ghost" data-act="shareBadge" data-arg="${b.id}">Share in Community</button><button class="btn gold" data-act="closeModal">Nice!</button></div>`);
 }
 
 /* ---------- Shell ---------- */
 const NAV = [
   ['dashboard','Dashboard','home'],['campus','Campus','campus'],['library','Library','book'],['challenge','Arcade','flag'],['career','Careers','compass'],
-  ['mentor','AI Lab','chip'],['community','Community','chat'],['achievements','Achievements','trophy'],['certificate','Certificate','scroll']
+  ['mentor','AI Lab','chip'],['community','Community','chat'],['achievements','Achievements','trophy'],['shop','Coin Shop','coin'],['certificate','Certificate','scroll']
 ];
 function renderApp(){
   clearTimers(); Campus.stop();
   if (!S.user){ renderOnboarding(); return; }
-  $('#app').innerHTML = `
+  touchStreak();
+  // Shell: sidebar navigation (collapsible; a slide-in panel on phones), top bar with streak, coins, notifications
+  // and the player chip, the page, and a bottom tab bar on phones
+  const app = $('#app'); app.className = 'shell' + (UI.sideMini ? ' mini' : ''); const nic = isDay() ? '#0a7ea3' : '#2ee6ff';
+  app.innerHTML = `
+    <aside class="side" aria-label="Main menu"><button class="logo side-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home"><span class="logo-full">CYBER<span>SITY</span></span><span class="logo-mini">C<span>S</span></span></button>
+      <nav class="side-nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}" title="${t}">${icon(ic, nic)}<span>${t}</span></button>`).join('')}</nav>
+      <button class="side-collapse" data-act="sideMini" aria-label="${UI.sideMini ? 'Expand' : 'Collapse'} menu">${UI.sideMini ? '»' : '« Collapse'}</button></aside>
     <header class="hud">
-      <button class="logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
-      <nav class="nav" id="nav" aria-label="Main">${NAV.map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, isDay() ? '#0a7ea3' : '#2ee6ff')}${t}</button>`).join('')}</nav>
+      <button class="hud-menu" data-act="sideOpen" aria-label="Open menu">${icon('menu', nic)}</button>
+      <button class="logo hud-logo" data-act="go" data-arg="dashboard" aria-label="Cybersity home">CYBER<span>SITY</span></button>
+      <span class="hud-spacer"></span>
+      <span class="hud-chip streak" title="Day streak">🔥 <b id="hudStreak">0</b></span>
+      <span class="hud-chip coins" id="hudCoinsChip" title="Coins">${coinIcon(16)} <b id="hudCoins">0</b></span>
+      <button class="icon-btn bell" data-act="toggleBell" aria-label="Notifications">${icon('bell', isDay() ? '#b07800' : '#ffd447')}<i class="bell-dot hidden" id="bellDot"></i></button>
       <div class="player-chip" data-act="go" data-arg="achievements" title="Your progress">
         <div class="ava"><img class="px" id="hudAva" alt=""></div>
         <div class="xpwrap"><div class="lvl" id="hudLvl"></div><div class="xpbar"><i id="hudXp"></i></div></div>
@@ -102,6 +115,8 @@ function renderApp(){
       <button class="icon-btn" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear', isDay() ? '#b07800' : '#ffd447')}</button>
     </header>
     <main class="stage" id="view"></main>
+    <nav class="tabbar" aria-label="Main">${[['dashboard','Home','home'],['campus','Campus','campus'],['library','Learn','book'],['challenge','Arcade','flag']].map(([v,t,ic])=>`<button data-act="go" data-arg="${v}" data-nav="${v}">${icon(ic, nic, 22)}<span>${t}</span></button>`).join('')}<button data-act="sideOpen">${icon('menu', nic, 22)}<span>More</span></button></nav>
+    <div id="bellHost"></div>
     <button class="fab" id="fab" data-act="toggleDrawer" aria-label="Ask BYTE, your AI mentor"><img class="px" alt="" src="${BOT_URL}"><span class="bubble-hint">Need help? Ask BYTE</span></button>
     <div class="drawer hidden" id="drawer"></div>
     <div id="menuHost"></div>`;
@@ -113,11 +128,12 @@ function updateHUD(){
   $('#hudAva').src = avatarURL(S.user.look);
   $('#hudLvl').textContent = `LV ${L.n} · ${S.xp} XP`;
   $('#hudXp').style.width = Math.round(L.pct*100)+'%';
+  const c = $('#hudCoins'), st = $('#hudStreak'), dot = $('#bellDot'); if (c) c.textContent = S.coins || 0; if (st) st.textContent = (S.streak && S.streak.n) || 0; if (dot) dot.classList.toggle('hidden', !bellUnread());
 }
 function go(view, params={}){
   if (view !== 'lesson' && view !== 'quiz') UI.quiz = null;
   if (view !== 'career') UI.cq = null;
-  S.view = view; S.params = params; save(); renderView(); window.scrollTo({top:0});
+  S.view = view; S.params = params; save(); renderView(); window.scrollTo({top:0}); Quests.track('visit:' + view);
 }
 function renderView(){
   clearTimers(); Campus.stop();
@@ -126,7 +142,7 @@ function renderView(){
   const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
-    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade };
+    challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade, shop:viewShop };
   (views[v] || viewDashboard)(el);
   themeHead(el, v);
 }
@@ -179,7 +195,7 @@ function onbPageHTML(step){
   return `<div class="onb-wide">${avatarCreatorHTML()}</div>`; // avatar
 }
 function renderOnboarding(dir='up'){
-  const app = $('#app');
+  const app = $('#app'); app.className = '';
   if (!$('#onbPages')){ app.innerHTML = `<div class="onb"><canvas id="onbSky" class="px" aria-hidden="true"></canvas><div class="onb-pages" id="onbPages"></div></div>`; startTitleScene($('#onbSky')); }
   const host = $('#onbPages'), old = host.querySelector('.onb-page.cur'), step = UI.onb;
   const pg = document.createElement('div'); pg.className = 'onb-page step-'+step; pg.innerHTML = onbPageHTML(step);
@@ -225,55 +241,57 @@ function bindAvatarCreator(){
 }
 
 /* ---------- Dashboard ---------- */
+// Dashboard = home screen: hero with one big "Continue learning", player card, learning path, arcade, daily and
+// weekly quests, recent activity, latest achievement, Safety Score and BYTE with a context tip
 function viewDashboard(el){
-  const L = levelInfo(), nx = nextStep(), pct = overallProgress();
-  const recent = S.badges.slice(-4).reverse().map(id=>BADGES.find(b=>b.id===id));
+  const L = levelInfo(), nx = nextStep(), pct = overallProgress(), m = Quests.state(), st = S.streak || { n:0 }, tip = byteTip();
+  const lastBadge = S.badges.length ? BADGES.find(b => b.id === S.badges[S.badges.length-1]) : null;
+  const curMod = MODULES.find(md => !modPassed(md)) || MODULES[MODULES.length-1];
+  const ago = t => { const s = (Date.now()-t)/1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s/60)} min ago` : s < 86400 ? `${Math.floor(s/3600)} h ago` : `${Math.floor(s/86400)} d ago`; };
+  const quest = (it, weekly) => { const q = Quests.def(it.id), p = Math.round(it.n / q.need * 100);
+    return `<button class="quest ${it.done ? 'done' : ''}" data-act="go" data-arg="${q.go}"><span class="q-box">${it.done ? icon('check','#05061a',14) : icon(q.icon, isDay() ? '#0a7ea3' : '#2ee6ff', 16)}</span>
+      <span class="q-body"><span>${esc(q.t)}</span>${weekly || q.need > 1 ? `<span class="bar green"><i style="width:${p}%"></i></span>` : ''}</span>
+      <span class="q-rew">${it.done ? 'Done' : `+${q.xp} XP · ${coinIcon(12)}${q.coins}`}</span></button>`; };
   el.innerHTML = `
-    <section class="welcome">
-      <div class="big-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
-      <div style="position:relative; z-index:1">
-        <div class="label" style="color:var(--cyan-ink)">Learner dashboard</div>
-        <h1>Welcome back, ${esc(S.user.name)}</h1>
-        <p class="muted" style="margin-top:6px">Level ${L.n} · ${esc(L.t)} · ${pct}% of the Cybersecurity Fundamentals pathway complete</p>
-      </div>
-      <div style="position:relative; z-index:1; display:flex; flex-direction:column; gap:8px">
-        <button class="btn gold" data-act="${nx.act}" data-arg="${nx.arg||''}">Continue ▸</button>
-        <small class="muted" style="max-width:220px">${esc(nx.label)}</small>
+  <div class="dash-top">
+    <section class="dash-hero">
+      <canvas id="miniCampus" class="px hero-art" width="240" height="96" aria-hidden="true"></canvas>
+      <div class="hero-body">
+        <div class="hero-ava"><img class="px" src="${avatarURL(S.user.look)}" alt=""></div>
+        <div class="hero-text"><div class="hero-hi">Good to see you again,</div><h1 class="dash-name">${esc(S.user.name)}!</h1>
+          <p>Continue your learning journey, complete challenges and keep the campus secure!</p>
+          <div class="hero-btns"><button class="btn gold" data-act="${nx.act}" data-arg="${nx.arg||''}">▶ Continue learning</button><button class="btn ghost" data-act="go" data-arg="campus">${icon('campus', isDay() ? '#0a7ea3' : '#2ee6ff', 16)} Explore campus</button></div>
+          <small class="muted">Next: ${esc(nx.label)}</small></div>
       </div>
     </section>
-    <div class="stats-row" style="margin-top:18px">
-      <div class="panel stat"><span>Total XP</span><b>${S.xp}</b></div>
-      <div class="panel stat"><span>Level</span><b>${L.n}</b><div class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></div></div>
-      <div class="panel stat"><span>Badges</span><b>${S.badges.length}/${BADGES.length}</b></div>
-      <div class="panel stat"><span>Programme</span><b>${pct}%</b><div class="bar"><i style="width:${pct}%"></i></div></div>
-    </div>
-    <div class="grid g-wide" style="margin-top:22px">
-      <section class="panel">
-        <div class="section-title">Learning progress</div>
-        ${MODULES.map(m=>{ const p=Math.round(modProgress(m)*100), un=modUnlocked(m); return `
-          <div class="mod-row"><div class="mod-num" style="background:${un?m.color:'#2a3070'}; color:#05061a">${un?m.n:icon('lock','#9aa3da',16)}</div>
-          <div style="min-width:0"><div style="display:flex; justify-content:space-between; gap:8px"><b style="font-weight:500; font-size:14.5px">${esc(m.title)}</b><span class="label muted">${modPassed(m)?'Passed':p+'%'}</span></div><div class="bar" style="margin-top:6px"><i style="width:${p}%; background:${m.color}"></i></div></div>
-          <button class="btn ghost small" data-act="openModule" data-arg="${m.id}" ${un?'':'disabled'}>${un?'Open':'Locked'}</button></div>`; }).join('')}
-      </section>
-      <div class="grid" style="align-content:start">
-        <section class="panel" style="padding:0; overflow:hidden">
-          <canvas id="miniCampus" class="px" width="240" height="96" style="width:100%; display:block; border-bottom:3px solid #000"></canvas>
-          <div style="padding:16px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap"><div><b>Virtual Campus</b><div class="muted" style="font-size:13px">${COMMUNITY_USERS.filter(u=>u.status==='on').length+1} learners online now</div></div><button class="btn" data-act="go" data-arg="campus">Enter</button></div>
-        </section>
-        <section class="panel home-card">
-          <canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas>
-          <div style="min-width:0; flex:1"><div class="label" style="color:var(--green-ink)">Safety Score</div><b class="pixel" style="font-size:38px; display:block; margin:6px 0">${healthScore()}%</b>
-            <div class="bar green"><i style="width:${healthScore()}%"></i></div><small class="muted" style="display:block; margin-top:6px">${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></div>
-          <button class="btn green small" data-act="go" data-arg="home">Home Base</button>
-        </section>
-        <section class="panel">
-          <div class="section-title">Recent badges</div>
-          ${recent.length ? `<div style="display:flex; gap:12px; flex-wrap:wrap">${recent.map(b=>`<div class="badge" style="padding:10px; flex:1; min-width:90px"><div class="medal" style="width:46px;height:46px;background:${b.c}">${icon(b.icon,'#05061a',24)}</div><b style="font-size:10px">${esc(b.t)}</b></div>`).join('')}</div>` : `<p class="muted">Complete your first lesson to earn a badge.</p>`}
-        </section>
-        <section class="tip-card"><div class="label">Security tip of the day</div><p style="margin-top:6px">${esc(TIPS[new Date().getDate()%TIPS.length])}</p></section>
-      </div>
-    </div>`;
-  drawMiniCampus(); animateDorm($('#miniDorm'), 2);
+    <section class="panel dash-player">
+      <div class="dp-head"><img class="px" src="${avatarURL(S.user.look)}" alt=""><div><b>${esc(S.user.name)}</b><span>${esc(L.t)}</span></div></div>
+      <div class="dp-level"><span>Level ${L.n}</span><span>${S.xp}${L.next ? ' / ' + L.next : ''} XP</span></div><div class="bar gold"><i style="width:${Math.round(L.pct*100)}%"></i></div>
+      <div class="dp-stats"><div>${icon('star','#ffd447',22)}<b>${S.xp}</b><span>XP</span></div><div>${coinIcon(22)}<b>${S.coins || 0}</b><span>Coins</span></div>
+        <div>${icon('trophy','#ffd447',22)}<b>${S.badges.length}</b><span>Badges</span></div><div><span class="flame">🔥</span><b>${st.n || 0}</b><span>Day streak</span></div></div>
+    </section>
+  </div>
+  <div class="dash-grid">
+    <section class="panel dash-card d-path"><div class="dc-head"><span>${icon('book','#ffd447',18)} My learning path</span><button data-act="go" data-arg="library">View all ›</button></div>
+      <div class="path-cur"><div class="path-ic" style="background:${curMod.color}">${icon(curMod.icon,'#05061a',26)}</div>
+        <div style="min-width:0; flex:1"><b>${esc(curMod.title)}</b><small>${esc(nx.label)}</small><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div>
+        <span class="path-pct">${pct}%</span><button class="path-play" data-act="${nx.act}" data-arg="${nx.arg||''}" aria-label="Continue">▶</button></div>
+      <div class="path-mods">${MODULES.map(md => `<span title="${esc(md.title)}" class="${modPassed(md) ? 'ok' : modUnlocked(md) ? 'cur' : ''}" style="--mc:${md.color}"><i style="width:${Math.round(modProgress(md)*100)}%"></i></span>`).join('')}</div></section>
+    <section class="panel dash-card d-arcade"><div class="dc-head"><span>${icon('flag','#ff4fae',18)} Cyber Arcade</span><button data-act="go" data-arg="challenge">Play now ›</button></div>
+      <div class="arc-strip">${ARCADE_GAMES.map(g => { const ok = Arcade.status(g.id).ok; return `<button class="arc-mini ${ok ? '' : 'locked'}" data-act="${ok ? 'arcPlay' : 'go'}" data-arg="${ok ? g.id : 'challenge'}" style="--mc:${g.color}"><canvas class="px" data-cab="${g.id}" width="192" height="252" aria-hidden="true"></canvas><b>${esc(g.t)}</b></button>`; }).join('')}
+        <div class="arc-mini soon"><b>More games coming</b><small>Byte Jump · Whack-a-Phish · Data Snake</small></div></div></section>
+    <section class="panel dash-card d-quests"><div class="dc-head"><span>${icon('check','#47f59a',18)} Daily quests</span><em>${m.daily.filter(x => x.done).length}/3 completed</em></div>
+      ${m.daily.map(it => quest(it)).join('')}
+      <div class="q-bonus ${m.bonus ? 'got' : ''}">${m.bonus ? '🎉 Daily bonus collected' : `Finish all 3: +${DAILY_BONUS.xp} XP · ${coinIcon(12)}${DAILY_BONUS.coins} bonus`}</div>
+      <div class="dc-sub">This week</div>${m.weekly.map(it => quest(it, true)).join('')}</section>
+    <section class="panel dash-card d-activity"><div class="dc-head"><span>${icon('star','#2ee6ff',18)} Recent activity</span><button data-act="go" data-arg="achievements">History ›</button></div>
+      ${S.history.length ? S.history.slice(0, 5).map(h => `<div class="act-row"><span>${esc(h.txt)}</span><small>${ago(h.t)}</small></div>`).join('') : '<p class="muted">Your milestones will appear here.</p>'}</section>
+    <section class="panel dash-card d-achieve"><div class="dc-head"><span>${icon('trophy','#ffd447',18)} Latest achievement</span></div>
+      ${lastBadge ? `<div class="ach"><div class="medal" style="background:${lastBadge.c}">${icon(lastBadge.icon,'#05061a',30)}</div><div><b>${esc(lastBadge.t)}</b><small>${esc(lastBadge.d)}</small></div></div>` : '<p class="muted">Complete your first lesson to earn a badge.</p>'}
+      <button class="home-mini" data-act="go" data-arg="home"><canvas id="miniDorm" class="px" width="256" height="208" aria-hidden="true"></canvas><span><b>Safety Score ${healthScore()}%</b><small>${healthDone()}/${HEALTH_CHECKS.length} real-life actions · ${esc(HOME_STAGES[homeStage()].t)}</small></span></button></section>
+    <section class="dash-byte"><div class="byte-bubble"><p>${esc(tip.text)}</p><button class="btn small purple" data-act="${tip.act}" data-arg="${tip.arg||''}">${esc(tip.btn)} ▸</button></div><img class="px byte-big" src="${BOT_URL}" alt="BYTE"></section>
+  </div>`;
+  drawMiniCampus(); animateDorm($('#miniDorm'), 2); bindArcadeHall();
 }
 function drawMiniCampus(){
   const c = $('#miniCampus'); if (!c) return; const x = c.getContext('2d'); x.imageSmoothingEnabled=false;
@@ -551,6 +569,8 @@ function renderMenu(){
     <span class="label">Profile</span>
     <button class="item" data-act="editAvatar">Edit avatar and name</button>
     <button class="item" data-act="go" data-arg="achievements">My progress</button>
+    <button class="item" data-act="sfxToggle">${Arcade.isMuted() ? '🔇 Sound effects: off' : '🔊 Sound effects: on'}</button>
+    <button class="item" data-act="musicToggle">${Music.isOn() ? '♪ Music: on' : '♪ Music: off'}</button>
     <button class="item" data-act="tourReplay">Replay campus tour with BYTE</button>
     <hr><span class="label">Presenter shortcuts</span>
     <button class="item" data-act="demoComplete" data-arg="1">Complete Module 1</button>
@@ -563,6 +583,7 @@ function renderMenu(){
     <hr><span class="label">Cyber Arcade</span>
     <button class="item" data-act="arcUnlock">${S.arcadeUnlocked ? '✓ Arcade unlocked (lock again)' : 'Unlock arcade (all games + incident)'}</button>
     <button class="item" data-act="arcReset">Reset arcade scores</button>
+    <button class="item" data-act="demoCoins">Add 500 coins (Coin Shop demo)</button>
     <hr>
     <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
     <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>
@@ -577,7 +598,7 @@ function demoComplete(n){
   MODULES.slice(0,n).forEach(m=>{ m.lessons.forEach(l=>{ const p=prog(l.id); if(!p.read){p.read=true; gained+=XP.lesson;} if(!p.activity){p.activity=true; p.actScore=100; gained+=XP.activity;} if(!p.quiz){p.quiz=true; p.quizBest=100; gained+=XP.quiz;} p.maxStage=6; });
     const mp=(S.modules[m.id] ||= {}); if(!mp.passed){ mp.passed=true; mp.best=100; gained+=XP.module; } });
   ['firstbyte','module'].forEach(id=>{ if(!S.badges.includes(id)) S.badges.push(id); }); if (n>=3 && !S.badges.includes('halfway')) S.badges.push('halfway');
-  S.xp += gained; log(`Presenter shortcut: completed ${n===1?'Module 1':'Modules 1–'+n}`, gained); save();
+  S.xp += gained; S.coins = (S.coins || 0) + Math.round(gained/5); log(`Presenter shortcut: completed ${n===1?'Module 1':'Modules 1–'+n}`, gained); save();
   UI.menu=false; renderMenu(); updateHUD(); toast(`Shortcut applied: +${gained} XP`); renderView();
 }
 
@@ -595,7 +616,7 @@ const ACTIONS = {
     UI.draftName = name; ACTIONS.enterCampus(); },
   cancelAvatar: () => { UI.editAvatar=false; renderApp(); },
   editAvatar: () => { UI.menu=false; UI.editAvatar=true; UI.draftLook={...S.user.look}; UI.draftName=S.user.name; clearTimers(); Campus.stop(); renderMenu(); $('#view').innerHTML = avatarCreatorHTML(); bindAvatarCreator(); },
-  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='campus'; save(); renderApp();
+  enterCampus: () => { S.user = { name:UI.draftName, look:UI.draftLook, joined:Date.now() }; S.view='dashboard'; save(); renderApp();
     if (Tour.shouldRun()) Tour.start(); else setTimeout(()=>award('hello'), 600); }, // first visit: BYTE's campus tour, which awards the welcome badge at the end
   openModule: a => go('module',{id:a}),
   openLesson: a => { const [id,st]=a.split('|'); const l=lessonById(id); if (!lessonUnlocked(l)){ toast('Finish the previous lesson first.'); return; } UI.lessonId=id; const p=prog(id); let s=+st; if (s===5 && !p.read) s=0; if (s===6 && !(p.read&&p.activity)) s = p.read?5:0; UI.stage=s; go('lesson'); },
