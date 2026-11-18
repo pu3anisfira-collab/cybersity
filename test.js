@@ -36,14 +36,17 @@ const fs = require('fs');
   await page.keyboard.down('ArrowUp'); await page.waitForTimeout(500); await page.keyboard.up('ArrowUp');
   await page.waitForTimeout(800); await shot('05-campus');
   // click library building to walk & enter
-  const box = await (await page.$('#campus')).boundingBox();
-  await page.mouse.click(box.x + box.width * (5.5/30), box.y + box.height * (4/25));
+  // campus page: the map fills the screen under the top bar, no building cards below it
+  console.log('campus fills page under top bar / no cards / dock buttons:', await page.evaluate(()=>{ const r = document.querySelector('#campus').getBoundingClientRect(), hud = document.querySelector('.hud').getBoundingClientRect();
+    return [Math.round(r.width) === innerWidth && Math.round(r.top) === Math.round(hud.bottom) && Math.round(r.bottom) === innerHeight, !document.querySelector('.quick-nav'), document.querySelectorAll('.cam-dock .dock-btn').length]; }));
+  const lib = await page.evaluate(()=>Campus.tour.rectOf('library'));
+  await page.mouse.click(lib.left + lib.width/2, lib.top + lib.height/2);
   await page.waitForFunction(()=>S.view!=="campus", null, {timeout:20000}).catch(()=>{});
   console.log('view after building click:', await page.evaluate(()=>S.view));
   await shot('06-library');
   // Home Base: walk there on the campus, tick real-life actions, watch the dorm upgrade
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(500);
-  await click('.quick-nav [data-arg="home"]'); await page.waitForFunction(()=>S.view==="home", null, {timeout:20000}).catch(()=>{});
+  await click('.cam-dock [data-arg="home"]'); await page.waitForFunction(()=>S.view==="home", null, {timeout:20000}).catch(()=>{});
   console.log('view after walking to Home Base:', await page.evaluate(()=>S.view));
   await shot('06a-home-dark');
   const tick = async id => { await click(`[data-act="healthTick"][data-arg="${id}"]`); await closeModals(); };
@@ -60,7 +63,7 @@ const fs = require('fs');
   await page.evaluate(()=>{ S.health={}; save(); });
   // Career Compass: walk to the plaza signpost, take the quiz, explore a role, play a taster mission
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(500);
-  await click('.quick-nav [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:20000}).catch(()=>{});
+  await click('.cam-dock [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:20000}).catch(()=>{});
   console.log('view after walking to signpost:', await page.evaluate(()=>S.view));
   await shot('07a-compass-hub');
   await click('[data-act="cqStart"]'); await shot('07b-compass-quiz');
@@ -182,18 +185,18 @@ const fs = require('fs');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(900); await shot('36-campus-unlocked');
   await page.click('#fab',{force:true}); await page.waitForTimeout(200); await page.waitForTimeout(300); await shot('37-drawer');
   // mobile
-  await page.setViewportSize({ width: 390, height: 844 }); await page.click('#fab',{force:true}); await page.waitForTimeout(200);
+  await page.evaluate(()=>{ if (UI.drawer) Mentor.toggleDrawer(); }); await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(200);
   await page.evaluate(()=>go('dashboard')); await page.waitForTimeout(400); await shot('38-m-dashboard');
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(700); await shot('39-m-campus');
   // phone camera: zoomed view that follows the avatar, taps still walk to the right place, full-map toggle
-  console.log('phone camera canvas (expect 576x672):', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width+'x'+c.height; }));
+  console.log('phone campus fills screen / camera zoomed in:', await page.evaluate(()=>{ const c=document.querySelector('#campus'), r=c.getBoundingClientRect(); return [Math.round(r.width)===innerWidth && Math.round(r.bottom)===innerHeight, c.width/3 < 480]; }));
   const cb = await (await page.$('#campus')).boundingBox();
   await page.mouse.click(cb.x + cb.width*0.5, cb.y + cb.height*0.85); await page.waitForTimeout(1600); await shot('39b-m-campus-walk');
-  await click('.quick-nav [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:25000}).catch(()=>{});
+  await click('.cam-dock [data-arg="compass"]'); await page.waitForFunction(()=>S.view==="career", null, {timeout:25000}).catch(()=>{});
   console.log('phone: walked to signpost and entered:', await page.evaluate(()=>S.view));
   await page.evaluate(()=>go('campus')); await page.waitForTimeout(900); await shot('39c-m-campus-follow');
   await click('#camToggle'); await page.waitForTimeout(300); await shot('39d-m-campus-fullmap');
-  console.log('full map toggle canvas (expect 1440x1200):', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width+'x'+c.height; }));
+  console.log('full map toggle shows the whole map:', await page.evaluate(()=>{ const c=document.querySelector('#campus'); return c.width/3 >= 480 && c.height/3 >= 400; }));
   await click('#camToggle'); await page.waitForTimeout(200);
   // full-screen campus: fills the window, survives a building visit, F toggles it
   await click('#fsToggle'); await page.waitForTimeout(600); await shot('39e-m-campus-fullscreen');

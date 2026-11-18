@@ -95,8 +95,12 @@ build tooling unless the owner asks.
   lesson's quiz step. A 1-minute plain-language card per lesson (`FAMILY_CARDS`) with a WhatsApp share link
   (`wa.me/?text=`) and copy text. The shared text holds lesson content only: never put the learner's name or
   other personal data in it.
-- **Phone camera** (07). On screens up to 640px wide the campus shows a 12×14-tile window that follows the
-  player. A Full map / Zoom in toggle sets `UI.campusFull`. Draw in world coordinates with `world()`; use
+- **Campus page and camera** (07). The campus is one big game screen: `.campus-shell.page` is fixed under the top
+  bar (`--hud-h`, measured in JS) and fills the rest of the window; the old title, instructions and building
+  cards are gone. HUD chips sit top-left, the ? help panel, Full map (phones) and Full screen top-right, the
+  incident banner floats on top, and a dock of building buttons along the bottom gives one-click travel and
+  keyboard access. `sizeCanvas()` gives the view the box's shape (full map width or height) and the camera
+  follows the player along the other side. Full map (`UI.campusFull`) fits the whole map instead. Draw in world coordinates with `world()`; use
   `screen()` with `vw`/`vh` for overlays that belong to the visible view. Map pointer input through `toLogical()`.
 
 - **Full-screen campus** (07). The Full screen button on the map (or the F key) sets `UI.campusFS`. The map then
@@ -182,5 +186,5 @@ Recording the incident (about 1–2 minutes):
    fast-forward if needed.
 4. "Back to campus" plays the restore animation, fireworks and the Campus saved modal (about 6s).
 
-On phones the campus is zoomed; use Full map to show the whole campus. For recording, press F (or Full screen) on
+The campus fills the screen under the top bar; use Full map to show the whole campus at once. For recording, press F (or Full screen) on
 the campus: the gear menu stays available from the map's top-right corner.

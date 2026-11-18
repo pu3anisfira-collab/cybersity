@@ -8,25 +8,30 @@ const Campus = (() => {
   let canvas, ctx, bg, raf=null, keys={}, player, npcs=[], frame=0, hover=null, nearDoor=null, pendingEnter=null, marker=null, bubbleT=0, active=false;
   let guide = null, focusPt = null, tourZoom = false; // campus tour: BYTE walking on the map, and a camera point to look at instead of the player
   // Phone camera: on small screens show a zoomed 12x14-tile window that follows the player (UI.campusFull shows the whole map)
-  const CAM_W=12*T, CAM_H=14*T; let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
+  let zoom=false, vw=W, vh=H, camX=0, camY=0, camFX=0, camFY=0, camSnap=true;
   const world = () => ctx.setTransform(SC,0,0,SC,-camX*SC,-camY*SC), screen = () => ctx.setTransform(SC,0,0,SC,0,0);
   // Full screen (UI.campusFS): the view takes the screen's shape and covers it, so the camera follows the player along the cut-off side
+  // The campus fills its box (the screen under the top bar, or the whole screen in full-screen mode). The view takes
+  // the box's shape: it shows the map's full width or height and the camera follows the player along the other side.
+  // "Full map" (UI.campusFull) instead fits the whole map, centred.
   function sizeCanvas(){
-    if (UI.campusFS){ const a = innerWidth/innerHeight; if (a >= W/H){ vw = W; vh = Math.round(W/a); } else { vh = H; vw = Math.round(H*a); } zoom = vw < W || vh < H; }
-    else { zoom = !UI.campusFull && matchMedia('(max-width:640px)').matches; vw = zoom ? CAM_W : W; vh = zoom ? CAM_H : H;
-      if (tourZoom && !zoom){ vw = Math.round(W/1.6); vh = Math.round(H/1.6); zoom = true; } } // the tour zooms in on desktop too
-    canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; canvas.style.aspectRatio = `${vw}/${vh}`; camSnap = true;
+    const box = canvas.parentElement.getBoundingClientRect(), a = Math.max(0.3, (box.width || innerWidth) / (box.height || innerHeight));
+    if (UI.campusFull){ if (a >= W/H){ vh = H; vw = Math.round(H*a); } else { vw = W; vh = Math.round(W/a); } }
+    else { if (a >= W/H){ vw = W; vh = Math.round(W/a); } else { vh = H; vw = Math.round(H*a); }
+      if (tourZoom){ vw = Math.round(vw/1.3); vh = Math.round(vh/1.3); } } // the tour zooms in a little more
+    zoom = vw < W || vh < H;
+    canvas.width = vw*SC; canvas.height = vh*SC; ctx.imageSmoothingEnabled = false; camSnap = true;
     const tb = $('#camToggle'); if (tb) tb.textContent = UI.campusFull ? 'Zoom in' : 'Full map';
   }
   function updateCam(){
-    if (!zoom){ camX = camY = 0; return; }
     const g = guide && guide.path.length ? guide : null; // while BYTE walks, the camera follows BYTE
     const fx = g ? g.x : focusPt ? focusPt.x : player.x, fy = g ? g.y : focusPt ? focusPt.y : player.y;
-    const tx = Math.max(0, Math.min(W-vw, fx-vw/2)), ty = Math.max(0, Math.min(H-vh, fy-10-vh/2));
+    const tx = vw >= W ? (W-vw)/2 : Math.max(0, Math.min(W-vw, fx-vw/2)), ty = vh >= H ? (H-vh)/2 : Math.max(0, Math.min(H-vh, fy-10-vh/2));
     if (camSnap){ camFX = tx; camFY = ty; camSnap = false; } else { camFX += (tx-camFX)*0.12; camFY += (ty-camFY)*0.12; }
     camX = Math.round(camFX*SC)/SC; camY = Math.round(camFY*SC)/SC;
   }
-  const onResize = () => { if (UI.campusFS || zoom !== (!UI.campusFull && matchMedia('(max-width:640px)').matches)) sizeCanvas(); };
+  const setHudH = () => { const h = $('.hud'); document.documentElement.style.setProperty('--hud-h', (h ? Math.round(h.getBoundingClientRect().bottom) : 0) + 'px'); };
+  const onResize = () => { setHudH(); sizeCanvas(); };
   const blocked = new Set(); const key=(c,r)=>c+','+r;
 
   function buildGrid(){
@@ -138,7 +143,7 @@ const Campus = (() => {
   }
 
   function draw(){
-    updateCam(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(bg, -camX*SC, -camY*SC); world(); ctx.imageSmoothingEnabled=false;
+    updateCam(); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#05061a'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.drawImage(bg, -camX*SC, -camY*SC); world(); ctx.imageSmoothingEnabled=false;
     const t = frame/60;
     // building animation: windows, doors, locks, hover
     B.forEach(b=>{
@@ -266,7 +271,7 @@ const Campus = (() => {
   const ku = e => { const k = e.key.length===1 ? e.key.toLowerCase() : e.key; keys[k]=false; };
 
   function start(cv){
-    canvas = cv; ctx = canvas.getContext('2d'); sizeCanvas(); window.addEventListener('resize', onResize);
+    canvas = cv; ctx = canvas.getContext('2d'); document.body.classList.add('campus-page'); setHudH(); sizeCanvas(); window.addEventListener('resize', onResize);
     buildGrid(); renderBG();
     player = player && player.look===S.user.look ? player : makeChar(S.user.look, 12, 9, S.user.name, true);
     player.path=[]; pendingEnter=null; marker=null; nearDoor=null; keys={};
@@ -277,9 +282,10 @@ const Campus = (() => {
     active = true; applyFS(); const go2 = ()=>{ if (active){ renderBG(); } }; if (document.fonts && document.fonts.ready) document.fonts.ready.then(go2);
     loop();
   }
-  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', onResize); keys={}; document.body.classList.remove('campus-fs'); }
+  function stop(){ active=false; if (raf) cancelAnimationFrame(raf); raf=null; window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', onResize); keys={}; document.body.classList.remove('campus-fs', 'campus-page'); }
   window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, { campusEnter: () => { if (nearDoor) enter(nearDoor); },
     campusZoom: () => { UI.campusFull = !UI.campusFull; if (active) sizeCanvas(); },
+    campusHelp: () => { const h = $('#camHelp'), b = $('[data-act="campusHelp"]'); if (!h) return; h.classList.toggle('hidden'); if (b) b.setAttribute('aria-expanded', !h.classList.contains('hidden')); },
     campusFS: () => setCampusFS(!UI.campusFS), campusGo: id => { const b=B.find(x=>x.id===id); if (!b) return; if (active){ const [pc,pr]=tileOf(player); const p=bfs(pc,pr,b.door.c,b.door.r); if (p){ player.path=p; pendingEnter=b; marker=[b.door.c,b.door.r]; if(!p.length){ pendingEnter=null; enter(b);} return; } } enter(b); } });
   // One building's front (roof, sign, windows, door) at x,y, as seen on the campus; used by banners and the title screen
   function drawFront(g, id, x, y, hacked){
@@ -355,14 +361,18 @@ const Campus = (() => {
 const BUBBLES = ['Just passed Module 2!','Anyone in Study Squad tonight?','The phishing lesson was eye-opening','BYTE explained hashing so well','Going for Phish Spotter!','Never share your OTP!','Turned on MFA everywhere today','Log Detective is so fun','WPA3 or nothing 😎','Halfway to my certificate!'];
 
 function viewCampus(el){
-  const online = COMMUNITY_USERS.filter(u=>u.status!=='off').length + 1;
-  el.innerHTML = `<div class="page-head"><div><div class="crumbs">Virtual Campus</div><h1>Cybersity Campus</h1><p>Walk with the arrow keys or WASD, or click/tap anywhere to move. Click a building to walk to its door and enter. Press F or Full screen to fill the screen.</p></div><div style="display:flex; gap:8px; flex-wrap:wrap"><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div></div>
-  <div class="campus-shell" id="campusShell"><div id="incBanner">${incBannerHTML()}</div>
-  <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons below for keyboard navigation."></canvas>
-    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} ${isDay() ? 'Day shift' : 'Night shift'} · Sector 7</span></div>
-    <div class="cam-tools"><button class="cam-btn fs-only" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear','#ffd447',14)}</button><button class="cam-btn cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button><button class="cam-btn" id="fsToggle" data-act="campusFS" aria-pressed="false">⛶ Full screen</button></div>
-    <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div></div>
-  <div class="quick-nav">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="qn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}">${icon(locked?'lock':b.icon, b.color, 24)}<b>${esc(b.name)}</b><small>${esc(b.desc)}</small></button>`; }).join('')}</div>`;
+  // The campus is one big game screen under the top bar: HUD chips and tools in the corners, the incident banner on
+  // top, a dock of building buttons along the bottom (one-click travel and keyboard access) and a "?" help panel.
+  const online = COMMUNITY_USERS.filter(u=>u.status!=='off').length + 1, showHint = !UI.campusHinted; UI.campusHinted = true;
+  el.innerHTML = `<h1 class="sr-only">Cybersity Campus</h1>
+  <div class="campus-shell page" id="campusShell"><div id="incBanner">${incBannerHTML()}</div>
+  <div class="campus-wrap ${incActive()?'alarm':''}"><canvas id="campus" class="px" aria-label="Virtual campus map. Use the building buttons at the bottom of the map for keyboard navigation."></canvas>
+    <div class="campus-hud"><span class="pill">${icon('campus','#2ee6ff',12)} ${isDay() ? 'Day shift' : 'Night shift'} · Sector 7</span><span class="pill green">● ${online} online</span><span class="pill gold">LV ${levelInfo().n} · ${S.xp} XP</span></div>
+    <div class="cam-tools"><button class="cam-btn fs-only" data-act="toggleMenu" aria-label="Menu and presenter tools">${icon('gear','#ffd447',14)}</button><button class="cam-btn" data-act="campusHelp" aria-expanded="false" aria-controls="camHelp" aria-label="How to play">?</button><button class="cam-btn cam-toggle" id="camToggle" data-act="campusZoom">${UI.campusFull ? 'Zoom in' : 'Full map'}</button><button class="cam-btn" id="fsToggle" data-act="campusFS" aria-pressed="false">⛶ Full screen</button></div>
+    <div class="cam-help hidden" id="camHelp"><b>How to play</b><span>Walk with the arrow keys or WASD, or click/tap anywhere.</span><span>Click a building, or a button at the bottom, to walk to its door and go in. Press E at a glowing door.</span><span>Press F for full screen.</span></div>
+    ${showHint ? '<div class="cam-hint">Walk with WASD / arrow keys or tap · Click a building to enter · F = full screen</div>' : ''}
+    <nav class="cam-dock" aria-label="Go to a building">${Campus.buildings.map(b=>{ const locked=bLocked(b.id); return `<button class="dock-btn ${locked?'locked':''}" data-act="campusGo" data-arg="${b.id}" data-name="${esc(b.name)}" aria-label="Go to ${esc(b.name)}${locked?' (locked)':''}">${icon(locked?'lock':b.icon, b.color, 22)}</button>`; }).join('')}</nav>
+    <div class="prompt hidden" id="campusPrompt"></div><div class="tooltip hidden" id="campusTip"></div></div></div>`;
   Campus.start($('#campus'));
 }
 
