@@ -149,17 +149,25 @@ const fs = require('fs');
   // Cyber Arcade hall: one cabinet per game, availability, sample leaderboard, practice/assessments still below
   console.log('arcade hall: machines / leaderboard / practice kept:', await page.evaluate(()=>[document.querySelectorAll('.machine').length, !!document.querySelector('.lb-list li'), !!document.querySelector('.boss') && document.querySelectorAll('.ch-row').length > 20]));
   await page.evaluate(()=>document.querySelector('.arcade-hall').scrollIntoView()); await page.waitForTimeout(700); await shot('35a-arcade-hall');
+  // Rocket Firewall: autopilot flies into the right tunnel, misses gate 2 on purpose
+  await page.evaluate(()=>{ UI.arcDiff='hard'; go('arcade',{game:'rocket'}); }); await page.waitForTimeout(400); await click('[data-act="arcStart"]');
+  await page.evaluate(()=>{ window.__rk = setInterval(()=>{ if (!ARC || !ARC.game || !ARC.game.state) return; const st = ARC.game.state(); if (st.phase !== 'fly' || st.correctLane === null) return;
+    const target = ARC.answers.length === 1 ? (st.correctLane + 1) % 3 : st.correctLane; if (st.lane < target) ARC.game.input('down'); else if (st.lane > target) ARC.game.input('up'); }, 120); });
+  await page.waitForFunction(()=>ARC.game.state().phase !== 'fly', null, {timeout:150000}).catch(()=>{}); await page.evaluate(()=>clearInterval(window.__rk));
+  await page.waitForTimeout(1800); await closeModals(); await shot('35e-rocket-results');
+  console.log('rocket: won / answers / 1 mistake / badge:', await page.evaluate(()=>[ARC.won, ARC.answers.length, document.querySelectorAll('.arc-mistakes > div:not(.label)').length, S.badges.includes('arc_rocket')]));
+  await page.evaluate(()=>{ UI.arcDiff='normal'; Arcade.resetScores(); go('challenge'); });
   // framework check with a tiny test-only game (the real games register themselves in later steps)
-  await page.evaluate(()=>{ if (!Arcade.games.rocket) Arcade.register('rocket', { controls:['up','down'], size:[320,200], create(api){ const qs = api.questions(4); let i = 0; api.prompt(qs[0].q, 'Question 1 of 4');
+  await page.evaluate(()=>{ ARCADE_GAMES.push({id:'testgame', t:'Test Game', color:'#2ee6ff', diff:'Easy', badge:'none', desc:'Test only.', how:'Test only.'}); Arcade.register('testgame', { controls:['up','down'], size:[320,200], create(api){ const qs = api.questions(4); let i = 0; api.prompt(qs[0].q, 'Question 1 of 4');
     return { update(){}, draw(g){ g.fillStyle='#10153b'; g.fillRect(0,0,api.W,api.H); g.fillStyle='#2ee6ff'; g.fillRect(20+i*60, 90, 40, 20); },
       input(d){ const q = qs[i], ok = d === 'up'; api.answer(ok, { q:q.q, chosen: ok ? q.correct : q.options.find(o=>o!==q.correct), correct:q.correct, e:q.e }); if (ok) api.addScore(100); else api.loseLife(); i++; if (i >= qs.length) api.end(true, 'Test run complete.'); else api.prompt(qs[i].q, 'Question '+(i+1)+' of 4'); } }; } }); go('challenge'); });
-  await page.waitForTimeout(400); await click('[data-act="arcPlay"][data-arg="rocket"]'); await page.waitForTimeout(300); await shot('35b-arcade-intro');
+  await page.waitForTimeout(400); await click('[data-act="arcPlay"][data-arg="testgame"]'); await page.waitForTimeout(300); await shot('35b-arcade-intro');
   await click('[data-act="arcDiff"][data-arg="hard"]'); await click('[data-act="arcStart"]'); await page.waitForTimeout(300); await shot('35c-arcade-play');
   const xpBefore = await page.evaluate(()=>S.xp);
   for (const k of ['ArrowUp','ArrowDown','w','ArrowUp']){ await page.keyboard.press(k); await page.waitForTimeout(150); }
   await page.waitForTimeout(1800); await closeModals(); await shot('35d-arcade-results');
-  console.log('arcade results: accuracy / mistakes listed / high score saved / XP gained / on leaderboard:', await page.evaluate(x=>[document.querySelector('.arc-stats').textContent.includes('75%'), document.querySelectorAll('.arc-mistakes > div:not(.label)').length, Arcade.scores().rocket.best, S.xp - x, Arcade.leaderboard('rocket').some(r=>r.me)], xpBefore));
-  await page.evaluate(()=>{ delete Arcade.games.rocket; Arcade.resetScores(); });
+  console.log('arcade results: accuracy / mistakes listed / high score saved / XP gained / on leaderboard:', await page.evaluate(x=>[document.querySelector('.arc-stats').textContent.includes('75%'), document.querySelectorAll('.arc-mistakes > div:not(.label)').length, Arcade.scores().testgame.best, S.xp - x, Arcade.leaderboard('testgame').some(r=>r.me)], xpBefore));
+  await page.evaluate(()=>{ delete Arcade.games.testgame; ARCADE_GAMES.pop(); Arcade.resetScores(); });
   // building-themed headers: every building page gets its colour and a pixel banner
   for (const v of ['library','mentor','community','home','career']){ await page.evaluate(v=>go(v), v); await page.waitForTimeout(300); await shot('35-theme-'+v); }
   console.log('themed headers:', await page.evaluate(()=>Object.keys(VIEW_BUILDING).map(v=>{ go(v); const h=document.querySelector('.page-head'); return v+':'+(h.classList.contains('bhead')&&!!h.querySelector('.bbanner')); }).join(' ')));
