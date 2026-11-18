@@ -39,8 +39,8 @@ const Quests = (() => {
       if (q.xpGoal){ if (!xp) return; it.n = Math.min(q.need, it.n + xp); } else if (q.match.test(key)) it.n = Math.min(q.need, it.n + 1); else return;
       if (it.n >= q.need){ it.done = true; done.push(q); S.questsDone = (S.questsDone || 0) + 1; } });
     save(); if (!done.length) return;
-    busy = true; // quest rewards call addXP, which must not count towards quests again
     setTimeout(() => {
+      busy = true; // quest rewards call addXP, which must not count towards quests again
       done.forEach(q => { toast(`${icon(q.icon,'#ffd447',16)} Quest complete: ${esc(q.t)} · +${q.xp} XP · +${q.coins} coins`, 'mission'); addCoins(q.coins); addXP(q.xp, 'Quest complete: ' + q.t); });
       if (!m.bonus && m.daily.every(x => x.done)){ m.bonus = true; toast('🎉 All daily quests done! Daily bonus unlocked', 'mission'); addCoins(DAILY_BONUS.coins); addXP(DAILY_BONUS.xp, 'All daily quests complete'); }
       busy = false; save(); sfx('win'); if (S.view === 'dashboard') renderView();

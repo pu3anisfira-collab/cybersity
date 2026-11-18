@@ -984,6 +984,14 @@ span.inc-chip{cursor:default}
 [data-theme="day"] .tabbar{background:#fffaf0; border-top-color:var(--wood)} [data-theme="day"] .tabbar button.on{color:#16300c; background:#bfeaa6}
 [data-theme="day"] .path-mods span{background:#f0e6cf}
 
+/* tablets: the sidebar shows icons only so pages keep their width */
+@media (min-width:761px) and (max-width:1100px){
+  .shell{--side-w:78px} .shell .side-nav button{justify-content:center; padding:10px 0} .shell .side-nav button span{display:none}
+  .shell .logo-full{display:none} .shell .logo-mini{display:inline} .side-collapse{display:none}
+  .shell .side-nav .nb{position:absolute; top:4px; right:8px; margin:0; min-width:0; font-size:9px; padding:0 4px}
+}
+[data-theme="day"] .arc-mini b{text-shadow:1px 0 #000,-1px 0 #000,0 1px #000,0 -1px #000}
+
 /* ---------- Phase 2: nav badges, clickable notifications, achievement stats ---------- */
 .side-nav button, .tabbar button{position:relative}
 .nb{margin-left:auto; min-width:20px; padding:1px 5px; font-family:var(--f-label); font-size:10px; font-style:normal; text-align:center; background:var(--pink); color:#fff; border:2px solid #000; box-shadow:1px 1px 0 #000}
