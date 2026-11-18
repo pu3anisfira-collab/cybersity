@@ -984,6 +984,16 @@ span.inc-chip{cursor:default}
 [data-theme="day"] .tabbar{background:#fffaf0; border-top-color:var(--wood)} [data-theme="day"] .tabbar button.on{color:#16300c; background:#bfeaa6}
 [data-theme="day"] .path-mods span{background:#f0e6cf}
 
+/* ---------- Phase 2: nav badges, clickable notifications, achievement stats ---------- */
+.side-nav button, .tabbar button{position:relative}
+.nb{margin-left:auto; min-width:20px; padding:1px 5px; font-family:var(--f-label); font-size:10px; font-style:normal; text-align:center; background:var(--pink); color:#fff; border:2px solid #000; box-shadow:1px 1px 0 #000}
+.nb.alert{background:var(--red); animation:siren .8s steps(2) infinite}
+.shell.mini .nb, .tabbar .nb{position:absolute; top:4px; right:8px; margin:0; min-width:0; font-size:9px; padding:0 4px}
+.bell-row{display:flex; gap:8px; align-items:flex-start; text-align:left; color:var(--text); cursor:pointer} .bell-row:hover{background:var(--panel-2)}
+.bell-row span{display:grid; gap:1px} .bell-row img{flex:none; margin-top:2px}
+.ach-stats{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px} .ach-stats img{width:12px; height:12px; vertical-align:-1px}
+.fab.quiet .bubble-hint{display:none}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}
@@ -2094,7 +2104,7 @@ function updateHUD(){
   $('#hudAva').src = avatarURL(S.user.look);
   $('#hudLvl').textContent = `LV ${L.n} · ${S.xp} XP`;
   $('#hudXp').style.width = Math.round(L.pct*100)+'%';
-  const c = $('#hudCoins'), st = $('#hudStreak'), dot = $('#bellDot'); if (c) c.textContent = S.coins || 0; if (st) st.textContent = (S.streak && S.streak.n) || 0; if (dot) dot.classList.toggle('hidden', !bellUnread());
+  const c = $('#hudCoins'), st = $('#hudStreak'), dot = $('#bellDot'); if (c) c.textContent = S.coins || 0; if (st) st.textContent = (S.streak && S.streak.n) || 0; if (dot) dot.classList.toggle('hidden', !bellUnread()); navBadges();
 }
 function go(view, params={}){
   if (view !== 'lesson' && view !== 'quiz') UI.quiz = null;
@@ -2105,7 +2115,7 @@ function renderView(){
   clearTimers(); Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
   document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
-  const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
+  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges();
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
     challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade, shop:viewShop };
@@ -2403,7 +2413,7 @@ function finishQuiz(){
   if (Q.kind==='lesson'){ const p=prog(Q.id), l=lessonById(Q.id); const first = pass && !p.quiz; p.quizBest = Math.max(p.quizBest||0, score); if (pass) p.quiz = true; save();
     if (first){ rewards.push(()=>addXP(XP.quiz, `Passed quiz: ${l.title}`)); if (score===100) rewards.push(()=>addXP(XP.perfectQuiz,'Perfect quiz bonus')); } }
   if (Q.kind==='module'){ const m=modById(Q.id), mp=(S.modules[m.id] ||= {}); const first = pass && !mp.passed; mp.best=Math.max(mp.best||0,score); if (pass) mp.passed=true; save();
-    if (first){ rewards.push(()=>addXP(XP.module, `Passed Module ${m.n} assessment`)); rewards.push(()=>award('module')); if (MODULES.filter(modPassed).length>=3) rewards.push(()=>award('halfway')); } }
+    if (first){ rewards.push(()=>addXP(XP.module, `Passed Module ${m.n} assessment`)); rewards.push(()=>award('module')); rewards.push(()=>unlockNote(m)); if (MODULES.filter(modPassed).length>=3) rewards.push(()=>award('halfway')); } }
   if (Q.kind==='final'){ const first = pass && !finalPassed(); S.final = { passed: finalPassed()||pass, best: Math.max(S.final?.best||0, score) };
     if (first){ S.cert = { ref: makeCertRef(), date: Date.now() }; save(); rewards.push(()=>addXP(XP.final,'Passed the final assessment')); rewards.push(()=>award('grad')); } }
   if (score===100) rewards.push(()=>award('perfect'));
@@ -2427,7 +2437,7 @@ function quizResult(el, Q){
     <div class="actions" style="display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap">
       ${!Q.pass && l ? `<button class="btn ghost" data-act="openLesson" data-arg="${l.id}|1">Review lesson</button>`:''}
       ${!Q.pass && m ? `<button class="btn ghost" data-act="openModule" data-arg="${m.id}">Review module</button>`:''}
-      <button class="btn ${Q.pass?'ghost':''}" data-act="retryQuiz">Retake</button>${nextBtn}
+      <button class="btn ${Q.pass?'ghost':''}" data-act="retryQuiz">Retake</button>${nextBtn}${Q.pass && Q.kind!=='final' ? `<button class="btn ghost" data-act="go" data-arg="challenge">${icon('flag','#ff4fae',14)} Practise in the arcade</button>` : ''}
     </div></div>
     ${Q.pass && l && FAMILY_CARDS[l.id] ? `<div class="kicker" style="margin-top:26px">Teach your family</div><p style="margin:6px 0 12px; color:var(--ink-2)">Share what you just learned with someone scammers might target, like your parents or grandparents.</p>${familyCardHTML(l)}` : ''}
     ${wrong.length?`<div class="kicker" style="margin-top:22px">Review your mistakes</div><div class="review">${wrong.map(x=>`<div class="bad"><b>${esc(x.q.q)}</b><br>Correct answer: <b>${esc(x.q.o[x.q.a])}</b><br><span style="color:var(--ink-2)">${esc(x.q.e)}</span></div>`).join('')}</div>`:''}
@@ -2457,9 +2467,9 @@ function viewAchievements(el){
   <div class="grid g-wide">
     <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:34px; margin-top:6px">${esc(L.t)}</h2>
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
-      <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
+      <div class="ach-stats"><span class="pill gold">${coinIcon(12)} ${S.coins||0} coins</span><span class="pill">🔥 Best streak ${(S.streak&&S.streak.best)||0}</span><span class="pill green">${S.questsDone||0} quests done</span></div><div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Daily and weekly quests','20–120'],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>
@@ -4072,7 +4082,7 @@ function arcIntro(id, diff){
   $('#arcOver').innerHTML = `<div class="arc-card">
       <div class="arc-title" data-t="${esc(gm.t)}">${esc(gm.t)}</div>
       ${mod.story ? `<p class="arc-story">${esc(mod.story(S.params || {}))}</p>` : ''}
-      <p>${esc(gm.how)}</p>
+      <p>${esc(gm.how)}</p>${id !== 'packet' ? `<p class="muted" style="font-size:13px">${arcadeMods() ? `Questions from the modules you've unlocked (1–${arcadeMods().length}). Pass more modules to add more.` : 'Questions from all six modules.'}</p>` : ''}
       <div class="arc-controls"><span><b>Desktop</b> ${keys}</span><span><b>Phone</b> tap the buttons or swipe</span><span><b>Pause</b> P or Esc</span></div>
       <div class="arc-diffs" role="radiogroup" aria-label="Difficulty">${Object.values(ARCADE_DIFF).map(d => `<button role="radio" aria-checked="${d.id===diff}" class="${d.id===diff?'on':''}" data-act="arcDiff" data-arg="${d.id}"><b>${d.t}</b><small>${d.note}</small></button>`).join('')}</div>
       <button class="btn gold arc-start" data-act="arcStart" data-arg="${id}">▶ Start</button>
@@ -4090,7 +4100,7 @@ function arcStart(id){
   const hud = () => { const sEl = $('#arcScore'), lEl = $('#arcLives'); if (sEl) sEl.textContent = run.score;
     if (lEl) lEl.innerHTML = Array.from({length:diff.lives}, (_,i) => `<i class="${i < run.lives ? 'on' : ''}"></i>`).join(''); };
   const api = {
-    W:LW, H:LH, diff, params:{ ...(S.params || {}) }, questions:Arcade.questions, sortSet:Arcade.sortSet, sfx:Arcade.sfx,
+    W:LW, H:LH, diff, params:{ ...(S.params || {}) }, questions:(n, mods) => Arcade.questions(n, mods || arcadeMods()), sortSet:Arcade.sortSet, sfx:Arcade.sfx,
     prompt(text, small){ const q = $('#arcQ'); if (!q) return; q.classList.toggle('hidden', !text); q.innerHTML = text ? `${small ? `<small>${esc(small)}</small>` : ''}${esc(text)}` : ''; },
     answer(ok, item){ run.answers.push({ ok, ...item }); Arcade.sfx(ok ? 'ok' : 'bad'); run.flashT = 0.35; run.flashC = ok ? '#47f59a' : '#ff5d6e'; hud(); },
     loseLife(){ if (run.over) return; run.lives = Math.max(0, run.lives-1); Arcade.sfx('life'); hud(); if (run.lives <= 0) api.end(false); },
@@ -4604,7 +4614,7 @@ const Quests = (() => {
     if (!S.user || busy) return; const m = state(), done = [];
     [...m.daily, ...m.weekly].forEach(it => { if (it.done) return; const q = def(it.id);
       if (q.xpGoal){ if (!xp) return; it.n = Math.min(q.need, it.n + xp); } else if (q.match.test(key)) it.n = Math.min(q.need, it.n + 1); else return;
-      if (it.n >= q.need){ it.done = true; done.push(q); } });
+      if (it.n >= q.need){ it.done = true; done.push(q); S.questsDone = (S.questsDone || 0) + 1; } });
     save(); if (!done.length) return;
     busy = true; // quest rewards call addXP, which must not count towards quests again
     setTimeout(() => {
@@ -4699,7 +4709,7 @@ function bellUnread(){ const seen = S.bellSeen || 0; return S.history.filter(h =
 function renderBell(){ const host = $('#bellHost'); if (!host) return;
   if (!UI.bell){ host.innerHTML = ''; return; }
   const ago = t => { const s = (Date.now() - t)/1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s/60)} min ago` : s < 86400 ? `${Math.floor(s/3600)} h ago` : `${Math.floor(s/86400)} d ago`; };
-  host.innerHTML = `<div class="bell-pop" role="dialog" aria-label="Notifications"><div class="label">Notifications</div>${S.history.slice(0, 7).map(h => `<div class="bell-row"><span>${esc(h.txt)}</span><small>${ago(h.t)}${h.xp ? ` · +${h.xp} XP` : ''}</small></div>`).join('') || '<p class="muted">Nothing yet. Start a lesson!</p>'}</div>`; }
+  host.innerHTML = `<div class="bell-pop" role="dialog" aria-label="Notifications"><div class="label">Notifications</div>${S.history.slice(0, 7).map(h => { const [v, ic] = noteTarget(h.txt); return `<button class="bell-row" data-act="go" data-arg="${v}">${icon(ic, '#ffd447', 16)}<span>${esc(h.txt)}<small>${ago(h.t)}${h.xp ? ` · +${h.xp} XP` : ''}</small></span></button>`; }).join('') || '<p class="muted">Nothing yet. Start a lesson!</p>'}</div>`; }
 
 /* ---------- BYTE companion: one context-aware tip ---------- */
 function byteTip(){
@@ -4731,6 +4741,34 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS || {}, {
 });
 document.addEventListener('click', e => { if (UI.bell && !e.target.closest('.bell-pop, [data-act="toggleBell"]')){ UI.bell = false; renderBell(); }
   if (!e.target.closest('.side, [data-act="sideOpen"]')) { const a = $('#app'); if (a) a.classList.remove('side-open'); } });
+
+/* ---------- Phase 2: connections between learning, arcade, quests and navigation ---------- */
+// Arcade questions come from the modules the learner has unlocked (all six once unlocked or with the presenter unlock)
+function arcadeMods(){ const k = MODULES.filter(modUnlocked).length; return (S.arcadeUnlocked || k >= MODULES.length) ? null : Array.from({ length:Math.max(1, k) }, (_, i) => i + 1); }
+// After a module assessment: tell the learner what just opened up
+function unlockNote(m){ const i = MODULES.indexOf(m), nx = MODULES[i + 1];
+  if (nx){ log(`Unlocked Module ${nx.n}: ${nx.title}`); toast(`🔓 Module ${nx.n} unlocked: ${esc(nx.title)}`, 'mission'); }
+  if (m.n === 2){ log('Unlocked Virus Escape and the campus incident'); setTimeout(() => toast('🕹 Virus Escape unlocked in the Cyber Arcade!', 'mission'), 900); }
+  if (!nx){ log('Unlocked the final assessment'); toast('🏆 The final assessment is unlocked!', 'mission'); } }
+// Where a notification leads, and its icon
+function noteTarget(txt){
+  const R = [[/^Badge/, 'achievements', 'trophy'], [/Quest|daily quests/, 'dashboard', 'check'], [/Virus Escape|Rocket Firewall|Packet Drop|arcade/i, 'challenge', 'flag'],
+    [/incident|Campus saved|Secured/i, 'campus', 'shield'], [/Home Base/, 'home', 'home'], [/Career|Taster/i, 'career', 'compass'], [/BYTE|tour/, 'mentor', 'chip'],
+    [/community/i, 'community', 'chat'], [/certificate|final/i, 'certificate', 'scroll'], [/lesson|quiz|Activity|Module/i, 'library', 'book']];
+  const hit = R.find(([re]) => re.test(txt)); return hit ? [hit[1], hit[2]] : ['dashboard', 'star']; }
+// Small badges on the sidebar and tab bar: quests left, campus alert, new game, affordable shop items
+function navBadges(){
+  if (!S.user || !document.querySelector('[data-nav]')) return; const m = Quests.state(), sc = Arcade.scores(), sh = shopState();
+  const marks = {
+    dashboard: m.daily.filter(x => !x.done).length || '',
+    campus: incActive() ? '!' : (incUnlocked() && !(S.incident && S.incident.done)) ? '!' : '',
+    challenge: (Arcade.status('virus').ok && !sc.virus) ? 'NEW' : '',
+    shop: SHOP_ITEMS.some(it => !sh.owned.includes(it.id) && (S.coins || 0) >= it.price) ? '$' : ''
+  };
+  document.querySelectorAll('[data-nav]').forEach(b => { let el = b.querySelector('.nb'); const v = marks[b.dataset.nav];
+    if (!v){ if (el) el.remove(); return; } if (!el){ el = document.createElement('i'); el.className = 'nb'; b.appendChild(el); }
+    el.textContent = v; el.classList.toggle('alert', v === '!'); });
+}
 /* ---------- Boot ---------- */
 BOT_URL = botCanvas().toDataURL();
 document.body.insertAdjacentHTML('beforeend', themeBtnHTML('theme-corner', 'themeCorner'));

@@ -36,6 +36,7 @@ build tooling unless the owner asks.
 | `src/13-virus.js` | Virus Escape: 3-lane campus runner, also the Campus Incident's game |
 | `src/14-rocket.js` | Rocket Firewall: steer the rocket through the gate tunnel with the right answer |
 | `src/15-packet.js` | Packet Drop: falling labelled blocks sorted into bins |
+| `src/16-rewards.js` | Coins, daily/weekly quests (`Quests`), day streak, Coin Shop (`SHOP_ITEMS`, `viewShop`), notifications bell, UI sound and chiptune `Music`, reward fly-ups, BYTE tips (`byteTip`), Phase 2 connections (`arcadeMods`, `unlockNote`, `navBadges`) |
 | `src/99-init.js` | Boot (always last in `build.sh`) |
 
 ## Features added for IIMaCC 2026
@@ -125,6 +126,30 @@ build tooling unless the owner asks.
   Replay from the gear menu or the AI Lab. To change what BYTE says, edit `TOUR_STEPS`. The static "Mission briefing"
   onboarding step was removed: the tour replaces it, so onboarding is now title, sign up, avatar, campus.
 
+## Gamification and layout (Phase 1 and 2)
+- **Shell** (05 `renderApp`). `#app` gets class `shell`: a fixed left sidebar (`.side`, `#nav` with `data-nav`
+  buttons; collapsible to icons with `UI.sideMini`, remembered in `cybersity-side-mini`), a top bar (`.hud`: streak,
+  coins `#hudCoinsChip`, notifications bell, player chip, theme, gear) and, at 760px and below, a bottom tab bar
+  (`.tabbar`) with a slide-in sidebar ("More"). Layout sizes are CSS variables `--side-w` and `--tab-h`; the
+  campus page uses them so it sits beside the sidebar and above the tab bar.
+- **Home** is the dashboard (`viewDashboard`): hero with Continue learning (`nextStep()`) and Explore campus, player
+  card, learning path, arcade cabinets, daily and weekly quests, recent activity, latest achievement, Safety Score
+  and BYTE with `byteTip()`. New learners still start with BYTE's campus tour.
+- **Coins**: `addXP()` also gives 1 coin per 5 XP (not for quest rewards, which pay their own coins); `addCoins()`
+  flies a coin pop-up to the top bar. Spend them in the **Coin Shop** (avatar colours, Home Base decorations drawn by
+  `drawDormDecor()`, BYTE skins via `botPal()` in 04). State: `S.coins`, `S.shop`.
+- **Quests** (`Quests`): 3 daily quests picked from `QUEST_POOL` by date, 3 `WEEKLY_QUESTS` (reset on Mondays),
+  and a bonus for all 3 daily. They match the XP reason passed to `addXP()` (e.g. "Completed lesson: …") or
+  "visit:<view>" from `go()`, so new actions count automatically if their XP reason matches a quest regex.
+  State: `S.missions`, `S.questsDone`. **Streak**: `touchStreak()` on each app render, state `S.streak`.
+- **Connections**: arcade questions come only from unlocked modules (`arcadeMods()`, all six with the presenter
+  unlock); passing a module assessment logs and toasts what it unlocked (`unlockNote()`); passed quizzes link to the
+  arcade; notifications (the bell, built from `S.history`) are clickable and go to the right page
+  (`noteTarget()`); the sidebar and tab bar show badges for quests left, a campus alert, a new game and affordable
+  shop items (`navBadges()`); the Achievement Hall shows coins, best streak and quests done.
+- **Sound**: click, coin, level-up and badge sounds reuse the arcade's Web Audio (`sfx()`, muted with the same
+  toggle); optional chiptune `Music` is off by default (key `cybersity-music`). Both toggles are in the gear menu.
+
 ## Day mode
 - A sun/moon button (top bar; top-right corner on the sign-in screens) switches between Night (default) and Day.
   The choice is saved in `localStorage` key `cybersity-theme` and applied as `<html data-theme="day">`.
@@ -175,7 +200,8 @@ environments is expected and harmless. `shots/` and `test-page.html` are git-ign
 - **Campus incident**: Start "Campus under attack!", Secure next building (plays the restore animation),
   End incident (resets for another take)
 - **Home Base**: tick every action / clear checklist (resets the dorm to dark without giving XP again)
-- **Cyber Arcade**: Unlock arcade (all games and the incident playable without Module 2), Reset arcade scores
+- **Cyber Arcade**: Unlock arcade (all games and the incident playable without Module 2), Reset arcade scores, Add 500 coins (Coin Shop demo)
+- **Sound**: sound effects on/off, music on/off
 - Admin view, reset demo progress, log out
 - Profile: **Replay campus tour with BYTE**
 

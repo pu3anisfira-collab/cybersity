@@ -37,7 +37,7 @@ const Quests = (() => {
     if (!S.user || busy) return; const m = state(), done = [];
     [...m.daily, ...m.weekly].forEach(it => { if (it.done) return; const q = def(it.id);
       if (q.xpGoal){ if (!xp) return; it.n = Math.min(q.need, it.n + xp); } else if (q.match.test(key)) it.n = Math.min(q.need, it.n + 1); else return;
-      if (it.n >= q.need){ it.done = true; done.push(q); } });
+      if (it.n >= q.need){ it.done = true; done.push(q); S.questsDone = (S.questsDone || 0) + 1; } });
     save(); if (!done.length) return;
     busy = true; // quest rewards call addXP, which must not count towards quests again
     setTimeout(() => {
@@ -132,7 +132,7 @@ function bellUnread(){ const seen = S.bellSeen || 0; return S.history.filter(h =
 function renderBell(){ const host = $('#bellHost'); if (!host) return;
   if (!UI.bell){ host.innerHTML = ''; return; }
   const ago = t => { const s = (Date.now() - t)/1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s/60)} min ago` : s < 86400 ? `${Math.floor(s/3600)} h ago` : `${Math.floor(s/86400)} d ago`; };
-  host.innerHTML = `<div class="bell-pop" role="dialog" aria-label="Notifications"><div class="label">Notifications</div>${S.history.slice(0, 7).map(h => `<div class="bell-row"><span>${esc(h.txt)}</span><small>${ago(h.t)}${h.xp ? ` · +${h.xp} XP` : ''}</small></div>`).join('') || '<p class="muted">Nothing yet. Start a lesson!</p>'}</div>`; }
+  host.innerHTML = `<div class="bell-pop" role="dialog" aria-label="Notifications"><div class="label">Notifications</div>${S.history.slice(0, 7).map(h => { const [v, ic] = noteTarget(h.txt); return `<button class="bell-row" data-act="go" data-arg="${v}">${icon(ic, '#ffd447', 16)}<span>${esc(h.txt)}<small>${ago(h.t)}${h.xp ? ` · +${h.xp} XP` : ''}</small></span></button>`; }).join('') || '<p class="muted">Nothing yet. Start a lesson!</p>'}</div>`; }
 
 /* ---------- BYTE companion: one context-aware tip ---------- */
 function byteTip(){
@@ -164,3 +164,31 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS || {}, {
 });
 document.addEventListener('click', e => { if (UI.bell && !e.target.closest('.bell-pop, [data-act="toggleBell"]')){ UI.bell = false; renderBell(); }
   if (!e.target.closest('.side, [data-act="sideOpen"]')) { const a = $('#app'); if (a) a.classList.remove('side-open'); } });
+
+/* ---------- Phase 2: connections between learning, arcade, quests and navigation ---------- */
+// Arcade questions come from the modules the learner has unlocked (all six once unlocked or with the presenter unlock)
+function arcadeMods(){ const k = MODULES.filter(modUnlocked).length; return (S.arcadeUnlocked || k >= MODULES.length) ? null : Array.from({ length:Math.max(1, k) }, (_, i) => i + 1); }
+// After a module assessment: tell the learner what just opened up
+function unlockNote(m){ const i = MODULES.indexOf(m), nx = MODULES[i + 1];
+  if (nx){ log(`Unlocked Module ${nx.n}: ${nx.title}`); toast(`🔓 Module ${nx.n} unlocked: ${esc(nx.title)}`, 'mission'); }
+  if (m.n === 2){ log('Unlocked Virus Escape and the campus incident'); setTimeout(() => toast('🕹 Virus Escape unlocked in the Cyber Arcade!', 'mission'), 900); }
+  if (!nx){ log('Unlocked the final assessment'); toast('🏆 The final assessment is unlocked!', 'mission'); } }
+// Where a notification leads, and its icon
+function noteTarget(txt){
+  const R = [[/^Badge/, 'achievements', 'trophy'], [/Quest|daily quests/, 'dashboard', 'check'], [/Virus Escape|Rocket Firewall|Packet Drop|arcade/i, 'challenge', 'flag'],
+    [/incident|Campus saved|Secured/i, 'campus', 'shield'], [/Home Base/, 'home', 'home'], [/Career|Taster/i, 'career', 'compass'], [/BYTE|tour/, 'mentor', 'chip'],
+    [/community/i, 'community', 'chat'], [/certificate|final/i, 'certificate', 'scroll'], [/lesson|quiz|Activity|Module/i, 'library', 'book']];
+  const hit = R.find(([re]) => re.test(txt)); return hit ? [hit[1], hit[2]] : ['dashboard', 'star']; }
+// Small badges on the sidebar and tab bar: quests left, campus alert, new game, affordable shop items
+function navBadges(){
+  if (!S.user || !document.querySelector('[data-nav]')) return; const m = Quests.state(), sc = Arcade.scores(), sh = shopState();
+  const marks = {
+    dashboard: m.daily.filter(x => !x.done).length || '',
+    campus: incActive() ? '!' : (incUnlocked() && !(S.incident && S.incident.done)) ? '!' : '',
+    challenge: (Arcade.status('virus').ok && !sc.virus) ? 'NEW' : '',
+    shop: SHOP_ITEMS.some(it => !sh.owned.includes(it.id) && (S.coins || 0) >= it.price) ? '$' : ''
+  };
+  document.querySelectorAll('[data-nav]').forEach(b => { let el = b.querySelector('.nb'); const v = marks[b.dataset.nav];
+    if (!v){ if (el) el.remove(); return; } if (!el){ el = document.createElement('i'); el.className = 'nb'; b.appendChild(el); }
+    el.textContent = v; el.classList.toggle('alert', v === '!'); });
+}

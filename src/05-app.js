@@ -128,7 +128,7 @@ function updateHUD(){
   $('#hudAva').src = avatarURL(S.user.look);
   $('#hudLvl').textContent = `LV ${L.n} · ${S.xp} XP`;
   $('#hudXp').style.width = Math.round(L.pct*100)+'%';
-  const c = $('#hudCoins'), st = $('#hudStreak'), dot = $('#bellDot'); if (c) c.textContent = S.coins || 0; if (st) st.textContent = (S.streak && S.streak.n) || 0; if (dot) dot.classList.toggle('hidden', !bellUnread());
+  const c = $('#hudCoins'), st = $('#hudStreak'), dot = $('#bellDot'); if (c) c.textContent = S.coins || 0; if (st) st.textContent = (S.streak && S.streak.n) || 0; if (dot) dot.classList.toggle('hidden', !bellUnread()); navBadges();
 }
 function go(view, params={}){
   if (view !== 'lesson' && view !== 'quiz') UI.quiz = null;
@@ -139,7 +139,7 @@ function renderView(){
   clearTimers(); Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
   document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
-  const fab = $('#fab'); if (fab) fab.classList.toggle('hidden', v==='mentor');
+  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges();
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
     challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade, shop:viewShop };
@@ -437,7 +437,7 @@ function finishQuiz(){
   if (Q.kind==='lesson'){ const p=prog(Q.id), l=lessonById(Q.id); const first = pass && !p.quiz; p.quizBest = Math.max(p.quizBest||0, score); if (pass) p.quiz = true; save();
     if (first){ rewards.push(()=>addXP(XP.quiz, `Passed quiz: ${l.title}`)); if (score===100) rewards.push(()=>addXP(XP.perfectQuiz,'Perfect quiz bonus')); } }
   if (Q.kind==='module'){ const m=modById(Q.id), mp=(S.modules[m.id] ||= {}); const first = pass && !mp.passed; mp.best=Math.max(mp.best||0,score); if (pass) mp.passed=true; save();
-    if (first){ rewards.push(()=>addXP(XP.module, `Passed Module ${m.n} assessment`)); rewards.push(()=>award('module')); if (MODULES.filter(modPassed).length>=3) rewards.push(()=>award('halfway')); } }
+    if (first){ rewards.push(()=>addXP(XP.module, `Passed Module ${m.n} assessment`)); rewards.push(()=>award('module')); rewards.push(()=>unlockNote(m)); if (MODULES.filter(modPassed).length>=3) rewards.push(()=>award('halfway')); } }
   if (Q.kind==='final'){ const first = pass && !finalPassed(); S.final = { passed: finalPassed()||pass, best: Math.max(S.final?.best||0, score) };
     if (first){ S.cert = { ref: makeCertRef(), date: Date.now() }; save(); rewards.push(()=>addXP(XP.final,'Passed the final assessment')); rewards.push(()=>award('grad')); } }
   if (score===100) rewards.push(()=>award('perfect'));
@@ -461,7 +461,7 @@ function quizResult(el, Q){
     <div class="actions" style="display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap">
       ${!Q.pass && l ? `<button class="btn ghost" data-act="openLesson" data-arg="${l.id}|1">Review lesson</button>`:''}
       ${!Q.pass && m ? `<button class="btn ghost" data-act="openModule" data-arg="${m.id}">Review module</button>`:''}
-      <button class="btn ${Q.pass?'ghost':''}" data-act="retryQuiz">Retake</button>${nextBtn}
+      <button class="btn ${Q.pass?'ghost':''}" data-act="retryQuiz">Retake</button>${nextBtn}${Q.pass && Q.kind!=='final' ? `<button class="btn ghost" data-act="go" data-arg="challenge">${icon('flag','#ff4fae',14)} Practise in the arcade</button>` : ''}
     </div></div>
     ${Q.pass && l && FAMILY_CARDS[l.id] ? `<div class="kicker" style="margin-top:26px">Teach your family</div><p style="margin:6px 0 12px; color:var(--ink-2)">Share what you just learned with someone scammers might target, like your parents or grandparents.</p>${familyCardHTML(l)}` : ''}
     ${wrong.length?`<div class="kicker" style="margin-top:22px">Review your mistakes</div><div class="review">${wrong.map(x=>`<div class="bad"><b>${esc(x.q.q)}</b><br>Correct answer: <b>${esc(x.q.o[x.q.a])}</b><br><span style="color:var(--ink-2)">${esc(x.q.e)}</span></div>`).join('')}</div>`:''}
@@ -491,9 +491,9 @@ function viewAchievements(el){
   <div class="grid g-wide">
     <section class="panel level-card"><div class="level-num">${L.n}</div><div><div class="label" style="color:var(--gold-ink)">Current rank</div><h2 class="pixel" style="font-size:34px; margin-top:6px">${esc(L.t)}</h2>
       <p class="muted" style="margin-top:6px">${S.xp} XP${L.next?` · ${L.next-S.xp} XP to level ${L.n+1}`:' · Max rank reached'}</p><div class="bar gold" style="margin-top:8px"><i style="width:${Math.round(L.pct*100)}%"></i></div>
-      <div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
+      <div class="ach-stats"><span class="pill gold">${coinIcon(12)} ${S.coins||0} coins</span><span class="pill">🔥 Best streak ${(S.streak&&S.streak.best)||0}</span><span class="pill green">${S.questsDone||0} quests done</span></div><div class="ladder">${LEVELS.map((x,i)=>`<span class="${i<L.n?'on':''}">${i+1} ${esc(x.t)}</span>`).join('')}</div></div></section>
     <section class="panel"><div class="section-title">How to earn XP</div><div class="history">
-      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
+      ${[['Complete a lesson',XP.lesson],['Finish an activity',XP.activity],['Perfect activity bonus',XP.perfectActivity],['Pass a lesson quiz',XP.quiz],['Pass a module assessment',XP.module],['Pass the final assessment',XP.final],['Home Base action (each)',XP.health],['Home Base 100% bonus',XP.healthFull],['Career taster mission (each role)',XP.taster],['Campus tour with BYTE',XP.tour],['Daily and weekly quests','20–120'],['Ask BYTE / chat in community',XP.mentor]].map(([t,x])=>`<div style="grid-template-columns:1fr auto"><span>${t}</span><span class="x">+${x} XP</span></div>`).join('')}</div></section>
   </div>
   <div class="section-title" style="margin-top:26px">Badges · ${S.badges.length}/${BADGES.length}</div>
   <div class="badge-grid">${BADGES.map(b=>{ const has=S.badges.includes(b.id); return `<div class="badge ${has?'':'locked'}"><div class="medal" style="background:${b.c}">${icon(b.icon,'#05061a',34)}</div><b>${esc(b.t)}</b><small>${esc(b.d)}</small>${has?`<button class="btn ghost small" data-act="shareBadge" data-arg="${b.id}">Share</button>`:''}</div>`; }).join('')}</div>

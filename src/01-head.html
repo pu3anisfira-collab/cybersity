@@ -984,6 +984,16 @@ span.inc-chip{cursor:default}
 [data-theme="day"] .tabbar{background:#fffaf0; border-top-color:var(--wood)} [data-theme="day"] .tabbar button.on{color:#16300c; background:#bfeaa6}
 [data-theme="day"] .path-mods span{background:#f0e6cf}
 
+/* ---------- Phase 2: nav badges, clickable notifications, achievement stats ---------- */
+.side-nav button, .tabbar button{position:relative}
+.nb{margin-left:auto; min-width:20px; padding:1px 5px; font-family:var(--f-label); font-size:10px; font-style:normal; text-align:center; background:var(--pink); color:#fff; border:2px solid #000; box-shadow:1px 1px 0 #000}
+.nb.alert{background:var(--red); animation:siren .8s steps(2) infinite}
+.shell.mini .nb, .tabbar .nb{position:absolute; top:4px; right:8px; margin:0; min-width:0; font-size:9px; padding:0 4px}
+.bell-row{display:flex; gap:8px; align-items:flex-start; text-align:left; color:var(--text); cursor:pointer} .bell-row:hover{background:var(--panel-2)}
+.bell-row span{display:grid; gap:1px} .bell-row img{flex:none; margin-top:2px}
+.ach-stats{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px} .ach-stats img{width:12px; height:12px; vertical-align:-1px}
+.fab.quiet .bubble-hint{display:none}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}

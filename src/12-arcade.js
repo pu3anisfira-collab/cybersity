@@ -151,7 +151,7 @@ function arcIntro(id, diff){
   $('#arcOver').innerHTML = `<div class="arc-card">
       <div class="arc-title" data-t="${esc(gm.t)}">${esc(gm.t)}</div>
       ${mod.story ? `<p class="arc-story">${esc(mod.story(S.params || {}))}</p>` : ''}
-      <p>${esc(gm.how)}</p>
+      <p>${esc(gm.how)}</p>${id !== 'packet' ? `<p class="muted" style="font-size:13px">${arcadeMods() ? `Questions from the modules you've unlocked (1–${arcadeMods().length}). Pass more modules to add more.` : 'Questions from all six modules.'}</p>` : ''}
       <div class="arc-controls"><span><b>Desktop</b> ${keys}</span><span><b>Phone</b> tap the buttons or swipe</span><span><b>Pause</b> P or Esc</span></div>
       <div class="arc-diffs" role="radiogroup" aria-label="Difficulty">${Object.values(ARCADE_DIFF).map(d => `<button role="radio" aria-checked="${d.id===diff}" class="${d.id===diff?'on':''}" data-act="arcDiff" data-arg="${d.id}"><b>${d.t}</b><small>${d.note}</small></button>`).join('')}</div>
       <button class="btn gold arc-start" data-act="arcStart" data-arg="${id}">▶ Start</button>
@@ -169,7 +169,7 @@ function arcStart(id){
   const hud = () => { const sEl = $('#arcScore'), lEl = $('#arcLives'); if (sEl) sEl.textContent = run.score;
     if (lEl) lEl.innerHTML = Array.from({length:diff.lives}, (_,i) => `<i class="${i < run.lives ? 'on' : ''}"></i>`).join(''); };
   const api = {
-    W:LW, H:LH, diff, params:{ ...(S.params || {}) }, questions:Arcade.questions, sortSet:Arcade.sortSet, sfx:Arcade.sfx,
+    W:LW, H:LH, diff, params:{ ...(S.params || {}) }, questions:(n, mods) => Arcade.questions(n, mods || arcadeMods()), sortSet:Arcade.sortSet, sfx:Arcade.sfx,
     prompt(text, small){ const q = $('#arcQ'); if (!q) return; q.classList.toggle('hidden', !text); q.innerHTML = text ? `${small ? `<small>${esc(small)}</small>` : ''}${esc(text)}` : ''; },
     answer(ok, item){ run.answers.push({ ok, ...item }); Arcade.sfx(ok ? 'ok' : 'bad'); run.flashT = 0.35; run.flashC = ok ? '#47f59a' : '#ff5d6e'; hud(); },
     loseLife(){ if (run.over) return; run.lives = Math.max(0, run.lives-1); Arcade.sfx('life'); hud(); if (run.lives <= 0) api.end(false); },
