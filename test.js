@@ -157,6 +157,14 @@ const fs = require('fs');
   await page.waitForTimeout(1800); await closeModals(); await shot('35e-rocket-results');
   console.log('rocket: won / answers / 1 mistake / badge:', await page.evaluate(()=>[ARC.won, ARC.answers.length, document.querySelectorAll('.arc-mistakes > div:not(.label)').length, S.badges.includes('arc_rocket')]));
   await page.evaluate(()=>{ UI.arcDiff='normal'; Arcade.resetScores(); go('challenge'); });
+  // Packet Drop: autopilot moves each block over the right bin and drops it, misses packet 2 on purpose
+  await page.evaluate(()=>{ go('arcade',{game:'packet'}); }); await page.waitForTimeout(400); await click('[data-act="arcStart"]');
+  await page.evaluate(()=>{ window.__pk = setInterval(()=>{ if (!ARC || !ARC.game || !ARC.game.state) return; const st = ARC.game.state(); if (st.phase !== 'play' || st.correctCol === null) return;
+    const target = ARC.answers.length === 1 ? (st.correctCol + 1) % (st.correctCol === 0 ? 2 : 1) : st.correctCol; if (st.col < target) ARC.game.input('right'); else if (st.col > target) ARC.game.input('left'); else ARC.game.input('down'); }, 120); });
+  await page.waitForFunction(()=>ARC.game.state().phase !== 'play', null, {timeout:150000}).catch(()=>{}); await page.evaluate(()=>clearInterval(window.__pk));
+  await page.waitForTimeout(1800); await closeModals(); await shot('35f-packet-results');
+  console.log('packet: won / answers / 1 mistake / badge:', await page.evaluate(()=>[ARC.won, ARC.answers.length, document.querySelectorAll('.arc-mistakes > div:not(.label)').length, S.badges.includes('arc_packet')]));
+  await page.evaluate(()=>{ Arcade.resetScores(); go('challenge'); });
   // framework check with a tiny test-only game (the real games register themselves in later steps)
   await page.evaluate(()=>{ ARCADE_GAMES.push({id:'testgame', t:'Test Game', color:'#2ee6ff', diff:'Easy', badge:'none', desc:'Test only.', how:'Test only.'}); Arcade.register('testgame', { controls:['up','down'], size:[320,200], create(api){ const qs = api.questions(4); let i = 0; api.prompt(qs[0].q, 'Question 1 of 4');
     return { update(){}, draw(g){ g.fillStyle='#10153b'; g.fillRect(0,0,api.W,api.H); g.fillStyle='#2ee6ff'; g.fillRect(20+i*60, 90, 40, 20); },

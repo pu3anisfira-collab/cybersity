@@ -611,7 +611,7 @@ const ARCADE_GAMES = [
     how:'Steer up and down into the gate with the right answer. A wrong gate costs a shield.'},
   {id:'packet', t:'Packet Drop', color:'#ff4fae', diff:'Hard', badge:'arc_packet',
     desc:'Data packets are falling. Slide each one into the right bin before the stack overflows.',
-    how:'Move each falling block left or right and drop it into the correct bin. Wrong bins stack junk blocks.'}
+    how:'Move each falling block left or right into the correct bin (down drops it faster). Wrong bins stack junk blocks; a stack that reaches the red line overflows and costs a heart.'}
 ];
 const ARCADE_QS = [
   // Module 1: cybersecurity basics and the CIA triad
