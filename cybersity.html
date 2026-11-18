@@ -2380,7 +2380,10 @@ function renderMenu(){
     <button class="item" data-act="demoComplete" data-arg="6">Complete all modules (final unlocked)</button>
     <hr><span class="label">Campus incident</span>
     ${incActive() ? `<button class="item" data-act="incNext">Secure next building (${S.incident.secured.length}/${INCIDENT.length})</button><button class="item" data-act="incEnd">End incident</button>`
-      : `<button class="item" data-act="incStart">${incUnlocked() ? '⚠ Start "Campus under attack!"' : '🔒 Campus under attack! (after Module 2)'}</button>`}
+      : `<button class="item" data-act="incStart">${incUnlocked() || S.arcadeUnlocked ? '⚠ Start "Campus under attack!"' : '🔒 Campus under attack! (after Module 2)'}</button>`}
+    <hr><span class="label">Cyber Arcade</span>
+    <button class="item" data-act="arcUnlock">${S.arcadeUnlocked ? '✓ Arcade unlocked (lock again)' : 'Unlock arcade (all games + incident)'}</button>
+    <button class="item" data-act="arcReset">Reset arcade scores</button>
     <hr>
     <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
     <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>
@@ -3018,7 +3021,7 @@ function incBannerHTML(){
       <button class="btn pink small inc-go" data-act="incPlay">▶ Chase the virus</button>
       <div class="inc-chips">${INCIDENT.map(x=>{ const ok = S.incident.secured.includes(x.b); return `<span class="inc-chip ${ok?'ok':''}">${ok?'✓':'⚠'} ${esc(bName(x.b))}</span>`; }).join('')}</div></div>`; }
   if (UI.incSaved) return `<div class="inc-banner saved"><div class="inc-title">${icon('shield','#47f59a',18)} Campus saved!</div><div class="inc-count"><b>${INCIDENT.length}/${INCIDENT.length}</b> buildings secured</div></div>`;
-  if (incUnlocked() && !(S.incident && S.incident.done)) return `<div class="inc-banner warn"><div class="inc-title"><span class="siren warn"></span>Strange activity near the Cyber Core…</div><div class="inc-count">Something is stirring on campus</div><button class="btn gold small inc-go" data-act="incStart">Investigate</button></div>`;
+  if ((incUnlocked() || S.arcadeUnlocked) && !(S.incident && S.incident.done)) return `<div class="inc-banner warn"><div class="inc-title"><span class="siren warn"></span>Strange activity near the Cyber Core…</div><div class="inc-count">Something is stirring on campus</div><button class="btn gold small inc-go" data-act="incStart">Investigate</button></div>`;
   return '';
 }
 function renderIncBanner(){ const el = $('#incBanner'); if (el) el.innerHTML = incBannerHTML(); const w = $('.campus-wrap'); if (w) w.classList.toggle('alarm', incActive()); }
@@ -3980,6 +3983,9 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
   arcStart: id => { if (ARC) arcStop(ARC); arcStart(id); },
   arcIntroBack: id => { if (ARC) arcStop(ARC); arcIntro(id, UI.arcDiff || 'normal'); },
   arcLb: id => { UI.lbGame = id; renderView(); },
+  // presenter shortcuts
+  arcUnlock: () => { UI.menu=false; renderMenu(); S.arcadeUnlocked = !S.arcadeUnlocked; save(); toast(S.arcadeUnlocked ? 'Arcade unlocked: every game and the campus incident are playable' : 'Arcade locked again'); renderView(); },
+  arcReset: () => { UI.menu=false; renderMenu(); Arcade.resetScores(); toast('Arcade high scores reset'); renderView(); },
   arcMute: () => { Arcade.setMuted(!Arcade.isMuted()); Arcade.unlockAudio(); document.querySelectorAll('[data-act="arcMute"]').forEach(b => { b.textContent = Arcade.isMuted() ? '♪ Sound off' : '♪ Sound on'; b.setAttribute('aria-pressed', !Arcade.isMuted()); }); Arcade.sfx('tick'); }
 });
 /* ============================================================

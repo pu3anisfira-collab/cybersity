@@ -559,7 +559,10 @@ function renderMenu(){
     <button class="item" data-act="demoComplete" data-arg="6">Complete all modules (final unlocked)</button>
     <hr><span class="label">Campus incident</span>
     ${incActive() ? `<button class="item" data-act="incNext">Secure next building (${S.incident.secured.length}/${INCIDENT.length})</button><button class="item" data-act="incEnd">End incident</button>`
-      : `<button class="item" data-act="incStart">${incUnlocked() ? '⚠ Start "Campus under attack!"' : '🔒 Campus under attack! (after Module 2)'}</button>`}
+      : `<button class="item" data-act="incStart">${incUnlocked() || S.arcadeUnlocked ? '⚠ Start "Campus under attack!"' : '🔒 Campus under attack! (after Module 2)'}</button>`}
+    <hr><span class="label">Cyber Arcade</span>
+    <button class="item" data-act="arcUnlock">${S.arcadeUnlocked ? '✓ Arcade unlocked (lock again)' : 'Unlock arcade (all games + incident)'}</button>
+    <button class="item" data-act="arcReset">Reset arcade scores</button>
     <hr>
     <button class="item" data-act="demoHome" data-arg="fill">Home Base: tick every action</button>
     <button class="item" data-act="demoHome" data-arg="clear">Home Base: clear checklist</button>

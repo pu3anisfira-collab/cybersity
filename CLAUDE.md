@@ -24,7 +24,7 @@ build tooling unless the owner asks.
 |---|---|
 | `src/01-head.html` | `<title>`, font links, all CSS (design tokens in `:root`) |
 | `src/02-body.html` | Mount points: `#app`, `#toasts`, `#layer` |
-| `src/03-data.js` | All content: 6 modules × 2 lessons (7-step structure), activities, quizzes, module extra questions, levels, XP values, badges, campus buildings, tips; Home Base (`HOME_BASE`, `HEALTH_CHECKS`, `HOME_STAGES`); Career Compass (`CAREER_SIGN`, `CAREERS`, `ROADMAP_STEPS`, `CAREER_QUIZ`); Campus Incident (`INCIDENT`, `FAKE_ADMIN`); `FAMILY_CARDS`; `SCAM_STEPS` |
+| `src/03-data.js` | All content: 6 modules × 2 lessons (7-step structure), activities, quizzes, module extra questions, levels, XP values, badges, campus buildings, tips; Home Base (`HOME_BASE`, `HEALTH_CHECKS`, `HOME_STAGES`); Career Compass (`CAREER_SIGN`, `CAREERS`, `ROADMAP_STEPS`, `CAREER_QUIZ`); Campus Incident (`INCIDENT`); Cyber Arcade (`ARCADE_GAMES`, `ARCADE_QS`, `ARCADE_SORT`); `FAMILY_CARDS`; `SCAM_STEPS` |
 | `src/04-pixel.js` | Pixel art drawn in code: avatar sprite grids, BYTE robot, icon grids, `iconURL()` / `avatarCanvas()` |
 | `src/05-app.js` | State, progression/lock rules, rewards (XP, levels, badges, modals, toasts), routing, building-themed page headers (`themeHead`), onboarding, dashboard (incl. Safety Score card), library, module, lesson (incl. scam "real life" box and "Teach your family" card), quiz engine, challenge centre, achievements, certificate, admin preview, presenter menu, click-action dispatcher (`ACTIONS`) |
 | `src/06-activities.js` | Six activity engines: sort, select (email/logs), match, toggle (router), password, order. `Activities.mount(lesson, el, opts)` also runs a game stand-alone (see Conventions) |
@@ -32,6 +32,10 @@ build tooling unless the owner asks.
 | `src/08-social.js` | BYTE scripted mentor (keyword knowledge base, safety refusals, lesson context, quiz-me) and Community Hub (rooms, bot replies, personal-info filter, reporting) |
 | `src/10-career.js` | Career Compass: role quiz, role pages, taster missions, roadmaps |
 | `src/11-tutorial.js` | Campus tour with BYTE: RPG dialogue engine, spotlight, the tour script (`TOUR_STEPS`), first-visit/skip/replay state |
+| `src/12-arcade.js` | Cyber Arcade framework: game registry and runner (intro, difficulty, HUD, input, pause, results, rewards, high scores, sample leaderboard, Web Audio sound), arcade hall and cabinet art |
+| `src/13-virus.js` | Virus Escape: 3-lane campus runner, also the Campus Incident's game |
+| `src/14-rocket.js` | Rocket Firewall: steer the rocket through the gate tunnel with the right answer |
+| `src/15-packet.js` | Packet Drop: falling labelled blocks sorted into bins |
 | `src/99-init.js` | Boot (always last in `build.sh`) |
 
 ## Features added for IIMaCC 2026
@@ -46,20 +50,40 @@ build tooling unless the owner asks.
   mission that reuses the matching game, and a 6-step roadmap marking what Cybersity covers. Tasters never
   change lesson progress. `explorer` badge for a taster. The platforms and certificates are named as examples to
   research, not endorsements.
-- **Campus Incident** (07). "Campus under attack!" starts from the gear menu and unlocks after the Module 2
-  assessment. Effects: red sky and edges, flashing alarm lamps, a red Cyber Core, and glitching "HACKED"
-  buildings. The banner shows "x/6 buildings secured" with chips that open each challenge directly.
-  Challenges by building:
-  - Library: phishing email
-  - AI Lab: passphrase
-  - Community Hub: `FAKE_ADMIN` sort
-  - Challenge Centre: router
-  - Achievement Hall: logs
-  - Certificate Hall: incident response order
+- **Campus Incident** (07 + 13). After the Module 2 assessment the campus shows a gold "Strange activity near the
+  Cyber Core" alert. Investigate (or the gear menu) starts the attack: red sky and edges, flashing alarm lamps, a
+  red Cyber Core and glitching "HACKED" buildings. About 3s later it launches **Virus Escape** in incident mode
+  (`go('arcade', {game:'virus', incident:true})`). Every 2 right answers there secures the next building in
+  `INCIDENT` order through `incSecure()`. Back on the campus each secured building plays its restore animation;
+  all six trigger fireworks, a "Campus saved" modal, +150 XP and the `defender` badge. Buildings secured before
+  being caught stay secured, and the banner's "Chase the virus" relaunches the run. State lives in `S.incident`.
+- **Cyber Arcade** (12–15). The Challenge Centre page (nav "Arcade") opens with the arcade hall: one pixel
+  cabinet per game (`ARCADE_GAMES`) with description, difficulty, local high score and availability, a sample
+  leaderboard (simulated learners plus the player's best, labelled as such), then the existing practice
+  activities, quizzes and assessments, unchanged. Games answer by moving, never in a pop-up quiz:
+  - **Virus Escape** (13): switch lanes into the answer sign; right = boost and distance, wrong = stumble, lose a
+    heart, the monster closes in. 6 buildings secured = win; caught or out of hearts = lose. Unlocks after
+    Module 2 (or the presenter unlock).
+  - **Rocket Firewall** (14): steer up/down into the gate tunnel with the right answer; 12 gates; wrong = a shield.
+  - **Packet Drop** (15): move falling packets left/right (down = faster) into the right bin; wrong bins stack
+    junk; a column reaching the red line overflows and costs a heart. Level 1 Safe/Risky, level 2
+    Phishing/Malware/Safe; blocks speed up.
 
-  A score under 60% leaves the building hacked. Each secured building plays a restore animation. All six
-  trigger fireworks, a "Campus saved" modal, +150 XP and the `defender` badge. The Certificate Hall opens
-  during the incident even before the final is passed. State lives in `S.incident`.
+  The runner gives every game Easy/Normal/Hard (speed and lives), score, hearts, a question bar above the
+  screen, arrow keys/WASD plus on-screen buttons and swipe on phones, pause (P/Esc, and on tab switch), and a
+  results screen with accuracy, correct/total and each mistake with the right answer and explanation. Rewards
+  follow accuracy and finishing, not speed: up to `XP.arcade` for accuracy plus `XP.arcadeWin` for a win, and
+  one badge per game at 70%+ (`arc_virus`, `arc_rocket`, `arc_packet`). High scores live in `localStorage`
+  key `cybersity-arcade-scores`; sound (off with the mute toggle, key `cybersity-arcade-mute`) starts only after
+  the first click. Content: `ARCADE_QS` (41 short questions, 3 options of 1–4 words, correct answer first, the
+  game shuffles) and `ARCADE_SORT` (30 sorting items in 2 sets) in 03-data.js.
+  To add a game: write `src/NN-name.js` calling `Arcade.register(id, { controls, size, create(api) })`, add
+  its entry to `ARCADE_GAMES` and a badge, and add the file to `build.sh` before `99-init.js`. `create`
+  returns `{ update(dt), draw(g), input(dir), after?(dt), state?() }`; see the comment at the top of 12-arcade.js
+  for the `api`. `state()` exposes the right answer's position so `test.js` can autopilot a run.
+  **Future games** (ideas, not built): Byte Jump (platformer: jump onto the platform with the right answer),
+  Whack-a-Phish (tap only the phishing messages as they pop up), Data Snake (grow by eating the safe items and
+  avoiding the risky ones).
 - **Building-themed pages** (05 `themeHead`, 07 `Campus.banner`). After each view renders, a building page's
   `.page-head` gets the building colour (`--bc`) and a pixel banner drawn with the campus building code. The
   view→building map is `VIEW_BUILDING`. Incident pages show the building hacked. Lesson/quiz pages and career
@@ -124,7 +148,7 @@ build tooling unless the owner asks.
   Also add its `FAMILY_CARDS` entry, and `realLife:'scam'` if it is about scams.
 - Reusing a game outside a lesson: `Activities.mount(lessonLikeObject, el, { onDone(score), nextAct, nextArg,
   nextLabel, tag })`. In this mode it skips lesson progress and calls `onDone` instead. Badges still award.
-  A lesson-like object only needs `{ id, activity }` (see `FAKE_ADMIN`).
+  A lesson-like object only needs `{ id, activity }` (a `title` too if shown).
 - Campus buildings: the six learning buildings come from `BUILDINGS`; Home Base and the signpost are added in
   `07` with custom drawing (`drawDorm`, `drawSignpost`). The Campus Incident uses only the six in `INCIDENT`.
 - Simulated parts (be clear about these when presenting): scripted mentor, bot classmates, fake accounts,
@@ -138,7 +162,7 @@ build tooling unless the owner asks.
 (Playwright + Chromium required: `npm i playwright && npx playwright install chromium`). It prints check results
 and any page errors. It covers the new features at desktop (1360px) and phone (390px) widths, including campus
 walking, Home Base stages, career quiz and taster, the full incident, themed headers, the real-life box, family
-cards and the phone camera. A full run takes about 5–6 minutes. A font-loading network error in offline
+cards and the phone camera. A full run takes about 7–8 minutes (it plays a full run of each arcade game by autopilot). A font-loading network error in offline
 environments is expected and harmless. `shots/` and `test-page.html` are git-ignored.
 
 ## Demo tips
@@ -147,15 +171,16 @@ environments is expected and harmless. `shots/` and `test-page.html` are git-ign
 - **Campus incident**: Start "Campus under attack!", Secure next building (plays the restore animation),
   End incident (resets for another take)
 - **Home Base**: tick every action / clear checklist (resets the dorm to dark without giving XP again)
+- **Cyber Arcade**: Unlock arcade (all games and the incident playable without Module 2), Reset arcade scores
 - Admin view, reset demo progress, log out
 - Profile: **Replay campus tour with BYTE**
 
-Recording the incident in about 40 seconds:
-1. Start it (the alert shows for about 3s).
-2. Play one or two challenges live. Fake Admin (about 8s) and the passphrase (about 5s) are the quickest; the
-   banner chips skip walking.
-3. Use "Secure next building" for the rest, about 2.5s each.
-4. The fireworks and modal take about 6s.
+Recording the incident (about 1–2 minutes):
+1. Complete Modules 1–2 (or Unlock arcade), open the campus and press Investigate on the alert.
+2. The campus turns red for about 3s, then Virus Escape opens: pick Easy for a calm recording and press Start.
+3. Play it live; every 2 right answers secures a building. Use "Secure next building" from the gear menu to
+   fast-forward if needed.
+4. "Back to campus" plays the restore animation, fireworks and the Campus saved modal (about 6s).
 
 On phones the campus is zoomed; use Full map to show the whole campus. For recording, press F (or Full screen) on
 the campus: the gear menu stays available from the map's top-right corner.

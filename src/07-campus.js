@@ -381,7 +381,7 @@ function incBannerHTML(){
       <button class="btn pink small inc-go" data-act="incPlay">▶ Chase the virus</button>
       <div class="inc-chips">${INCIDENT.map(x=>{ const ok = S.incident.secured.includes(x.b); return `<span class="inc-chip ${ok?'ok':''}">${ok?'✓':'⚠'} ${esc(bName(x.b))}</span>`; }).join('')}</div></div>`; }
   if (UI.incSaved) return `<div class="inc-banner saved"><div class="inc-title">${icon('shield','#47f59a',18)} Campus saved!</div><div class="inc-count"><b>${INCIDENT.length}/${INCIDENT.length}</b> buildings secured</div></div>`;
-  if (incUnlocked() && !(S.incident && S.incident.done)) return `<div class="inc-banner warn"><div class="inc-title"><span class="siren warn"></span>Strange activity near the Cyber Core…</div><div class="inc-count">Something is stirring on campus</div><button class="btn gold small inc-go" data-act="incStart">Investigate</button></div>`;
+  if ((incUnlocked() || S.arcadeUnlocked) && !(S.incident && S.incident.done)) return `<div class="inc-banner warn"><div class="inc-title"><span class="siren warn"></span>Strange activity near the Cyber Core…</div><div class="inc-count">Something is stirring on campus</div><button class="btn gold small inc-go" data-act="incStart">Investigate</button></div>`;
   return '';
 }
 function renderIncBanner(){ const el = $('#incBanner'); if (el) el.innerHTML = incBannerHTML(); const w = $('.campus-wrap'); if (w) w.classList.toggle('alarm', incActive()); }

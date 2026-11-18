@@ -239,5 +239,8 @@ window.EXTRA_ACTIONS = Object.assign(window.EXTRA_ACTIONS||{}, {
   arcStart: id => { if (ARC) arcStop(ARC); arcStart(id); },
   arcIntroBack: id => { if (ARC) arcStop(ARC); arcIntro(id, UI.arcDiff || 'normal'); },
   arcLb: id => { UI.lbGame = id; renderView(); },
+  // presenter shortcuts
+  arcUnlock: () => { UI.menu=false; renderMenu(); S.arcadeUnlocked = !S.arcadeUnlocked; save(); toast(S.arcadeUnlocked ? 'Arcade unlocked: every game and the campus incident are playable' : 'Arcade locked again'); renderView(); },
+  arcReset: () => { UI.menu=false; renderMenu(); Arcade.resetScores(); toast('Arcade high scores reset'); renderView(); },
   arcMute: () => { Arcade.setMuted(!Arcade.isMuted()); Arcade.unlockAudio(); document.querySelectorAll('[data-act="arcMute"]').forEach(b => { b.textContent = Arcade.isMuted() ? '♪ Sound off' : '♪ Sound on'; b.setAttribute('aria-pressed', !Arcade.isMuted()); }); Arcade.sfx('tick'); }
 });
