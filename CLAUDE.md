@@ -1,8 +1,7 @@
 # Cybersity prototype — notes for Claude Code
 
-Cybersity is a competition prototype of an AI-powered cybersecurity learning and social platform for beginners
-(students and the general public, English only), entered in IIMaCC 2026 (category T2 Educational Innovation;
-judged on a video of 5 minutes or less plus an abstract). **It is deliberately prototype-only**: no backend, no real
+Cybersity is a prototype of an AI-powered cybersecurity learning and social platform for beginners
+(students and the general public, English only). **It is deliberately prototype-only**: no backend, no real
 accounts, no database. Everything runs in the browser with simulated data. Do not add a server, framework or
 build tooling unless the owner asks.
 
@@ -39,7 +38,7 @@ build tooling unless the owner asks.
 | `src/16-rewards.js` | Coins, daily/weekly quests (`Quests`), day streak, Coin Shop (`SHOP_ITEMS`, `viewShop`), notifications bell, UI sound and chiptune `Music`, reward fly-ups, BYTE tips (`byteTip`), Phase 2 connections (`arcadeMods`, `unlockNote`, `navBadges`) |
 | `src/99-init.js` | Boot (always last in `build.sh`) |
 
-## Features added for IIMaCC 2026
+## Added features
 - **Home Base + Security Health Check** (07). A dorm in the campus's south strip. 7 real-life actions (2FA,
   updates, unique password, screen lock, photo backup, app permissions, save NSRC 997) are ticked by the learner
   and raise a Safety Score. The dorm upgrades in 4 stages: dark → lights on (1–3 ticks) → padlock (4–6) → shield

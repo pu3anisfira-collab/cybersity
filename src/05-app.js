@@ -169,7 +169,7 @@ function onbPageHTML(step){
       <div class="hero-tag">Learn cybersecurity. Level up together.</div>
       <button class="press-start" data-act="pressStart">▶ Press start</button>
       <div class="ts-hint">Press Enter or tap to begin</div>
-      <div class="ts-foot">© 2026 Cybersity · A prototype for IIMaCC 2026</div>
+      <div class="ts-foot">© 2026 Cybersity</div>
     </div>`;
   if (step==='auth') return `<div class="onb-card">
       <div class="onb-top"><button class="onb-back" data-act="backToTitle">◂ Title screen</button><span class="label">Step 1 of 2</span></div>

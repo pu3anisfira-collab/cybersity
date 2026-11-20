@@ -1,7 +1,7 @@
 # Cybersity — prototype
 
 An interactive, AI-powered cybersecurity learning and social platform for beginners. This is a
-front-end prototype for competition demos: all features work with simulated data, entirely in the browser.
+front-end prototype: all features work with simulated data, entirely in the browser.
 
 ## Run it
 Open `cybersity.html` in any modern browser. Nothing to install.
