@@ -98,8 +98,9 @@ build tooling unless the owner asks.
 - **Campus page and camera** (07). The campus is one big game screen: `.campus-shell.page` is fixed under the top
   bar (`--hud-h`, measured in JS) and fills the rest of the window; the old title, instructions and building
   cards are gone. HUD chips sit top-left, the ? help panel, Full map (phones) and Full screen top-right, the
-  incident banner floats on top, and a dock of building buttons along the bottom gives one-click travel and
-  keyboard access. `sizeCanvas()` gives the view the box's shape (full map width or height) and the camera
+  incident banner floats on top as one compact strip (title, secured count and Chase the virus; the per-building
+  chips are hidden on the map so it never overflows), and a dock of building buttons along the bottom gives
+  one-click travel and keyboard access. `sizeCanvas()` gives the view the box's shape (full map width or height) and the camera
   follows the player along the other side. Full map (`UI.campusFull`) fits the whole map instead. Draw in world coordinates with `world()`; use
   `screen()` with `vw`/`vh` for overlays that belong to the visible view. Map pointer input through `toLogical()`.
 
@@ -126,16 +127,17 @@ build tooling unless the owner asks.
   onboarding step was removed: the tour replaces it, so onboarding is now title, sign up, avatar, campus.
 
 ## Gamification and layout (Phase 1 and 2)
-- **Shell** (05 `renderApp`). Navigation is in the top bar (`.hud .nav#nav`) on tablets and desktops; the sidebar
-  (`.side`) is now only the phone "More" menu. `#app` gets class `shell`: a fixed left sidebar (`.side`, `#nav` with `data-nav`
-  buttons; collapsible to icons with `UI.sideMini`, remembered in `cybersity-side-mini`), a top bar (`.hud`: streak,
-  coins `#hudCoinsChip`, notifications bell, player chip, theme, gear) and, at 760px and below, a bottom tab bar
-  (`.tabbar`) with a slide-in sidebar ("More"). Layout sizes are CSS variables `--side-w` and `--tab-h`; the
-  campus page uses them so it sits beside the sidebar and above the tab bar.
-- **Home** is the dashboard (`viewDashboard`), 3 blocks: hero (level, coins, streak and badges chips, Continue learning
-  from `nextStep()`, Explore campus, BYTE tip), today's quests with a weekly line, and learning path + arcade. Older notes: player
-  card, learning path, arcade cabinets, daily and weekly quests, recent activity, latest achievement, Safety Score
-  and BYTE with `byteTip()`. New learners still start with BYTE's campus tour.
+- **Shell** (05 `renderApp`). `#app` gets class `shell`. The top bar (`.hud`) holds the logo, the navigation
+  (`.hud .nav#nav`, `data-nav` buttons), streak (hidden below 1400px), coins `#hudCoinsChip`, notifications bell,
+  player chip, theme and gear. The nav scrolls sideways when the links do not fit: mouse wheel (a `wheel` listener
+  in 16), thin scrollbar and faded edges, and `navIntoView()` keeps the current page visible. At 760px and below
+  the nav is hidden and a bottom tab bar (`.tabbar`) takes over, with the sidebar (`.side`) as the slide-in
+  "More" menu; on larger screens the sidebar is hidden (`--side-w` is 0). The gear menu (`.menu`) has a max height
+  and scrolls inside itself. `--tab-h` keeps the campus page above the tab bar.
+- **Home** is the dashboard (`viewDashboard`), 3 blocks: a hero (level, coins, streak and badge chips, Continue
+  learning from `nextStep()`, Explore campus, and BYTE's tip from `byteTip()`, closable), today's quests in one row
+  with a weekly line, and the learning path beside the arcade. Recent activity lives in the bell, achievements in
+  the Achievement Hall and the Safety Score in Home Base. New learners still start with BYTE's campus tour.
 - **Coins**: `addXP()` also gives 1 coin per 5 XP (not for quest rewards, which pay their own coins); `addCoins()`
   flies a coin pop-up to the top bar. Spend them in the **Coin Shop** (avatar colours, Home Base decorations drawn by
   `drawDormDecor()`, BYTE skins via `botPal()` in 04). State: `S.coins`, `S.shop`.
