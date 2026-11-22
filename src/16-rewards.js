@@ -193,3 +193,9 @@ function navBadges(){
     if (!v){ if (el) el.remove(); return; } if (!el){ el = document.createElement('i'); el.className = 'nb'; b.appendChild(el); }
     el.textContent = v; el.classList.toggle('alert', v === '!'); });
 }
+
+// Top navigation: the mouse wheel scrolls it sideways when it does not fit, and the current page stays in view
+document.addEventListener('wheel', e => { const n = e.target.closest && e.target.closest('.hud .nav'); if (!n || n.scrollWidth <= n.clientWidth) return;
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ n.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive:false });
+function navIntoView(){ const n = document.querySelector('.hud .nav'), b = n && n.querySelector('button.on'); if (!b) return;
+  const l = b.offsetLeft - n.offsetLeft, r = l + b.offsetWidth; if (l < n.scrollLeft) n.scrollLeft = l - 20; else if (r > n.scrollLeft + n.clientWidth) n.scrollLeft = r - n.clientWidth + 20; }

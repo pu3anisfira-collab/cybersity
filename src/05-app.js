@@ -139,7 +139,7 @@ function renderView(){
   clearTimers(); Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
   document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
-  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges();
+  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges(); navIntoView();
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
     challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade, shop:viewShop };

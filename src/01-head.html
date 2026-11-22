@@ -1041,6 +1041,15 @@ span.inc-chip{cursor:default}
 [data-theme="day"] .hero-chips > span{background:#fffaf0cc; color:var(--text)}
 [data-theme="day"] .tq.done{background:#d6f5c466}
 
+/* ---------- Campus banner fits the map; top navigation scrolls on every screen size ---------- */
+.campus-shell:is(.fs,.page) #incBanner{left:12px; right:12px; width:auto; transform:none; display:flex; justify-content:center; pointer-events:none}
+.campus-shell:is(.fs,.page) #incBanner .inc-banner{pointer-events:auto; width:auto; max-width:min(760px, 100%); flex-wrap:wrap}
+.campus-shell:is(.fs,.page) .inc-chips{display:none}
+.hud .nav{overflow-x:auto; overscroll-behavior-x:contain; scroll-behavior:smooth; scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%); mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%); padding-inline:6px}
+.hud .nav::-webkit-scrollbar{display:block; height:5px} .hud .nav::-webkit-scrollbar-thumb{background:var(--line)} .hud .nav::-webkit-scrollbar-track{background:transparent}
+.hud .nav button{flex:none}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}

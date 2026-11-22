@@ -1041,6 +1041,15 @@ span.inc-chip{cursor:default}
 [data-theme="day"] .hero-chips > span{background:#fffaf0cc; color:var(--text)}
 [data-theme="day"] .tq.done{background:#d6f5c466}
 
+/* ---------- Campus banner fits the map; top navigation scrolls on every screen size ---------- */
+.campus-shell:is(.fs,.page) #incBanner{left:12px; right:12px; width:auto; transform:none; display:flex; justify-content:center; pointer-events:none}
+.campus-shell:is(.fs,.page) #incBanner .inc-banner{pointer-events:auto; width:auto; max-width:min(760px, 100%); flex-wrap:wrap}
+.campus-shell:is(.fs,.page) .inc-chips{display:none}
+.hud .nav{overflow-x:auto; overscroll-behavior-x:contain; scroll-behavior:smooth; scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%); mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 22px), transparent 100%); padding-inline:6px}
+.hud .nav::-webkit-scrollbar{display:block; height:5px} .hud .nav::-webkit-scrollbar-thumb{background:var(--line)} .hud .nav::-webkit-scrollbar-track{background:transparent}
+.hud .nav button{flex:none}
+
 /* Theme switch on the sign-in screens (the top bar has its own once signed in) */
 .theme-corner{position:fixed; right:max(16px, env(safe-area-inset-right,0px)); top:calc(14px + env(safe-area-inset-top,0px)); z-index:80; width:44px; height:44px; display:grid; place-items:center; background:var(--panel); border:3px solid #000; box-shadow:3px 3px 0 #000}
 .theme-corner img, .icon-btn img{width:20px; height:20px}
@@ -2162,7 +2171,7 @@ function renderView(){
   clearTimers(); Campus.stop();
   const v = S.view; const el = $('#view'); if (!el) return;
   document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('on', b.dataset.nav===v || (v==='module'&&b.dataset.nav==='library') || (v==='lesson'&&b.dataset.nav==='library') || ((v==='quiz'||v==='arcade')&&b.dataset.nav==='challenge') || ((v==='home'||v==='incident')&&b.dataset.nav==='campus')));
-  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges();
+  const fab = $('#fab'); if (fab){ fab.classList.toggle('hidden', v==='mentor'); fab.classList.toggle('quiet', v==='dashboard'); } navBadges(); navIntoView();
   if (v==='mentor' && UI.drawer){ UI.drawer=false; $('#drawer').classList.add('hidden'); }
   const views = { dashboard:viewDashboard, campus:viewCampus, library:viewLibrary, module:viewModule, lesson:viewLesson, quiz:viewQuiz,
     challenge:viewChallenge, mentor:viewMentor, community:viewCommunity, achievements:viewAchievements, certificate:viewCertificate, admin:viewAdmin, home:viewHome, career:viewCareer, arcade:viewArcade, shop:viewShop };
@@ -4805,6 +4814,12 @@ function navBadges(){
     if (!v){ if (el) el.remove(); return; } if (!el){ el = document.createElement('i'); el.className = 'nb'; b.appendChild(el); }
     el.textContent = v; el.classList.toggle('alert', v === '!'); });
 }
+
+// Top navigation: the mouse wheel scrolls it sideways when it does not fit, and the current page stays in view
+document.addEventListener('wheel', e => { const n = e.target.closest && e.target.closest('.hud .nav'); if (!n || n.scrollWidth <= n.clientWidth) return;
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ n.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive:false });
+function navIntoView(){ const n = document.querySelector('.hud .nav'), b = n && n.querySelector('button.on'); if (!b) return;
+  const l = b.offsetLeft - n.offsetLeft, r = l + b.offsetWidth; if (l < n.scrollLeft) n.scrollLeft = l - 20; else if (r > n.scrollLeft + n.clientWidth) n.scrollLeft = r - n.clientWidth + 20; }
 /* ---------- Boot ---------- */
 BOT_URL = botCanvas().toDataURL();
 document.body.insertAdjacentHTML('beforeend', themeBtnHTML('theme-corner', 'themeCorner'));
